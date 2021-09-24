@@ -54,7 +54,9 @@ export default {
                     const {code} = transformSync(content, {
                         jsc: {
                             parser: {syntax: 'typescript'},
-                        }
+                        },
+                        root: "./src",
+                        sourceRoot: "./src"
                     });
                     return {code};
                 },
@@ -79,7 +81,7 @@ export default {
             use: {
                 sass: null,
                 stylus: null,
-                less: { javascriptEnabled: true }
+                less: {javascriptEnabled: true}
             },
             extract: true
         }),

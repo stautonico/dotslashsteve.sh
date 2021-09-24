@@ -4,7 +4,7 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public",
+    "start": "sirv public --single",
     "validate": "svelte-check",
     "test": "jest"
   },
@@ -19,7 +19,7 @@
     "@tsconfig/svelte": "^1.0.0",
     "@types/jest": "^26.0.14",
     "babel-jest": "^26.5.2",
-    "jest": "^26.5.2",
+    "jest": "^26.6.3",
     "jest-css-modules-transform": "^4.3.0",
     "less": "^3.13.1",
     "rollup": "^2.3.4",
@@ -32,6 +32,7 @@
     "svelte-jester": "^1.1.5",
     "svelte-preprocess": "^4.9.4",
     "svelte-preprocess-less": "^0.4.0",
+    "svelte-routing": "^1.6.0",
     "ts-jest": "^26.4.1",
     "tslib": "^2.0.0",
     "typescript": "^3.9.3"
