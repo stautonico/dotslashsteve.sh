@@ -1,34 +1,29 @@
 {
-  "extends": "@tsconfig/svelte/tsconfig.json",
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules/*",
-    "__sapper__/*",
-    "public/*"
-  ],
-  "compilerOptions": {
-    "types": [
-      "jest",
-      "svelte"
-    ],
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2018",
-      "dom"
-    ],
-    "allowJs": true,
-    "sourceMap": true,
-    "rootDir": "src",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "node"
-  }
+	"include": ["src/**/*", "webpack.config.ts"],
+	"exclude": ["node_modules/*", "__sapper__/*", "public/*"],
+	"compilerOptions": {
+		"moduleResolution": "node",
+		"target": "es2017",
+		"module": "es2020",
+		"importsNotUsedAsValues": "remove",
+		"isolatedModules": true,
+		"esModuleInterop": true,
+		"sourceMap": true,
+		"strict": false,
+		"baseUrl": ".",
+		"paths": {
+			"src/*": ["src/*"]
+		},
+		"typeRoots": ["node_modules/@types"],
+		"types": [
+			"svelte",
+			"svelte/store",
+			"svelte/motion",
+			"svelte/transition",
+			"svelte/animate",
+			"svelte/easing",
+			"jest",
+			"sentry"
+		]
+	}
 }

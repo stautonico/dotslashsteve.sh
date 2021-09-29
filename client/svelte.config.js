@@ -1,5 +1,11 @@
-const sveltePreprocess = require("svelte-preprocess");
+const preprocess = require("svelte-preprocess");
 
-module.exports = {
-  preprocess: sveltePreprocess(),
+const config = {
+  preprocess: [preprocess({
+    scss: {
+      "prependData": "@import \"src/app.scss\";"
+    }
+  })]
 };
+
+module.exports = config;

@@ -210,11 +210,11 @@
 
 </script>
 
-<style lang="less">
-  @import "../assets/styles/fonts";
+<style lang="scss">
+  @import "../styles/fonts";
 
-  @link-fade-color: #5e5e5e;
-  @link-fade-timing: cubic-bezier(.33, .05, .69, .93);
+  $link-fade-color: #5e5e5e;
+  $link-fade-timing: cubic-bezier(.33, .05, .69, .93);
 
   * {
     font-family: "Source Code Pro", Sans-Serif, serif;
@@ -266,11 +266,11 @@
   }
 
   :global(a:hover) {
-    -webkit-animation: link-fade 1s @link-fade-timing infinite;
-    -moz-animation: link-fade 1s @link-fade-timing infinite;
-    -ms-animation: link-fadelink-fade 1s @link-fade-timing infinite;
-    -o-animation: link-fade 1s @link-fade-timing infinite;
-    animation: link-fade 1s @link-fade-timing infinite;
+    -webkit-animation: link-fade 1s $link-fade-timing infinite;
+    -moz-animation: link-fade 1s $link-fade-timing infinite;
+    -ms-animation: link-fadelink-fade 1s $link-fade-timing infinite;
+    -o-animation: link-fade 1s $link-fade-timing infinite;
+    animation: link-fade 1s $link-fade-timing infinite;
   }
 
   // Shared
@@ -289,7 +289,7 @@
       color: white;
     }
     50% {
-      color: @link-fade-color;
+      color: $link-fade-color;
     }
     100% {
       color: white;
@@ -301,7 +301,7 @@
       color: white;
     }
     50% {
-      color: @link-fade-color;
+      color: $link-fade-color;
     }
     100% {
       color: white;
@@ -313,7 +313,7 @@
       color: white;
     }
     50% {
-      color: @link-fade-color;
+      color: $link-fade-color;
     }
     100% {
       color: white;

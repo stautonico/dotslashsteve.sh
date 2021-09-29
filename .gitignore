@@ -226,3 +226,4 @@ pip-selfcheck.json
 
 #client/public/build/
 docs/build/
+client/.routify/

@@ -1,7 +1,7 @@
 @import "fonts";
 
-@terminal-username-color: #49ec0f;
-@terminal-dir-color: #0e7aef;
+$terminal-username-color: #49ec0f;
+$terminal-dir-color: #0e7aef;
 
 * {
   font-family: 'Source Code Pro', Sans-Serif, serif;
@@ -35,15 +35,15 @@ body, main {
 
 #terminal {
   :global(#username) {
-    color: @terminal-username-color;
+    color: $terminal-username-color;
   }
 
   :global(#computer) {
-    color: @terminal-username-color;
+    color: $terminal-username-color;
   }
 
   :global(.directory) {
-    color: @terminal-dir-color;
+    color: $terminal-dir-color;
   }
 
   a {

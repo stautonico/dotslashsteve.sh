@@ -1,10 +1,9 @@
 <!--<script lang="ts">-->
 <script>
-    import {Router} from "svelte-routing";
     import Terminal from "../components/Terminal.svelte";
     import Site from "../components/Site.svelte";
     import {onMount} from "svelte";
-    import {typeTitle} from "../helper/title.svelte";
+    import {typeTitle} from "../helpers/title.svelte";
 
     export let url = "";
 
@@ -111,7 +110,7 @@
 
 </script>
 
-<Router {url}>
+<div>
     <div id="terminal">
         <Terminal on:message={handleMessage}/>
     </div>
@@ -123,14 +122,18 @@
     <div id="notification" class:fade-in={showNotification}>
         <span>{@html notificationContent}</span>
     </div>
-</Router>
+</div>
 
-<style lang="less">
+<style lang="scss">
 
   * {
     font-weight: normal;
     font-style: normal;
     box-sizing: border-box;
+  }
+
+  #notification {
+    font-family: "Source Code Pro", Sans-Serif, serif;
   }
 
   #terminal {
