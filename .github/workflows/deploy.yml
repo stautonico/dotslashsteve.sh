@@ -1,4 +1,4 @@
-name: Deploy Eleventy via SSH
+name: Deploy To Server
 
 on:
   push:
@@ -35,5 +35,5 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
           rm: true
-          source: "client/dist/*, index.html"
+          source: "client/dist/*,client/index.html"
           target: "${{ secrets.REMOTE_DIR }}"
