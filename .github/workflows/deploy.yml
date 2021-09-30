@@ -53,5 +53,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
           script: |
-            cd ${{ secrets.REMOTE_DIR }}
-            ls
+            cd ${{ secrets.REMOTE_DIR }}/client/dist
+            mv * ../..
+            cd ../..
+            rm -rfv client/
+            cd ..
+            chown root:dotslashers -R public
