@@ -1,5 +1,7 @@
 <div id="container">
-    HELLO!
+    <div class="container">
+        <h1>This site is under construction!</h1>
+    </div>
 </div>
 
 <style>
@@ -12,5 +14,14 @@
         background: white;
         height: 100vh;
         width: 100vw;
+    }
+
+    .container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -moz-transform: translateX(-50%) translateY(-50%);
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
     }
 </style>
