@@ -55,5 +55,6 @@ jobs:
           script: |
             cd ${{ secrets.REMOTE_DIR }}/client/dist
             mv * ../..
+            mv .well-known ../..
             cd ../..
             rm -rfv client/
