@@ -43,3 +43,15 @@ jobs:
           rm: true
           source: "client/dist/*"
           target: "${{ secrets.REMOTE_DIR }}"
+
+      - name: Re-arrange File System
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          port: ${{ secrets.REMOTE_PORT }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
+          script: |
+            cd ${{ secrets.REMOTE_DIR }}
+            ls
