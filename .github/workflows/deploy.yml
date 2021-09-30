@@ -57,5 +57,3 @@ jobs:
             mv * ../..
             cd ../..
             rm -rfv client/
-            cd ..
-            chown root:dotslashers -R public
