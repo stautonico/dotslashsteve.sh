@@ -38,6 +38,8 @@
             console.log(error);
         });
 
+
+
 </script>
 
 <div>
@@ -60,6 +62,10 @@
 </div>
 
 <style lang="scss">
+  * {
+    font-family: system-ui;
+  }
+
   // SVG styles.
   svg {
     animation: 2s linear infinite svg-animation;
@@ -108,21 +114,5 @@
       transform: rotate(360deg);
     }
   }
-
-  /*
-  @media (prefers-color-scheme: dark) {
-    div {
-      background-color: #1f1f1f;
-      color: white;
-    }
-  }
-
-  @media (prefers-color-scheme: light) {
-    body {
-      background-color: #b0b0b0;
-      color: black;
-    }
-  }
-   */
 
 </style>

@@ -76,6 +76,27 @@
         event.preventDefault()
     });
 
+    function darkMode() {
+        console.log("Dark mode!");
+        document.body.style.background = "#494949";
+        document.body.style.background_color = "#494949";
+    }
+
+    function lightMode() {
+        console.log("Light mode!");
+        document.body.style.background = "#c5c5c5";
+        document.body.style.background_color = "#c5c5c5";
+    }
+
+    window.matchMedia("(prefers-color-scheme: dark)")
+        .addListener(e => {
+            if (e.matches) {
+                darkMode();
+            } else {
+                lightMode();
+            }
+        });
+
 
     typeTitle("./steve.sh");
 
@@ -176,6 +197,5 @@
     transform: scale(1);
     opacity: 1;
   }
-
 
 </style>

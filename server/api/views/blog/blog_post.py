@@ -26,7 +26,7 @@ def blog_post(request, title=None):
             return JsonResponse({"message": "missing title"}, status=422)
         else:
             # Get the blog post
-            object = get_object_or_None(BlogPost, title=title.lower().replace("_", " "))
+            object = get_object_or_None(BlogPost, title=title.lower().replace("_", " ").replace("-", " "))
 
             if not object:
                 return JsonResponse({"message": "post not found"}, status=404)
