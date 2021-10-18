@@ -7,7 +7,7 @@
     }
 
     a {
-      transition: color 250ms;
+      //transition: color 250ms;
     }
 
     a:hover {
@@ -64,4 +64,6 @@
 
 <script>
     import Navbar from "../../components/Navbar.svelte";
+
+    document.title = "./steve.sh | Blog";
 </script>

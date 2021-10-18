@@ -30,30 +30,7 @@
 
 <div>
     <slot/>
-    <button on:click={light}>Light</button>
-    <button on:click={dark}>Dark</button>
 </div>
 
 <script>
-    function light() {
-        document.documentElement.style.setProperty('--background', getComputedStyle(document.documentElement).getPropertyValue('--background-light'));
-        document.documentElement.style.setProperty('--foreground', getComputedStyle(document.documentElement).getPropertyValue('--foreground-light'));
-        localStorage.setItem("theme", "light");
-    }
-
-    function dark() {
-        document.documentElement.style.setProperty('--background', getComputedStyle(document.documentElement).getPropertyValue('--background-dark'));
-        document.documentElement.style.setProperty('--foreground', getComputedStyle(document.documentElement).getPropertyValue('--foreground-dark'));
-        localStorage.setItem("theme", "dark");
-    }
-
-    let currentTheme = localStorage.getItem("theme") || "dark";
-
-    if (currentTheme === "dark") {
-        dark();
-    } else {
-        light();
-    }
-
-
 </script>

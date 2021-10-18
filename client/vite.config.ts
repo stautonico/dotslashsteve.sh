@@ -35,7 +35,16 @@ const config = <UserConfig>defineConfig({
     plugins: [
         svelte({
             emitCss: production,
-            preprocess: sveltePreprocess(),
+            preprocess: sveltePreprocess(
+                // {
+                //     postcss: {
+                //         plugins: [
+                //             require("tailwindcss"),
+                //             require("autoprefixer"),
+                //         ]
+                //     }
+                // }
+            ),
             compilerOptions: {
                 dev: !production,
             },
@@ -46,6 +55,7 @@ const config = <UserConfig>defineConfig({
     ],
     server: {
         host: 'localhost',
+        // host: '0.0.0.0',
         port: 5000,
         proxy: {
             '/api': {
