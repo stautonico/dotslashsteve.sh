@@ -18,4 +18,8 @@ urlpatterns = [
     # We have 2 because title is optional
     path("post/", blog_post.blog_post),
     path("post/<title>", blog_post.blog_post),
+
+    path("list/", list_posts.list_posts),
+    path("list/<int:limit>/<int:page>", list_posts.list_posts)
+
 ]

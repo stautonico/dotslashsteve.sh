@@ -1,9 +1,8 @@
 <nav>
     <a class="logo" on:click={() => {$goto('/')}}><img
-            src="https://dotslashsteve.sh/assets/img/logos/apple-touch-icon.png"
+            src="/assets/img/logos/apple-touch-icon.png"
             alt="Logo"></a>
-    <a on:click={toggleTheme} class="right"><i class="far {theme==='dark' ? 'fa-sun' : 'fa-sun'}"></i>
-    </a>
+    <a on:click={toggleTheme} class="right"><i class="far {theme==='dark' ? 'fa-sun' : 'fa-moon'}"></i></a>
     <a class="right">About</a>
     <a class="right active">Blog</a>
     <a on:click={() => {$goto('/')}} class="right">Home</a>
@@ -15,6 +14,7 @@
 
     let theme = localStorage.getItem("theme") || "dark";
 
+    // Initial theme setup
     if (theme === "dark") {
         dark();
     } else {
@@ -22,9 +22,6 @@
     }
 
     function toggleTheme() {
-        // A 1 millisecond delay is theoretically long enough for the icon to change but to be safe, I'll use
-        // a delay of 10 milliseconds is better for slower browsers (haha ie), but it shouldn't be noticeable
-        // Without this delay, the background of the icon changes instantly
         if (theme === "dark") {
             theme = "light";
             light();
@@ -37,12 +34,14 @@
     function light() {
         document.documentElement.style.setProperty('--background', getComputedStyle(document.documentElement).getPropertyValue('--background-light'));
         document.documentElement.style.setProperty('--foreground', getComputedStyle(document.documentElement).getPropertyValue('--foreground-light'));
+        document.documentElement.style.setProperty('--link', getComputedStyle(document.documentElement).getPropertyValue('--link-light'));
         localStorage.setItem("theme", "light");
     }
 
     function dark() {
         document.documentElement.style.setProperty('--background', getComputedStyle(document.documentElement).getPropertyValue('--background-dark'));
         document.documentElement.style.setProperty('--foreground', getComputedStyle(document.documentElement).getPropertyValue('--foreground-dark'));
+        document.documentElement.style.setProperty('--link', getComputedStyle(document.documentElement).getPropertyValue('--link-dark'));
         localStorage.setItem("theme", "dark");
     }
 </script>

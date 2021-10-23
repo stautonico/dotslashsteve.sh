@@ -16,7 +16,6 @@ from api.models import BlogPost, Tag
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
-from  datetime import datetime
 
 
 @api_view(["GET"])

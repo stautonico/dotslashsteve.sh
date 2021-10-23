@@ -101,7 +101,7 @@
     typeTitle("./steve.sh");
 
     // let title = "\u200E./steve.sh"
-    // let currentIndex = 0;
+    // let currentIndex = 0;T
     // let sleepTimer = 0;
     // let forward = true;
     // document.title = "";
