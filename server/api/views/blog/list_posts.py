@@ -24,7 +24,7 @@ def list_posts(request, limit=30, page=0):
     objects = []
 
     for post in blog_posts:
-        payload = {"title": post.title, "date_published": post.date_published, "category": post.category, "tags": []}
+        payload = {"id": post.id, "title": post.title, "date_published": post.date_published, "category": post.category, "tags": []}
 
         # Get the tags belonging to this post
         tags = Tag.objects.filter(post_id=post.id)

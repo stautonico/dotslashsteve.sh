@@ -3,10 +3,13 @@
 
     <button on:click={loadMore}>Load More</button>
 
+<!--    <BlogCard/>-->
+
     <ul>
         {#each posts as post}
             <li>
-                {post.title}
+<!--                <a style="color: deepskyblue;" href={$url("/blog/" + post.title.replace(" ", "_").toLowerCase())}>{post.title}</a>-->
+                <a style="color: deepskyblue;" href={$url("/blog/id_" + post.id)}>{post.title}</a>
             </li>
         {/each}
     </ul>
@@ -14,6 +17,9 @@
 </div>
 
 <script>
+    import BlogCard from "src/components/BlogCard.svelte";
+    import {url} from "@roxi/routify";
+
     let page = 1;
 
     let posts = [];
