@@ -1,16 +1,16 @@
 <nav>
-    <a class="logo" on:click={() => {$goto('/')}}><img
+    <a class="logo" href="{$url('/')}"><img
             src="/assets/img/logos/apple-touch-icon.png"
             alt="Logo"></a>
     <a on:click={toggleTheme} class="right"><i class="far {theme==='dark' ? 'fa-sun' : 'fa-moon'}"></i></a>
-    <a class="right">About</a>
-    <a class="right active">Blog</a>
-    <a on:click={() => {$goto('/')}} class="right">Home</a>
+    <a class="right"href="{$url('/about')}">About</a>
+    <a class="right active" href="{$url('/blog')}">Blog</a>
+    <a href="{$url('/')}" class="right">Home</a>
 
 </nav>
 
 <script>
-    import {goto} from '@roxi/routify'
+    import {goto, url} from '@roxi/routify'
 
     let theme = localStorage.getItem("theme") || "dark";
 

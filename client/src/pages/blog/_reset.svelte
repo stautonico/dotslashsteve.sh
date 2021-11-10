@@ -1,3 +1,12 @@
+<svelte:head>
+    <style>
+        body {
+            background-color: var(--background);
+            transition: color 1s, background-color 1s;
+        }
+    </style>
+</svelte:head>
+
 <style lang="scss">
   @import "src/styles/variables";
 
@@ -30,13 +39,6 @@
   a:hover {
     color: lighten($selected-text, 5);
     cursor: pointer;
-  }
-
-  // Container styles
-
-  .container {
-    width: 100vw;
-    height: 100vh;
   }
 
   main {
@@ -88,12 +90,12 @@
 
 </style>
 
-<div class="container">
-    <main>
-        <Navbar/>
-        <slot/>
-    </main>
-</div>
+<!--<div class="container">-->
+<main>
+    <Navbar/>
+    <slot/>
+</main>
+<!--</div>-->
 
 <script>
     import Navbar from "../../components/Navbar.svelte";

@@ -3,7 +3,7 @@ from django.db import models
 
 class BlogPost(models.Model):
     title = models.CharField(max_length=256, unique=True, null=False, blank=False)
-    date_published = models.DateField(auto_now_add=True, editable=True)
+    date_published = models.DateTimeField(auto_now_add=True, editable=True)
     category = models.CharField(max_length=128, unique=False, null=False, blank=False)
     markdown_file = models.CharField(max_length=512, unique=True, null=False, blank=False)
 

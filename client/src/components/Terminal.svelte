@@ -210,113 +210,113 @@
 
 </script>
 
-<style lang="scss">
-  @import "../styles/fonts";
+<!--<style lang="scss">-->
+<!--  @import "../styles/fonts";-->
 
-  $link-fade-color: #5e5e5e;
-  $link-fade-timing: cubic-bezier(.33, .05, .69, .93);
+<!--  $link-fade-color: #5e5e5e;-->
+<!--  $link-fade-timing: cubic-bezier(.33, .05, .69, .93);-->
 
-  * {
-    font-family: "Source Code Pro", Sans-Serif, serif;
-    font-weight: normal;
-    font-style: normal;
-    box-sizing: border-box;
-    overflow: -moz-scrollbars-none !important;
-    -ms-overflow-style: none !important;
-    margin: 0;
-    padding: 0;
-  }
+<!--  * {-->
+<!--    font-family: "Source Code Pro", Sans-Serif, serif;-->
+<!--    font-weight: normal;-->
+<!--    font-style: normal;-->
+<!--    box-sizing: border-box;-->
+<!--    overflow: -moz-scrollbars-none !important;-->
+<!--    -ms-overflow-style: none !important;-->
+<!--    margin: 0;-->
+<!--    padding: 0;-->
+<!--  }-->
 
-  ::-webkit-scrollbar {
-    width: 0 !important;
-  }
+<!--  ::-webkit-scrollbar {-->
+<!--    width: 0 !important;-->
+<!--  }-->
 
-  #terminal {
-    position: absolute;
-    //overflow-y: scroll;
-    color: white;
-    white-space: pre-line;
-    z-index: 0;
-    background-color: black;
-    height: 100%;
-    width: 100%;
-    // Add some padding so the text isn't touching the window frame
-    padding: 6px;
-  }
+<!--  #terminal {-->
+<!--    position: absolute;-->
+<!--    //overflow-y: scroll;-->
+<!--    color: white;-->
+<!--    white-space: pre-line;-->
+<!--    z-index: 0;-->
+<!--    background-color: black;-->
+<!--    height: 100%;-->
+<!--    width: 100%;-->
+<!--    // Add some padding so the text isn't touching the window frame-->
+<!--    padding: 6px;-->
+<!--  }-->
 
-  :global(#username) {
-    color: #49ec0f;
-  }
+<!--  :global(#username) {-->
+<!--    color: #49ec0f;-->
+<!--  }-->
 
-  :global(#computer) {
-    color: #49ec0f;
-  }
+<!--  :global(#computer) {-->
+<!--    color: #49ec0f;-->
+<!--  }-->
 
-  :global(#directory) {
-    color: #0e7aef;
-  }
+<!--  :global(#directory) {-->
+<!--    color: #0e7aef;-->
+<!--  }-->
 
-  .cursor::after {
-    content: "█"
-  }
+<!--  .cursor::after {-->
+<!--    content: "█"-->
+<!--  }-->
 
-  :global(a) {
-    color: white;
-    transition: color 500ms;
-  }
+<!--  :global(a) {-->
+<!--    color: white;-->
+<!--    transition: color 500ms;-->
+<!--  }-->
 
-  :global(a:hover) {
-    -webkit-animation: link-fade 1s $link-fade-timing infinite;
-    -moz-animation: link-fade 1s $link-fade-timing infinite;
-    -ms-animation: link-fadelink-fade 1s $link-fade-timing infinite;
-    -o-animation: link-fade 1s $link-fade-timing infinite;
-    animation: link-fade 1s $link-fade-timing infinite;
-  }
+<!--  :global(a:hover) {-->
+<!--    -webkit-animation: link-fade 1s $link-fade-timing infinite;-->
+<!--    -moz-animation: link-fade 1s $link-fade-timing infinite;-->
+<!--    -ms-animation: link-fadelink-fade 1s $link-fade-timing infinite;-->
+<!--    -o-animation: link-fade 1s $link-fade-timing infinite;-->
+<!--    animation: link-fade 1s $link-fade-timing infinite;-->
+<!--  }-->
 
-  // Shared
-  .no-select {
-    -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-    -khtml-user-select: none; /* Konqueror HTML */
-    -moz-user-select: none; /* Old versions of Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
-    user-select: none;
-  }
+<!--  // Shared-->
+<!--  .no-select {-->
+<!--    -webkit-touch-callout: none; /* iOS Safari */-->
+<!--    -webkit-user-select: none; /* Safari */-->
+<!--    -khtml-user-select: none; /* Konqueror HTML */-->
+<!--    -moz-user-select: none; /* Old versions of Firefox */-->
+<!--    -ms-user-select: none; /* Internet Explorer/Edge */-->
+<!--    user-select: none;-->
+<!--  }-->
 
-  // Animations
-  @-webkit-keyframes link-fade {
-    0% {
-      color: white;
-    }
-    50% {
-      color: $link-fade-color;
-    }
-    100% {
-      color: white;
-    }
-  }
+<!--  // Animations-->
+<!--  @-webkit-keyframes link-fade {-->
+<!--    0% {-->
+<!--      color: white;-->
+<!--    }-->
+<!--    50% {-->
+<!--      color: $link-fade-color;-->
+<!--    }-->
+<!--    100% {-->
+<!--      color: white;-->
+<!--    }-->
+<!--  }-->
 
-  @-moz-keyframes link-fade {
-    0% {
-      color: white;
-    }
-    50% {
-      color: $link-fade-color;
-    }
-    100% {
-      color: white;
-    }
-  }
+<!--  @-moz-keyframes link-fade {-->
+<!--    0% {-->
+<!--      color: white;-->
+<!--    }-->
+<!--    50% {-->
+<!--      color: $link-fade-color;-->
+<!--    }-->
+<!--    100% {-->
+<!--      color: white;-->
+<!--    }-->
+<!--  }-->
 
-  @keyframes link-fade {
-    0% {
-      color: white;
-    }
-    50% {
-      color: $link-fade-color;
-    }
-    100% {
-      color: white;
-    }
-  }
-</style>
+<!--  @keyframes link-fade {-->
+<!--    0% {-->
+<!--      color: white;-->
+<!--    }-->
+<!--    50% {-->
+<!--      color: $link-fade-color;-->
+<!--    }-->
+<!--    100% {-->
+<!--      color: white;-->
+<!--    }-->
+<!--  }-->
+<!--</style>-->

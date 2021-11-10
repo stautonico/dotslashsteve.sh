@@ -19,7 +19,7 @@ from rest_framework.decorators import api_view
 
 @api_view(["GET"])
 def list_posts(request, limit=30, page=0):
-    blog_posts = BlogPost.objects.all()
+    blog_posts = BlogPost.objects.order_by("date_published")
 
     objects = []
 
