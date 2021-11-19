@@ -347,12 +347,10 @@
 
         // These don't need to be reset after upload is complete
         if (["dragover", "dragenter"].includes(event.type)) {
-            console.log("Adding class");
             uploadContainer.classList.add("upload-container-active");
         }
 
         if (["dragleave", "dragend", "drop"].includes(event.type)) {
-            console.log("Removing class");
             uploadContainer.classList.remove("upload-container-active");
         }
 
@@ -391,7 +389,7 @@
                 formData.append('file' + x, files.item(x));
             }
 
-            fetch("/upload/", {
+            fetch("/share/upload/", {
                 //fetch("http://localhost:3000/upload/", {
                 method: "POST",
                 body: formData
@@ -399,7 +397,6 @@
                 .then(response => response.json())
                 .then(data => {
                     if ("message" in data) {
-                        console.log("Successful!");
                         succeedUpload();
                         console.log(data);
                     } else {
@@ -408,7 +405,6 @@
                     }
                 })
                 .catch((error) => {
-                    console.log("Fail!");
                     failUpload();
                     console.error(error);
                 });
