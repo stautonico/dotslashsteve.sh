@@ -50,9 +50,9 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
-          rm: true
+          rm: false
           source: "share/*"
-          target: "${{ secrets.REMOTE_DIR }}/.."
+          target: "${{ secrets.REMOTE_DIR }}"
 
       - name: Re-arrange File System
         uses: appleboy/ssh-action@v0.1.4
