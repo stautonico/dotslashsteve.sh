@@ -52,7 +52,7 @@ app.post("/share/upload", async (req, res) => {
                 const outputDirectory = process.env.UPLOAD_DIR || path.join(__dirname, 'public/uploads/');
 
                 const filePath = path.join(outputDirectory, newFileName);
-                file.mv(filePath, async (err) => {
+                file.mv(filePath, (err) => {
                     if (err) {
                         return res.status(500).send(err);
                     }
