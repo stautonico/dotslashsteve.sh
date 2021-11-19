@@ -31,11 +31,11 @@ app.use(fileUpload({
 
 
 // Routes
-app.get('/', (req, res) => {
+app.get('/share/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
-app.post("/upload", async (req, res) => {
+app.post("/share/upload", async (req, res) => {
     try {
         if (!req.files) {
             return res.status(400).send('No files were uploaded.');
