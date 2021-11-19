@@ -52,7 +52,7 @@ jobs:
           passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
           rm: true
           source: "share/*"
-          target: "${{ secrets.PROJECT_ROOT }}/share"
+          target: "${{ secrets.PROJECT_ROOT }}/"
 
       - name: Re-arrange File System
         uses: appleboy/ssh-action@v0.1.4
