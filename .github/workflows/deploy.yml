@@ -68,3 +68,7 @@ jobs:
             mv .well-known ../..
             cd ../..
             rm -rfv client/
+
+            rm -rfv ../share/index.js ../share/public/
+            mv share/* ../share/
+            rm -rfv share/
