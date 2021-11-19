@@ -52,7 +52,7 @@ jobs:
           passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
           rm: true
           source: "share/*"
-          target: "${{ secrets.PROJECT_ROOT }}/"
+          target: "${{ secrets.PROJECT_ROOT }}/share"
 
       - name: Re-arrange File System
         uses: appleboy/ssh-action@v0.1.4
@@ -72,6 +72,8 @@ jobs:
 
             cd ${{ secrets.PROJECT_ROOT }}
             cd share
+            mv share/* .
+            rm -rfv share
             npm i
 
             cd ..
