@@ -44,6 +44,18 @@ jobs:
           source: "client/dist/*"
           target: "${{ secrets.REMOTE_DIR }}"
 
+      - name: Copy Share Files to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          port: ${{ secrets.REMOTE_PORT }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
+          rm: true
+          source: "share/*"
+          target: "${{ secrets.REMOTE_DIR }}"
+
       - name: Re-arrange File System
         uses: appleboy/ssh-action@v0.1.4
         with:

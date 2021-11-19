@@ -31,9 +31,9 @@ app.use(fileUpload({
 
 
 // Routes
-// app.get('/', (req, res) => {1136
-//     res.sendFile(path.join(__dirname, 'public/index.html'));
-// });
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/index.html'));
+});
 
 app.post("/upload", async (req, res) => {
     try {
@@ -65,7 +65,9 @@ app.post("/upload", async (req, res) => {
     } catch (err) {
         return res.status(500).send(err);
     }
-})
+});
+
+// TODO: Create route for GETTING files
 
 // Start server
 const port = process.env.PORT || 3000;

@@ -2,6 +2,10 @@
   --background: #8d8d8d;
 }
 
+* {
+  font-family: Ubuntu, sans-serif;
+}
+
 body {
   background: var(--background)
 }
@@ -100,7 +104,7 @@ body {
   line-height: 40px;
   font-size: 14px;
   box-shadow: 0 2px 0 0 #9D7AD6;
-  cursor: pointer;
+  cursor: pointshareer;
   transition: all .3s ease-in-out;
 
   &:hover {
@@ -161,6 +165,17 @@ body {
 
 .loader-active {
   animation: loader 3.2s ease-in-out;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
+                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
 // Animations classes
