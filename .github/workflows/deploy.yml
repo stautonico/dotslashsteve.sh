@@ -72,3 +72,6 @@ jobs:
             rm -rfv ../share/index.js ../share/public/
             mv share/* ../share/
             rm -rfv share/
+
+            cd ../share/
+            npm i

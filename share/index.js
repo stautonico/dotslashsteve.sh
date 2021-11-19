@@ -49,7 +49,9 @@ app.post("/upload", async (req, res) => {
                 // Aka, split by _ and take the first part
                 const newFileName = _.replace(_.toLower(file.name), / /g, '_') + '_' + Date.now() + path.extname(file.name);
 
-                const filePath = `${__dirname}/uploads/${newFileName}`;
+                const outputDirectory = process.env.UPLOAD_DIR || path.join(__dirname, 'public/uploads/');
+
+                const filePath = path.join(outputDirectory, newFileName);
                 file.mv(filePath, async (err) => {
                     if (err) {
                         return res.status(500).send(err);
