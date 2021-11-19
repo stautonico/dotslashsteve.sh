@@ -3,8 +3,6 @@ name: Deploy To Server
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build:
@@ -54,7 +52,7 @@ jobs:
           passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
           rm: true
           source: "share/*"
-          target: "${{ secrets.REMOTE_DIR }}"
+          target: "${{ secrets.REMOTE_DIR }}/.."
 
       - name: Re-arrange File System
         uses: appleboy/ssh-action@v0.1.4

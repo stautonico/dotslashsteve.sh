@@ -227,3 +227,7 @@ pip-selfcheck.json
 #client/public/build/
 docs/build/
 client/.routify/
+
+share/public/index.css
+
+share/public/index.css.map
