@@ -231,3 +231,5 @@ client/.routify/
 share/public/index.css
 
 share/public/index.css.map
+
+share/share.db
