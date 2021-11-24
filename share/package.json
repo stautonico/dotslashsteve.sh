@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:backend": "nodemon index.js",
+    "dev:backend": "nodemon index.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -15,7 +15,9 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.2.1",
     "lodash": "^4.17.21",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "sqlite-async": "^1.1.2",
+    "moment": "^2.29.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
