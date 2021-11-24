@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>./steve.sh | View</title>
+
+    <!-- Meta Tags -->
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width,initial-scale=1'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="description" content="Steve's (really well programmed 😅) personal portfolio website"/>
+
+    <meta property="og:locale" content="en_US"/>
+    <meta property="og:type" content="portfolio"/>
+    <meta property="og:title" content="./steve.sh"/>
+    <meta property="og:description" content="Steve's (really well programmed 😅) personal portfolio website"/>
+    <meta property="og:url" content="https://dotslashsteve.sh">
+    <meta property="og:site_name" content="./steve.sh">
+    <meta property="og:image" content="">
+
+    <meta name="google" content="nositelinkssearchbox"/>
+    <meta name="keywords" content="portfolio, personal">
+    <meta name="robots" content="index, follow">
+    <meta name="copyright" content="Steve 2021">
+    <meta name="language" content="EN">
+    <meta name="author" content="Steve Tautonico">
+    <meta name="distribution" content="global">
+    <meta name="rating" content="general">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/logos/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/logos/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/logos/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <!-- TODO: Minify CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --background: #8d8d8d;
+        }
+
+        * {
+            font-family: Ubuntu, sans-serif;
+        }
+
+        input {
+            border: 1px solid #c9c9c9;
+            border-radius: 4px;
+            font-size: 1rem;
+            min-width: 125px;
+            padding: 0.5rem;
+            transition: border 0.5s ease-out;
+            position: relative;
+            display: block;
+
+            margin: 0 auto;
+        }
+
+        .fail {
+            background: #ff4e4e !important;
+            box-shadow: 0 2px 0 0 #ff4e4e !important;
+        }
+
+        *:focus {
+            outline: none;
+        }
+
+
+        body {
+            background: var(--background);
+        }
+
+        #frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 400px;
+            margin-top: -200px;
+            margin-left: -200px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .center {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+
+        #center {
+            position: absolute;
+            width: 300px;
+            height: 200px;
+            top: 70px;
+            left: 50px;
+            background: #fff;
+            box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        #title {
+            color: #676767;
+            font-size: 16px;
+            line-height: 50px;
+            text-align: center;
+            height: 50px;
+            border-bottom: 1px solid #D8D8D8;
+        }
+
+
+        #upload-container:hover * {
+            cursor: pointer;
+        }
+
+        #upload-container #content {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        #upload-container #filename {
+            display: block;
+            color: #676767;
+            font-size: 14px;
+            line-height: 18px;
+        }
+
+        #upload-container #input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+        }
+
+        #upload-button {
+            position: absolute;
+            width: 140px;
+            height: 40px;
+            left: 80px;
+            bottom: 24px;
+            background: #9D7AD6;
+            border-radius: 3px;
+            text-align: center;
+            line-height: 40px;
+            font-size: 14px;
+            box-shadow: 0 2px 0 0 #9D7AD6;
+            cursor: pointshareer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #upload-button:hover {
+            box-shadow: 0 2px 0 0 #5d3d96, 0 2px 10px 0 #9D7AD6;
+        }
+
+        .noselect {
+            -webkit-touch-callout: none;
+            /* iOS Safari */
+            -webkit-user-select: none;
+            /* Safari */
+            -khtml-user-select: none;
+            /* Konqueror HTML */
+            -moz-user-select: none;
+            /* Old versions of Firefox */
+            -ms-user-select: none;
+            /* Internet Explorer/Edge */
+            user-select: none;
+            /* Non-prefixed version, currently
+                                             supported by Chrome, Edge, Opera and Firefox */
+        }
+
+    </style>
+</head>
+<body>
+<noscript>Please enable JavaScript to view this application.</noscript>
+
+<!-- Password input field -->
+<div id="frame" class="noselect">
+    <div id="center">
+        <div id="title">Input Password to Unlock</div>
+        <div id="content">
+            <input class="center" id="password-input" type="password" placeholder="Password" autofocus>
+        </div>
+        <div id="upload-button">Unlock</div>
+    </div>
+</div>
+
+<script>
+    const passwordInput = document.getElementById('password-input');
+    const uploadButton = document.getElementById('upload-button');
+
+    passwordInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            submit();
+        }
+    });
+
+
+    function submit(e) {
+        try {
+            e.preventDefault();
+        } catch (err) {
+        }
+        const password = passwordInput.value;
+        if (password.length === 0) {
+            alert('Please enter a password');
+            return;
+        }
+
+        const pathParams = location.href.replace(location.origin, '').split("/")
+        const filename = pathParams[pathParams.length - 1]
+
+        try {
+            fetch(`/share/unlock/${filename}`, {
+                method: "POST",
+                body: JSON.stringify({'password': password}),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    passwordInput.value = '';
+                    document.location.href = "/share/download/" + data.token;
+                })
+                .catch((error) => {
+                    passwordInput.value = '';
+                    uploadButton.classList.add("fail");
+                    uploadButton.innerHTML = "Incorrect Password";
+
+                    setTimeout(function () {
+                        uploadButton.classList.remove("fail");
+                        uploadButton.innerHTML = "Unlock";
+                    }, 2000);
+                    console.error(error);
+
+                });
+        } catch (error) {
+            uploadButton.classList.add("fail");
+            uploadButton.innerHTML = "Error";
+            console.error(error);
+        }
+    }
+
+    // Upload button
+    document.getElementById('upload-button').addEventListener('click', submit);
+</script>
+
+
+</body>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LK5W0HZYT"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-9LK5W0HZYT');
+</script>
+
+</html>
