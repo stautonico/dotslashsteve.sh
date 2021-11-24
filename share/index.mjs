@@ -22,6 +22,7 @@ await db.exec(`
     (
         id       INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         filename TEXT                              NOT NULL,
+        alias    TEXT,
         password TEXT                              NOT NULL,
         archived BOOLEAN                           NOT NULL DEFAULT 0
     );
@@ -40,9 +41,6 @@ function newFile(filename, password) {
     return db.run("INSERT INTO files (filename, password) VALUES (?, ?)", [filename, password]);
 }
 
-// newShareFile("external-content.duckduckgo.com.jpg_1637264633341.jpg", "password");
-
-
 // Misc functions
 function makeID(length) {
     let result = '';
@@ -59,7 +57,7 @@ function makeID(length) {
 const app = express();
 
 // Middleware
-app.use(cors());
+// app.use(cors());
 app.use(bodyParser.json({limit: "100mb"}));
 app.use(express.json());
 app.use(bodyParser.urlencoded({limit: "100mb", extended: true}));
@@ -147,17 +145,18 @@ app.get("/share/download/:token", async (req, res) => {
         return res.send(`<script>window.location.href = "/share/view/${fileResult.filename}";</script>`);
     }
     res.header('Content-Disposition', 'filename="' + fileResult.filename + '"');
-    return res.sendFile(path.join(__dirname, 'uploads/' + fileResult.filename));
+    return res.sendFile(process.env.DOWNLOAD_DIR || path.join(__dirname, 'public/downloads/'));
 
 });
 
-app.get('/share/view/:filename', async (req, res) => {
+app.get('/share/view/:filenameOrAlias', async (req, res) => {
     // Check if the file has a password
-    const filename = req.params.filename;
+    const filename = req.params.filenameOrAlias;
     let fileResult = await db.get(`
         SELECT *
         FROM files
-        WHERE filename = '${filename}'
+        WHERE (filename = '${filename}'
+            OR alias = '${filename}')
           AND archived = 0
     `);
 
@@ -180,14 +179,14 @@ app.get('/share/view/:filename', async (req, res) => {
     res.sendFile(path.join(__dirname, 'public/view.html'));
 });
 
-app.post("/share/unlock/:filename", async (req, res) => {
+app.post("/share/unlock/:filenameOrAlias", async (req, res) => {
     const password = req.body.password;
-    const filename = req.params.filename;
+    const filename = req.params.filenameOrAlias;
 
     let fileResult = await db.get(`
         SELECT *
         FROM files
-        WHERE filename = '${filename}'
+        WHERE (filename = '${filename}' OR alias = '${filename}')
           AND password = '${password}'
           AND archived = 0
     `);
