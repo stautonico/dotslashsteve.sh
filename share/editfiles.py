@@ -7,7 +7,10 @@ if os.geteuid() != 0:
     exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
 
 # Setup db
-db = sqlite3.connect('share.db')
+if os.getenv("EDITFILES_DB") is None:
+    db = sqlite3.connect('../share.db')
+else:
+    db = sqlite3.connect(os.getenv("EDITFILES_DB"))
 
 while True:
     print("[1] List Files")
