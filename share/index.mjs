@@ -145,7 +145,7 @@ app.get("/share/download/:token", async (req, res) => {
         return res.send(`<script>window.location.href = "/share/view/${fileResult.filename}";</script>`);
     }
     res.header('Content-Disposition', 'filename="' + fileResult.filename + '"');
-    return res.sendFile(process.env.DOWNLOAD_DIR || path.join(__dirname, 'public/downloads/'));
+    return res.sendFile(path.join(process.env.DOWNLOAD_DIR || path.join(__dirname, 'public/downloads/'), fileResult.filename));
 
 });
 
