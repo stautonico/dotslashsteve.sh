@@ -1,5 +1,10 @@
 import sqlite3
 import tabulate
+import os
+
+# Only root can run
+if os.geteuid() != 0:
+    exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
 
 # Setup db
 db = sqlite3.connect('share.db')
