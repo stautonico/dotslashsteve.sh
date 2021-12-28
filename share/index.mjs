@@ -105,6 +105,7 @@ app.use(bodyParser.urlencoded({limit: "100mb", extended: true}));
 app.use(morgan("dev"));
 
 // set up rate limiter: maximum of five requests per minute (additional on top of nginx rate limiter)
+// TODO: maybe change these values?
 import rateLimit from "express-rate-limit";
 const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
@@ -115,7 +116,7 @@ const limiter = rateLimit({
 });
 
 
-app.use("/share/*", limiter);
+app.use("/share/upload", limiter);
 
 app.use(fileUpload({
     createParentPath: true, limits: {
