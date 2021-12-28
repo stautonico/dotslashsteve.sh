@@ -78,4 +78,4 @@ jobs:
 
             cd ..
             export HOME=${{ secrets.PROJECT_ROOT }}
-            pm2 restart all --update-env
+            pm2 restart all --update-env ecosystem.config.js
