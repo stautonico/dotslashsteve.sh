@@ -205,7 +205,7 @@ table *{border-color:inherit;text-align:left;vertical-align:top}
         }
     } catch (err) {
         console.log(err);
-        return res.status(500).send(err);
+        return res.status(500).send();
     }
 });
 
