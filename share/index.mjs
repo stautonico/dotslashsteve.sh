@@ -9,6 +9,7 @@ import moment from "moment";
 import database from "sqlite-async";
 import sgMail from "@sendgrid/mail";
 import dotenv from "dotenv";
+import sanitizeHtml from 'sanitize-html';
 
 if (process.env.NODE_ENV === "development") {
     dotenv.config();
@@ -126,7 +127,10 @@ app.post("/share/upload", async (req, res) => {
                 file = req.files[file];
                 // We want to name the file 'file.ext_timestamp.ext' so if we want to cut off the file extension we can just cut the timestamp and extra extension off
                 // Aka, split by _ and take the first part
-                const newFileName = _.replace(_.toLower(file.name), / /g, '_') + '_' + Date.now() + path.extname(file.name);
+                const newFileName = _.replace(_.toLower(sanitizeHtml(file.name, {
+                    allowedTags: [],
+                    allowedAttributes: {}
+                })), / /g, '_') + '_' + Date.now() + path.extname(file.name);
 
                 const outputDirectory = process.env.UPLOAD_DIR || path.join(__dirname, 'public/uploads/');
 
@@ -145,7 +149,10 @@ app.post("/share/upload", async (req, res) => {
             let table = '<table><thead><tr><th>File</th><th>Size</th></tr></thead><tbody>';
             for (let file of files) {
                 table += `<tr>
-                            <td>${file.name}</td>
+                            <td>${sanitizeHtml(file.name, {
+                    allowedTags: [],
+                    allowedAttributes: {}
+                })}</td>
                             <td>${file.size}</td>
                           </tr>`;
             }
