@@ -18,7 +18,6 @@ if (process.env.NODE_ENV === "development") {
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
-
 // Emulate __dirname
 import {fileURLToPath} from 'url';
 
@@ -104,6 +103,16 @@ app.use(bodyParser.json({limit: "100mb"}));
 app.use(express.json());
 app.use(bodyParser.urlencoded({limit: "100mb", extended: true}));
 app.use(morgan("dev"));
+
+// set up rate limiter: maximum of five requests per minute (additional on top of nginx rate limiter)
+import rateLimit from "express-rate-limit";
+const limiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 5
+});
+
+
+app.use(limiter);
 
 app.use(fileUpload({
     createParentPath: true, limits: {
