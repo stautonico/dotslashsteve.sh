@@ -7,6 +7,13 @@ import _ from "lodash";
 import path from "path";
 import moment from "moment";
 import database from "sqlite-async";
+import sgMail from "@sendgrid/mail";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
 
 // Emulate __dirname
 import {fileURLToPath} from 'url';
@@ -47,10 +54,41 @@ function makeID(length) {
     let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let charactersLength = characters.length;
     for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() *
-            charactersLength));
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
+}
+
+/**
+ * Format bytes as human-readable text.
+ *
+ * @param bytes Number of bytes.
+ * @param si True to use metric (SI) units, aka powers of 1000. False to use
+ *           binary (IEC), aka powers of 1024.
+ * @param dp Number of decimal places to display.
+ *
+ * @return Formatted string.
+ */
+function humanFileSize(bytes, si = false, dp = 1) {
+    const thresh = si ? 1000 : 1024;
+
+    if (Math.abs(bytes) < thresh) {
+        return bytes + ' B';
+    }
+
+    const units = si
+        ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+        : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+    let u = -1;
+    const r = 10 ** dp;
+
+    do {
+        bytes /= thresh;
+        ++u;
+    } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+
+    return bytes.toFixed(dp) + ' ' + units[u];
 }
 
 // Express setup
@@ -64,13 +102,9 @@ app.use(bodyParser.urlencoded({limit: "100mb", extended: true}));
 app.use(morgan("dev"));
 
 app.use(fileUpload({
-    createParentPath: true,
-    limits: {
+    createParentPath: true, limits: {
         fileSize: 100 * 1024 * 1024 // 100MB max file size
-    },
-    abortOnLimit: true,
-    useTempFiles: true,
-    tempFileDir: '/tmp/'
+    }, abortOnLimit: true, useTempFiles: true, tempFileDir: '/tmp/'
 }));
 
 // Routes
@@ -79,6 +113,8 @@ app.get('/share/', (req, res) => {
 });
 
 app.post("/share/upload", async (req, res) => {
+    let files = [];
+    let totalSize = 0;
     try {
         if (!req.files) {
             return res.status(400).send('No files were uploaded.');
@@ -93,7 +129,52 @@ app.post("/share/upload", async (req, res) => {
 
                 const filePath = path.join(outputDirectory, newFileName);
                 let result = await file.mv(filePath);
+
+                // Add the file to the payload, so we can send an email
+                files.push({
+                    name: file.name, size: `${humanFileSize(file.size, true, 2)}`
+                });
+                totalSize += file.size;
             }
+
+            // Send an email with the file info
+            // Convert the files object into an HTML table
+            let table = '<table><thead><tr><th>File</th><th>Size</th></tr></thead><tbody>';
+            for (let file of files) {
+                table += `<tr>
+                            <td>${file.name}</td>
+                            <td>${file.size}</td>
+                          </tr>`;
+            }
+            table += '</tbody></table>';
+
+            const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+            const msg = {
+                to: process.env.MAIL_TO,
+                from: process.env.MAIL_FROM,
+                subject: `New file${files.length > 1 ? 's' : ''} uploaded`,
+                html: `
+                        <head>
+                        <style type="text/css">
+                                table  {border-collapse:collapse;border-spacing:0;}
+    table td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+  table th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal; background-color: #8d8d8d; color: #fff;}
+table *{border-color:inherit;text-align:left;vertical-align:top}
+                        </style>
+                        </head>
+                        <h1>New file${files.length > 1 ? 's' : ''} uploaded!</h1>
+                        <span>${files.length} new file${files.length > 1 ? 's have' : ' has'} been uploaded by ${ip}:</span><br /><br />
+                        Total size: ${humanFileSize(totalSize, true, 2)}<br />
+                        ${table}`
+            };
+
+            sgMail.send(msg)
+                .catch(err => {
+                    console.error(err);
+                });
 
             return res.json({
                 message: "success"
