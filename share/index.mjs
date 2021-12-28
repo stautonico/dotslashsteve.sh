@@ -108,11 +108,14 @@ app.use(morgan("dev"));
 import rateLimit from "express-rate-limit";
 const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    max: 5
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: true,
+    message: "Too many requests from this IP, please try again later."
 });
 
 
-app.use(limiter);
+app.use("/share/*", limiter);
 
 app.use(fileUpload({
     createParentPath: true, limits: {
