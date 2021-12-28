@@ -9,6 +9,7 @@ import moment from "moment";
 import database from "sqlite-async";
 import sgMail from "@sendgrid/mail";
 import dotenv from "dotenv";
+import sanitizeHtml from 'sanitize-html';
 
 if (process.env.NODE_ENV === "development") {
     dotenv.config();
@@ -16,7 +17,6 @@ if (process.env.NODE_ENV === "development") {
 
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
-
 
 // Emulate __dirname
 import {fileURLToPath} from 'url';
@@ -104,6 +104,19 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({limit: "100mb", extended: true}));
 app.use(morgan("dev"));
 
+// set up rate limiter: maximum of five requests per minute (additional on top of nginx rate limiter)
+import rateLimit from "express-rate-limit";
+const limiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: true,
+    message: "Too many requests from this IP, please try again later."
+});
+
+
+app.use("/share/*", limiter);
+
 app.use(fileUpload({
     createParentPath: true, limits: {
         fileSize: 100 * 1024 * 1024 // 100MB max file size
@@ -126,7 +139,10 @@ app.post("/share/upload", async (req, res) => {
                 file = req.files[file];
                 // We want to name the file 'file.ext_timestamp.ext' so if we want to cut off the file extension we can just cut the timestamp and extra extension off
                 // Aka, split by _ and take the first part
-                const newFileName = _.replace(_.toLower(file.name), / /g, '_') + '_' + Date.now() + path.extname(file.name);
+                const newFileName = _.replace(_.toLower(sanitizeHtml(file.name, {
+                    allowedTags: [],
+                    allowedAttributes: {}
+                })), / /g, '_') + '_' + Date.now() + path.extname(file.name);
 
                 const outputDirectory = process.env.UPLOAD_DIR || path.join(__dirname, 'public/uploads/');
 
@@ -145,7 +161,10 @@ app.post("/share/upload", async (req, res) => {
             let table = '<table><thead><tr><th>File</th><th>Size</th></tr></thead><tbody>';
             for (let file of files) {
                 table += `<tr>
-                            <td>${file.name}</td>
+                            <td>${sanitizeHtml(file.name, {
+                    allowedTags: [],
+                    allowedAttributes: {}
+                })}</td>
                             <td>${file.size}</td>
                           </tr>`;
             }
@@ -186,7 +205,7 @@ table *{border-color:inherit;text-align:left;vertical-align:top}
         }
     } catch (err) {
         console.log(err);
-        return res.status(500).send(err);
+        return res.status(500).send();
     }
 });
 
