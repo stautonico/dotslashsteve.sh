@@ -9,6 +9,8 @@
 
     const dispatch = createEventDispatcher();
 
+    const NPM_PACKAGE_AMOUNT = 805;
+
     const COMPUTERS = ["skynet", "hp3000", "hal9000", "wopr", "GlaDOS", "joshua", "alpha60", "localhost"];
 
     const CURRENT_COMPUTER_NAME = COMPUTERS[Math.floor(Math.random() * COMPUTERS.length)];
@@ -84,6 +86,7 @@
     }
 
     async function writeLink(toWrite: string, url?: string) {
+        writing = true;
         return new Promise<void>(async (resolve) => {
             if (!url) {
                 url = toWrite;
@@ -92,23 +95,19 @@
             currentString += `<a href='${url}' target="_blank">`
 
             for (let i = 0; i < toWrite.length; i++) {
-                // Try to remove the link ending
-                // We do this at the beginning so it stays as a link at the end of the input
-                // const lastChar = currentString.substring(currentString.length - "</a>".length)
-                // if (lastChar === "</a>") {
-                //     currentString = currentString.slice(0, -"</a>".length);
-                // }
-
                 await addString(toWrite[i]);
             }
             // Add the link ending
             currentString += "</a>";
+            writing = false;
             resolve();
         });
     }
 
     // Simulates output from the binary
     async function writeOutput(toWrite: string, newline = true) {
+        writing = false;
+        cursor = false;
         return new Promise<void>(async (resolve) => {
             if (newline) {
                 // currentString = currentString + "<br />" + toWrite;
@@ -116,6 +115,7 @@
             } else {
                 currentString += toWrite;
             }
+            writing = true;
             resolve();
         });
     }
@@ -124,6 +124,15 @@
         return new Promise<void>(async (resolve) => {
             let splitString = currentString.split("<br />");
             splitString.shift();
+            currentString = splitString.join("<br />");
+            resolve();
+        });
+    }
+
+    async function deleteBottomLine() {
+        return new Promise<void>(async (resolve) => {
+            let splitString = currentString.split("<br />");
+            splitString.pop();
             currentString = splitString.join("<br />");
             resolve();
         });
@@ -168,22 +177,96 @@
         await writeInput("git clone ");
         await writeLink("https://github.com/stautonico/dotslashsteve.sh");
         await sleep(350);
-        writing = true;
         await writeOutput("Cloning into 'dotslashsteve.sh'...");
         await sleep(50);
-        await writeOutput("remote: Enumerating objects: 83, done.");
+        await writeOutput("remote: Enumerating objects: 532, done.");
         await sleep(50);
-        await writeOutput("remote: Counting objects: 100% (83/83), done.");
+        await writeOutput("remote: Counting objects: 100% (532/532), done.");
         await sleep(50);
-        await writeOutput("remote: Compressing objects: 100% (75/75), done.");
+        await writeOutput("remote: Compressing objects: 100% (467/467), done.");
         await sleep(50);
-        await writeOutput("remote: Total 83 (delta 11), reused 68 (delta 0), pack-reused 0");
+        await writeOutput("remote: Total 532 (delta 230), reused 312 (delta 25), pack-reused 0");
         await sleep(50);
-        await writeOutput("Receiving objects: 100% (83/83), 392.45 KiB | 5.45 MiB/s, done.");
+        await writeOutput("Receiving objects: 100% (532/532), 593.01 KiB | 6.24 MiB/s, done.");
         await sleep(50);
-        await writeOutput("Resolving deltas: 100% (11/11), done.");
+        await writeOutput("Resolving deltas: 100% (230/230), done.");
         await sleep(50);
-        newLine()
+        newLine();
+        await sleep(500);
+        await writeInput("cd dotslashsteve.sh/client");
+        await sleep(50);
+        newLine("~/dotslashsteve.sh/client");
+        // 1/3 chance of building without installing packages first
+        const generateWithFail = getRandomInt(0, 2);
+        if (generateWithFail == 0) {
+            await sleep(440);
+            await writeInput("npm run build");
+            await sleep(50);
+            await newLine(null, true);
+            await sleep(500);
+            await writeOutput("> build", true);
+            await writeOutput("> routify -b && vite build");
+            await sleep(50);
+            await newLine(null, true);
+            await writeOutput("sh: line 1: routify: command not found", true);
+            newLine();
+        }
+        await sleep(500);
+        await writeInput("npm i");
+        await sleep(50);
+        for (let i = 0; i < NPM_PACKAGE_AMOUNT; i++) {
+            await writeOutput(`Installing packages: ${Math.round((i / NPM_PACKAGE_AMOUNT) * 100)}% (${i}/${NPM_PACKAGE_AMOUNT})`);
+            await sleep(0.5);
+            await deleteBottomLine();
+        }
+        await writeOutput(`Installing packages: 100 (${NPM_PACKAGE_AMOUNT}/${NPM_PACKAGE_AMOUNT}), done.`);
+        await sleep(300);
+        await newLine();
+        await sleep(300);
+        await writeInput("npm run build");
+        await sleep(50);
+        await newLine(null, true);
+        await sleep(500);
+        await writeOutput("> build", true);
+        await writeOutput("> routify -b && vite build");
+        await sleep(50);
+        await writeOutput("vite v2.5.10 building for production...");
+        await sleep(500);
+        await writeOutput("dist/index.html                  2.30 KiB");
+        await writeOutput("dist/assets/index.e5961dc5.css   3.38 KiB / brotli: 0.89 KiB");
+        await writeOutput("dist/assets/index.7f9381c1.js    6.79 KiB / brotli: 2.49 KiB");
+        await writeOutput("dist/assets/vendor.44f7e1c6.js   26.68 KiB / brotli: 9.23 KiB");
+        await newLine();
+        await sleep(880);
+        await writeInput("cd dist");
+        await sleep(50);
+        await newLine("~/dotslashsteve.sh/client/dist");
+        await sleep(300);
+
+        await writeInput("sudo cp * /var/www/dotslashsteve.sh/public");
+        await sleep(150);
+        // Set writing to not show cursor (maybe rename)
+        writing = true;
+        cursor = true;
+        await writeOutput("[sudo] password for steve: ");
+        await sleep(1500);
+        // 1/4 chance of entering incorrect password
+        const wrongPassword = getRandomInt(0, 3);
+        if (wrongPassword == 0) {
+            await newLine(null, true);
+            cursor = false;
+            await sleep(1500);
+            await deleteBottomLine();
+            await writeOutput("Sorry, try again.");
+            await sleep(500);
+            cursor = true;
+            await writeOutput("[sudo] password for steve: ");
+            await sleep(1500);
+        }
+        writing = false;
+        newLine();
+
+
         writing = false;
         let command: string
         try {
@@ -199,7 +282,7 @@
         await writeInput(command + " https://localhost/");
         await newLine("", true);
         writing = true;
-        await sleep(350);
+        await sleep(750);
         showMainSite();
     }
 
