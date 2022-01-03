@@ -33,7 +33,7 @@ await db.exec(`
         id       INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         filename TEXT                              NOT NULL,
         alias    TEXT,
-        password TEXT                              NOT NULL,
+        password TEXT,
         archived BOOLEAN                           NOT NULL DEFAULT 0
     );
 
@@ -107,6 +107,7 @@ app.use(morgan("dev"));
 // set up rate limiter: maximum of five requests per minute (additional on top of nginx rate limiter)
 // TODO: maybe change these values?
 import rateLimit from "express-rate-limit";
+
 const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
     max: 5,
