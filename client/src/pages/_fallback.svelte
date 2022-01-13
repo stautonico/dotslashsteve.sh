@@ -1,5 +1,6 @@
+<svelte:body use:classList={"error-page-body"}/>
 <div id="error-container">
-    <Body {style}/>
+    <!--    <Body {style}/>-->
     <div class="scanlines"></div>
     <div id="terminal">
         <h1 id="error-title">{@html title}</h1>
@@ -13,7 +14,7 @@
 <script>
     import {onMount} from "svelte";
     import {goto} from "@roxi/routify";
-    import {Body} from "svelte-body";
+    import {classList} from "svelte-body";
 
     let titleToShow = "Error <>404</>";
     let descriptionLineToShow = "The page you are looking for might have been removed, had its name changed or is temporarily unavailable";
@@ -195,6 +196,19 @@
     ::-moz-selection {
         color: none;
         background: none;
+    }
+
+    :global(.error-page-body) {
+        cursor: default;
+        overflow: hidden;
+        font-family: Inconsolata, monospace;
+        min-height: 100%;
+        box-sizing: border-box;
+        background-color: #000000;
+        background-image: radial-gradient(#11581E, #041607);
+        color: rgba(128, 255, 128, 0.8);
+        text-shadow: 0 0 1ex rgba(51, 255, 51, 1), 0 0 2px rgba(255, 255, 255, 0.8);
+        font-size: 24px;
     }
 
     :global(html) {
