@@ -1,4 +1,4 @@
-const esModules = ["@roxi"].join("|")
+const esModules = ["@roxi", "svelte-body"].join("|")
 
 module.exports = {
     testEnvironment: "jsdom",
