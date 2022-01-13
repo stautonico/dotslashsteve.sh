@@ -12,5 +12,5 @@
     const params = Object.fromEntries(urlSearchParams.entries());
 
     console.log(params);
-    window.history.replaceState({}, '', params.page);
+    window.history.replaceState({}, '', params.path);
 </script>
