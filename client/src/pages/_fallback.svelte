@@ -16,7 +16,7 @@
     import {Body} from "svelte-body";
 
     let titleToShow = "Error <>404</>";
-    let descriptionLineToShow = "The page you are looking for might have been removed, had its name changed or is temporarily unavailable";
+    let descriptionLineToShow = "The page you are looking for might have been removed, had its name changed or is temporarily unavailable (this is the test build).";
     let linkLineToShow = "You could try <>going back</> or <>going home</>";
 
     let indentDescriptionLine = false;
@@ -45,6 +45,11 @@
         color: "rgba(128, 255, 128, 0.8)",
         textShadow: "0 0 1ex rgba(51, 255, 51, 1), 0 0 2px rgba(255, 255, 255, 0.8)",
         fontSize: "24px",
+    }
+
+    // Global styles for the body
+    const style = {
+
     }
 
     async function sleep(ms) {
@@ -149,9 +154,6 @@
             await sleep(SPEED);
         }
 
-        // document.getElementById("link-one").addEventListener("click", goBack);
-        // document.getElementById("link-one").onclick = goBack
-        // document.getElementById("link-two").addEventListener("click", goHome);
         doneTyping = true;
     });
 
