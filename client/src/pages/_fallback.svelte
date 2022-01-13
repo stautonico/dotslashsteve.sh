@@ -1,5 +1,5 @@
 <div>
-    <Body {style} />
+<!--    <Body {style} />-->
     <div class="scanlines"></div>
     <div id="terminal">
         <h1 id="error-title">{@html title}</h1>
@@ -12,7 +12,7 @@
 
 <script>
     import {onMount} from "svelte";
-    import {Body} from "svelte-body";
+    //import {Body} from "svelte-body";
 
     let titleToShow = "Error <>404</>";
     let descriptionLineToShow = "The page you are looking for might have been removed, had its name changed or is temporarily unavailable (this is the test build).";
