@@ -3,7 +3,8 @@
     import {url} from "@roxi/routify";
 
     onMount(() => {
-        window.location.href = `/error/404?path=${$url()}`;
+        console.log($url());
+        window.location.href = `/error/404.html?path=${$url()}`;
     });
 </script>
 <!--<svelte:body use:classList={"error-page-body"}/>-->
