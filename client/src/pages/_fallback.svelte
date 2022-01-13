@@ -16,7 +16,7 @@
     import {Body} from "svelte-body";
 
     let titleToShow = "Error <>404</>";
-    let descriptionLineToShow = "The page you are looking for might have been removed, had its name changed or is temporarily unavailable (this is the test build).";
+    let descriptionLineToShow = "The page you are looking for might have been removed, had its name changed or is temporarily unavailable";
     let linkLineToShow = "You could try <>going back</> or <>going home</>";
 
     let indentDescriptionLine = false;
@@ -32,8 +32,9 @@
     let showCursor = true;
     let doneTyping = false;
 
-    const SPEED = 5;
+    const SPEED = 25;
 
+    // Global styles for the body
     const style = {
         cursor: "default",
         overflow: "hidden",
@@ -44,12 +45,7 @@
         backgroundImage: "radial-gradient(#11581E, #041607)",
         color: "rgba(128, 255, 128, 0.8)",
         textShadow: "0 0 1ex rgba(51, 255, 51, 1), 0 0 2px rgba(255, 255, 255, 0.8)",
-        fontSize: "24px",
-    }
-
-    // Global styles for the body
-    const style = {
-
+        fontSize: "24px"
     }
 
     async function sleep(ms) {
@@ -188,12 +184,6 @@
         font-stretch: normal;
         src: url(https://fonts.gstatic.com/s/inconsolata/v21/QldgNThLqRwH-OJ1UHjlKENVzkWGVkL3GZQmAwLYxYWI2qfdm7Lpp4U8WR32lw.woff2) format('woff2');
         unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-    }
-
-    #error-container :global(*) {
-        cursor: default;
-        overflow: hidden;
-        font-family: Inconsolata, monospace;
     }
 
     ::selection {
