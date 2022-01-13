@@ -1,5 +1,6 @@
+<html>
 <div id="error-container">
-    <Body {style}/>
+<!--    <Body class="error-global-body"/>-->
     <div class="scanlines"></div>
     <div id="terminal">
         <h1 id="error-title">{@html title}</h1>
@@ -9,6 +10,7 @@
            class:blink-cursor={showCursor && currentLine==="link"}>{@html linkLine}</p>
     </div>
 </div>
+</html>
 
 <script>
     import {onMount} from "svelte";
@@ -32,19 +34,18 @@
     let showCursor = true;
     let doneTyping = false;
 
-    const SPEED = 5;
+    const SPEED = 10;
 
     const style = {
-        cursor: "default",
-        overflow: "hidden",
-        fontFamily: "Inconsolata, monospace",
         minHeight: "100%",
+        height: "100%",
         boxSizing: "border-box",
         backgroundColor: "#000000",
-        backgroundImage: "radial-gradient(#11581E, #041607)",
+        backgroundImage: "radial-gradient(#11581E,#041607) !important",
+        fontFamily: "'Inconsolata', Helvetica, sans-serif",
+        fontSize: "1.5rem",
         color: "rgba(128, 255, 128, 0.8)",
         textShadow: "0 0 1ex rgba(51, 255, 51, 1), 0 0 2px rgba(255, 255, 255, 0.8)",
-        fontSize: "24px",
     }
 
     async function sleep(ms) {
@@ -57,6 +58,7 @@
 
     window.goHome = () => {
         $goto("/");
+        // window.location.href = "/";
     }
 
     onMount(async () => {
@@ -145,13 +147,9 @@
             }
             if (linkLineToShow[i] === undefined) break;
             linkLine += linkLineToShow[i];
-            // title.innerHTML = linkLine;
             await sleep(SPEED);
         }
 
-        // document.getElementById("link-one").addEventListener("click", goBack);
-        // document.getElementById("link-one").onclick = goBack
-        // document.getElementById("link-two").addEventListener("click", goHome);
         doneTyping = true;
     });
 
@@ -188,6 +186,27 @@
         unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
     }
 
+    :global(html) {
+        min-height: 100%;
+        box-sizing: border-box !important;
+        height: 100% !important;
+        background-color: #000000 !important;
+        background-image: radial-gradient(#11581E, #041607) !important;
+        font-family: 'Inconsolata', Helvetica, sans-serif !important;
+        font-size: 1.5rem !important;
+        color: rgba(128, 255, 128, 0.8) !important;
+        text-shadow: 0 0 1ex rgba(51, 255, 51, 1),
+        0 0 2px rgba(255, 255, 255, 0.8) !important;
+    }
+
+
+
+
+    /* We're prefixing all our global styles with #error-container which limits the styles to our local
+    <div id="error-container">
+    The reason we have to do this is because routify does not unload global styles between routes.
+    This causes ALL our routes to have these global styles applied to them, which we don't want.
+    */
     #error-container :global(*) {
         cursor: default;
         overflow: hidden;
@@ -205,11 +224,7 @@
         background: none;
     }
 
-    :global(html) {
-        height: 100%; /* Idk why, but the background gradient disappears without this */
-    }
-
-    #error-container #error-title {
+    #error-title {
         color: rgba(128, 255, 128, 0.8) !important;
     }
 
@@ -219,7 +234,7 @@
         height: 100%;
         width: 1000px;
         max-width: 100%;
-        padding: 96px !important;
+        padding: 4rem;
         text-transform: uppercase;
     }
 
@@ -241,7 +256,7 @@
     }
 
     #error-container :global(a:hover) {
-        color: #c3c3c3;
+        color: #a2a2a2;
     }
 
     #error-container :global(a::before) {
@@ -254,6 +269,10 @@
 
     #error-container :global(.error-code) {
         color: white;
+    }
+
+    .hidden {
+        display: none;
     }
 
     #error-container :global(.blink-cursor::after) {
