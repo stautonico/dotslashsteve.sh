@@ -1,0 +1,9 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>./steve.sh | Blog</title>
+        <link>https://dotslashsteve.sh/</link>
+        <description>./steve.sh | Blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language>
+            <atom:link href="https://dotslashsteve.sh/index.xml" rel="self" type="application/rss+xml" />
+        </channel>
+</rss>
