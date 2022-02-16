@@ -1,0 +1,34 @@
+#+hugo_base_dir: ../
+#+seq_todo: TODO DRAFT DONE
+
+#+property: header-args :eval never-export
+
+#+startup: indent
+
+#+hugo_paired_shortcodes: gist
+
+* Post 1
+:PROPERTIES:
+:EXPORT_FILE_NAME: post-1
+:EXPORT_DATE: 2017-03-03T14:15:59-06:00
+:END:
+This is the first post! This *post* can be ~uploaded~ by =using= ~org-hugo-export-whatever~
+This my updated post!
+
+* Post 2
+:PROPERTIES:
+:EXPORT_FILE_NAME: post-2
+:EXPORT_DATE: 2017-03-03T14:15:59-06:00
+:END:
+/This/ is my *SECOND* post!
+
+#+begin_gist
+spf13 7896402
+#+end_gist
+
+
+[[/images/hugologo.jpg]]
+
+# Local Variables:
+# eval: (org-hugo-auto-export-mode)
+# End:
