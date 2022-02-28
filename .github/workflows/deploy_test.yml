@@ -30,7 +30,6 @@ jobs:
 
       - name: Org-mode to Markdown
         run: |
-          # emacs ./blog/content-org/all-posts.org --script scripts/build-blog.el --kill
           emacs ./blog/content-org/all-posts.org --batch -L ../../scripts -l build-blog.el --eval='(org-hugo-export-wim-to-md t)' --kill
 
       - name: Setup Hugo
