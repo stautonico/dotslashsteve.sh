@@ -1,0 +1,91 @@
+#+hugo_base_dir: ../
+#+seq_todo: TODO DRAFT DONE
+
+#+property: header-args :eval never-export
+
+#+startup: indent
+
+#+hugo_paired_shortcodes: highlight
+
+* Post 1
+:PROPERTIES:
+:EXPORT_FILE_NAME: post-1
+:EXPORT_DATE: 2017-03-03T14:15:59-06:00
+:END:
+This is the first post! This *post* can be ~uploaded~ by =using= ~org-hugo-export-whatever~
+This my updated post!
+
+* Post 2
+:PROPERTIES:
+:EXPORT_FILE_NAME: post-2
+:EXPORT_DATE: 2017-03-03T14:15:59-06:00
+:END:
+/This/ is my *SECOND* post!
+
+
+
+
+[[/images/hugologo.jpg]]
+* Post 3
+:PROPERTIES:
+:EXPORT_FILE_NAME: post-3
+:EXPORT_DATE: 2017-03-03T14:15:59-06:00
+:END:
+This is the first post! This *post* can be ~uploaded~ by =using= ~org-hugo-export-whatever~
+This my updated post!
+
+* Post 4
+:PROPERTIES:
+:EXPORT_FILE_NAME: post-4
+:EXPORT_DATE: 2017-03-03T14:15:59-06:00
+:END:
+/This/ is my *SECOND* post!
+
+
+* Post 5
+:PROPERTIES:
+:EXPORT_FILE_NAME: post-5
+:EXPORT_DATE: 2017-03-03T14:15:59-06:00
+:END:
+This is the first post! This *post* can be ~uploaded~ by =using= ~org-hugo-export-whatever~
+This my updated post!
+
+* Post 6
+:PROPERTIES:
+:EXPORT_FILE_NAME: post-6
+:EXPORT_DATE: 2017-03-03T14:15:59-06:00
+:END:
+/This/ is my *SECOND* post!
+
+
+* Post 7
+:PROPERTIES:
+:EXPORT_FILE_NAME: post-7
+:EXPORT_DATE: 2017-03-03T14:15:59-06:00
+:END:
+This is the first post! This *post* can be ~uploaded~ by =using= ~org-hugo-export-whatever~
+This my updated post!
+
+* Post 8
+:PROPERTIES:
+:EXPORT_FILE_NAME: post-8
+:EXPORT_DATE: 2019-03-03T14:15:59-06:00
+:END:
+/This/ is my *SECOND* post!
+
+
+#+attr_shortcode: python
+#+begin_highlight
+for x in range(10):
+    print(x)
+#+end_highlight
+
+#+begin_src python
+for y in range(100):
+    print(y-10)
+#+end_src
+
+
+# Local Variables:
+# eval: (org-hugo-auto-export-mode)
+# End:

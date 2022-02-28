@@ -1,0 +1,49 @@
+#+title: First Test Post!
+#+date: <2012-01-01 Sun>
+#+tags: test
+#+author: Steve Tautonico
+#+status: <public>
+#+creator: <Steve Tautonico>
+#+options: <H:1 num:t toc:t tags:t pri:t status:t creator:t email:t>
+
+#+hugo_base_dir: ../../
+#+hugo_section: posts
+#+hugo_tags: internal-links table src-block image figure link-type language
+
+#+macro: oxhugoissue =ox-hugo= Issue #[[https://github.com/kaushalmodi/ox-hugo/issues/$1][$1]]
+
+#+language: de
+
+{{{oxhugoissue(244)}}}
+
+
+* Links to source blocks
+:PROPERTIES:
+:CUSTOM_ID: links-to-source-blocks
+:END:
+From [[https://orgmode.org/manual/Internal-Links.html][(org) Internal Links]],
+
+#+begin_quote
+   If no dedicated target exists, the link will then try to match the
+exact name of an element within the buffer.  Naming is done with the
+‘#+name’ keyword, which has to be put in the line before the element it
+refers to, as in the following example
+    #+begin_example
+    ,#+name: My Target
+    | a  | table      |
+    |----+------------|
+    | of | four cells |
+    #+end_example
+#+end_quote
+
+Also, when targeting a =#+name= keyword, *=#+caption= keyword is
+mandatory in order to get proper numbering* for _source blocks_,
+_images_ and _tables_.
+
+So the below code block:
+#+begin_src org
+,#+caption: Hello
+,#+name: code__hello
+,#+begin_src emacs-lisp
+(message "Hello")
+,#+end_src
