@@ -13,7 +13,7 @@ jobs:
         node-version: [ 16.x ]
         emacs-version: [ 27.2 ]
     steps:
-      - name: Checkout repo + submodules
+      - name: Checkout Repo + Submodules
         uses: actions/checkout@v2
         with:
           submodules: recursive
@@ -28,10 +28,7 @@ jobs:
         with:
           version: ${{ matrix.emacs-version }}
 
-      - name: Setup ox-hugo
-        run: git clone https://github.com/kaushalmodi/ox-hugo.git ox-hugo
-
-      - name: Org-mode to markdown
+      - name: Org-mode to Markdown
         run: |
           # emacs ./blog/content-org/all-posts.org --script scripts/build-blog.el --kill
           emacs ./blog/content-org/all-posts.org --batch -L ../../scripts -l build-blog.el --eval='(org-hugo-export-wim-to-md t)' --kill
@@ -80,6 +77,18 @@ jobs:
           rm: true
           source: "share/*"
           target: "${{ secrets.TEST_PROJECT_ROOT }}/share"
+
+      - name: Copy Blog Files to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          port: ${{ secrets.REMOTE_PORT }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
+          rm: true
+          source: "blog/public/*"
+          target: "${{ secrets.TEST_PROJECT_ROOT }}/blog"
 
       - name: Re-arrange File System
         uses: appleboy/ssh-action@v0.1.4
