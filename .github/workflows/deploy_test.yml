@@ -88,7 +88,7 @@ jobs:
           passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
           rm: true
           source: "blog/public/*"
-          target: "${{ secrets.TEST_PROJECT_ROOT }}/blog"
+          target: "${{ secrets.TEST_PROJECT_ROOT }}"
 
       - name: Re-arrange File System
         uses: appleboy/ssh-action@v0.1.4
@@ -111,6 +111,11 @@ jobs:
             mv share/* .
             rm -rfv share
             npm i
+            
+            cd ${{ secrets.TEST_PROJECT_ROOT }}
+            cd blog
+            mv public/* .
+            rm -rfv public
 
             cd ..
             export HOME=${{ secrets.TEST_PROJECT_ROOT }}
