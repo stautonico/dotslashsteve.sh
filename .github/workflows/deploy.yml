@@ -37,7 +37,7 @@ jobs:
         with:
           hugo-version: 'latest'
 
-      - name: Build
+      - name: Build blog
         run: |
           cd blog
           hugo --minify
