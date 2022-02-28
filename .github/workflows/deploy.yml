@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -18,6 +18,29 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Install Emacs
+        run: |
+          sudo apt update -y
+          sudo apt install emacs-nox -y
+
+      - name: Setup ox-hugo
+        run: git clone https://github.com/kaushalmodi/ox-hugo.git ox-hugo
+
+      - name: Org-mode to markdown
+        run: |
+          emacs ./blog/content-org/all-posts.org --batch -L ../../ox-hugo -l ox-hugo.el --eval='(org-hugo-export-wim-to-md t)' --kill
+#          rm -rf ox-hugo
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: 'latest'
+
+      - name: Build
+        run: |
+          cd blog
+          hugo --minify
 
       - name: Install NPM Dependencies and Build
         run: |
