@@ -40,7 +40,7 @@ jobs:
       - name: Build blog
         run: |
           cd blog
-          hugo --minify
+          hugo --minify --config config.production.toml
 
       - name: Install NPM Dependencies and Build
         run: |
