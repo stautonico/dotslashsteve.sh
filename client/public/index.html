@@ -31,25 +31,21 @@
     <link rel="icon" type="image/png" sizes="16x16" href="assets/img/logos/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
 
-    <link rel="icon" type="image/png" href="/favicon.png">
-    <link rel="stylesheet" type="text/css" href="/src/styles/app.scss">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css">
+    <link rel="icon" type="image/png" href="assets/img/logos/favicon.ico">
+    <link rel="stylesheet" href="global.css">
+<!--    <link rel="stylesheet" type="text/css" href="/src/styles/app.scss">-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css">-->
 </head>
 <body>
+
+<div>
+    <iframe src="terminal.html" id="terminal"></iframe>
+    <iframe src="site.html" id="site" class="scaleIn"></iframe>
+    <div id="notification"></div>
+</div>
+
 <noscript>Please enable JavaScript to view this application.</noscript>
-<script type="module" src="/src/main.ts"></script>
+<script src="src/index.js"></script>
 </body>
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LK5W0HZYT"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-        dataLayer.push(arguments);
-    }
-
-    gtag('js', new Date());
-
-    gtag('config', 'G-9LK5W0HZYT');
-</script>
+<!-- No analytics because I don't use it and no one likes trackers -->
 </html>

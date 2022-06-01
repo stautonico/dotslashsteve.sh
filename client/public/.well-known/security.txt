@@ -1,5 +1,5 @@
-Contact: mailto:stautonico@gmail.com?subject=tautonico.tech%20security%20issue
-Expires: Fri, 1 Apr 2022 12:01 -0400
+Contact: mailto:stautonico@gmail.com?subject=dotslashsteve.sh%20security%20issue
+Expires: Fri, 1 Apr 2023 12:01 -0400
 Encryption: https://stautonico.keybase.pub/public_pgp.txt
 Preferred-Languages: en
-Canonical: https://tautonico.tech/.well-known/security.txt
+Canonical: https://dotslashsteve.sh/.well-known/security.txt
