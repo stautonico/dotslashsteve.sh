@@ -1,15 +1,13 @@
-// setTimeout(() => {
-//     @ts-ignore
-// window.top.postMessage("site", "*");
-// }, 1000);
-const OUTPUT_FRAME = document.getElementById('text-content');
-const CURSOR = document.getElementById('cursor');
-let output_buffer: string[][] = [];
+import {OUTPUT_FRAME, CURSOR, output_buffer} from "./helpers/globals.js";
 let input_buffer: string[] = [];
 let typing = false;
 let keydown_timeout = 0;
 let ps1 = "steve@localhost:~$ ";
 
+setInterval(() => {
+    // Problem: You can't manually scroll
+   CURSOR!.scrollIntoView();
+}, 100);
 
 setInterval(() => {
     if (typing) {
@@ -30,7 +28,7 @@ setInterval(() => {
 }, 1);
 
 // We're going use our buffer to handle key input
-document.body.addEventListener("keydown", (e) => {
+document.body.addEventListener("keydown", async (e) => {
     keydown_timeout = 75;
     typing = true;
     if (e.key === "Backspace") {
@@ -40,16 +38,18 @@ document.body.addEventListener("keydown", (e) => {
         }
     } else if (e.key === "Enter") {
         // Process input
-        if (input_buffer.join("") === "exit") {
-            window.parent.postMessage("exit", "*");
-            // Try to close the window (if we're an external window)
-            window.parent.close();
-        }
+        await handle_input();
 
         output_buffer.push([ps1]);
         // Clear the input buffer
         input_buffer = [];
-    } else if (!(["Shift", "Control", "Alt", "OS", "Meta"].includes(e.key))) {
+    } else if (e.key === "Tab") {
+        // TODO: Handle tab completion
+        alert("Tab completion not implemented yet.");
+    }else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+        // TODO: Handle arrow keys
+        alert("Arrow keys not implemented yet.");
+    } else if (!(["Shift", "Control", "Alt", "OS", "Meta", "Escape"].includes(e.key))) {
         output_buffer[output_buffer.length - 1].push(e.key);
         input_buffer.push(e.key);
     }
@@ -73,6 +73,20 @@ function render_buffer() {
     output = output.slice(0, -6); // 6 = length of "<br />"
 
     OUTPUT_FRAME!.innerHTML = output;
+}
+
+async function handle_input() {
+    const joined = input_buffer.join("");
+
+    const command = joined.split(" ")[0];
+    const args = joined.split(" ").slice(1);
+
+    try {
+        const module = await import(`./bin/${command}.js`);
+        module.main(args);
+    } catch (e) {
+        output_buffer.push([`shell: command not found: ${command}`]);
+    }
 }
 
 function main() {
