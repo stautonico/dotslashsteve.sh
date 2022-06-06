@@ -1,4 +1,6 @@
 import {OUTPUT_FRAME, CURSOR, output_buffer, computer} from "./helpers/globals.js";
+import {make_backslash_d, make_backslash_t, make_backslash_T, make_backslash_at} from "./helpers/date.js";
+
 let input_buffer: string[] = [];
 let typing = false;
 let keydown_timeout = 0;
@@ -110,18 +112,20 @@ async function handle_input() {
                 console.error(e);
             }
         }
-        ps1 = generate_prompt();
     }
+    ps1 = generate_prompt();
+    // We make a new prompt regardless of the existence of input or not
+    // This is so we can update the time and date if we enter anything
 }
 
 function generate_prompt() {
     // TODO: Support $PS1 environment variable
-    // let prompt_format = "\\e[0;31m\\u\\e[0m@\\e[0;32m\\h\\e[0m:\\e[0;34m\\w\\\\e[0m\\$ ";
-    let prompt_format = "\\u@\\h \\W \\$ ";
+    let prompt_format = "\\e[0;31m\\u\\e[0m@\\e[0;32m\\h\\e[0m:\\e[0;34m\\w\\\\e[0m\\$ ";
+
     // Default shell prompt is <USERNAME>@<HOSTNAME>:<WORKING DIR><$/#>
 
     // \d   The date, in "Weekday Month Date" format (e.g., "Tue May 26").
-    // \h   The hostname, up to the first .
+    // \h   The hostname (we don't care about dots here)
     // \t   The time, in 24-hour HH:MM:SS format.
     // \T   The time, in 12-hour HH:MM:SS format.
     // \@   The time, in 12-hour am/pm format.
@@ -129,45 +133,99 @@ function generate_prompt() {
     // \w   The current working directory.
     // \W   The basename of $PWD.
     // \$   If you are not root, inserts a "$"; if you are root, you get a "#"  (root uid = 0)
-    // \e   An escape character (typically a color code).
     // \\   A backslash.
 
+    // Note: If we're using \W and our current working directory
+    // is our home directory, we'll just show ~
+
+
+    // I'll worry about color checking correctness later
+    // At this point, if someone breaks this, it's their own fault
+
     let prompt = prompt_format;
-    // prompt = prompt.replace("\\d", datetime.now().strftime("%a %B %d"))
-    prompt = prompt.replace("\\h", computer.get_hostname())
-    // prompt = prompt.replace("\\t", datetime.now().strftime("%H:%M:%S"))
-    // prompt = prompt.replace("\\T", datetime.now().strftime("%I:%M:%S"))
-    // prompt = prompt.replace("\\@", datetime.now().strftime("%I:%M:%S %p"))
-    prompt = prompt.replace("\\u",computer.get_current_user().get_username())
-    // prompt = prompt.replace("\\w", self.computers[-1].sessions[-1].current_dir.pwd())
+    prompt = prompt.replaceAll("\\d",  make_backslash_d());
+    prompt = prompt.replaceAll("\\h", computer.get_hostname())
+    prompt = prompt.replaceAll("\\t", make_backslash_t());
+    prompt = prompt.replaceAll("\\T", make_backslash_T());
+    prompt = prompt.replaceAll("\\@", make_backslash_at());
+    prompt = prompt.replaceAll("\\u",computer.get_current_user().get_username());
+    prompt = prompt.replaceAll("\\w", computer.current_session().get_current_dir().pwd());
+    // prompt = prompt.replaceAll("\\w", self.computers[-1].sessions[-1].current_dir.pwd())
     // TODO: Current working directory
-    prompt = prompt.replace("\\W", "/");
-    prompt = prompt.replace("\\$", computer.geteuid() === 0 ? "#" : "$");
-    prompt = prompt.replace("\\\\", "\\")
+    prompt = prompt.replaceAll("\\W", "/");
+    prompt = prompt.replaceAll("\\$", computer.geteuid() === 0 ? "#" : "$");
+    prompt = prompt.replaceAll("\\\\", "\\")
 
     // TODO: Support ANSI escape color codes
-    // prompt = prompt.replace("\\e[0;31m", Fore.RED)
-    // prompt = prompt.replace("\\e[1;31m", Fore.LIGHTRED_EX)
-    // prompt = prompt.replace("\\e[0;32m", Fore.GREEN)
-    // prompt = prompt.replace("\\e[1;32m", Fore.LIGHTGREEN_EX)
-    // prompt = prompt.replace("\\e[0;33m", Fore.YELLOW)
-    // prompt = prompt.replace("\\e[1;33m", Fore.LIGHTYELLOW_EX)
-    // prompt = prompt.replace("\\e[0;34m", Fore.BLUE)
-    // prompt = prompt.replace("\\e[1;34m", Fore.LIGHTBLUE_EX)
-    // prompt = prompt.replace("\\e[0;35m", Fore.MAGENTA)
-    // prompt = prompt.replace("\\e[1;35m", Fore.LIGHTMAGENTA_EX)
-    //
-    // prompt = prompt.replace("\\e[41m", Back.RED)
-    // prompt = prompt.replace("\\e[42m", Back.GREEN)
-    // prompt = prompt.replace("\\e[43m", Back.YELLOW)
-    // prompt = prompt.replace("\\e[44m", Back.BLUE)
-    // prompt = prompt.replace("\\e[45m", Back.MAGENTA)
-    // prompt = prompt.replace("\\e[46m", Back.LIGHTBLUE_EX)
+
+    // Regular colors
+    prompt = prompt.replaceAll("\\e[0;30m", "<span style='color: var(--term-black)'>");
+    prompt = prompt.replaceAll("\\e[0;31m", "<span style='color: var(--term-red)'>");
+    prompt = prompt.replaceAll("\\e[0;32m", "<span style='color: var(--term-green)'>");
+    prompt = prompt.replaceAll("\\e[0;33m", "<span style='color: var(--term-yellow)'>");
+    prompt = prompt.replaceAll("\\e[0;34m", "<span style='color: var(--term-blue)'>");
+    prompt = prompt.replaceAll("\\e[0;35m", "<span style='color: var(--term-purple)'>");
+    prompt = prompt.replaceAll("\\e[0;36m", "<span style='color: var(--term-cyan)'>");
+    prompt = prompt.replaceAll("\\e[0;37m", "<span style='color: var(--term-white)'>");
+
+    // Bold colors
+    prompt = prompt.replaceAll("\\e[1;30m", "<span style='font-weight: bold; color: var(--term-black)'>");
+    prompt = prompt.replaceAll("\\e[1;31m", "<span style='font-weight: bold; color: var(--term-red)'>");
+    prompt = prompt.replaceAll("\\e[1;32m", "<span style='font-weight: bold; color: var(--term-green)'>");
+    prompt = prompt.replaceAll("\\e[1;33m", "<span style='font-weight: bold; color: var(--term-yellow)'>");
+    prompt = prompt.replaceAll("\\e[1;34m", "<span style='font-weight: bold; color: var(--term-blue)'>");
+    prompt = prompt.replaceAll("\\e[1;35m", "<span style='font-weight: bold; color: var(--term-purple)'>");
+    prompt = prompt.replaceAll("\\e[1;36m", "<span style='font-weight: bold; color: var(--term-cyan)'>");
+    prompt = prompt.replaceAll("\\e[1;37m", "<span style='font-weight: bold; color: var(--term-white)'>");
+
+    // Underline colors
+    prompt = prompt.replaceAll("\\e[4;30m", "<span style='text-decoration: underline; color: var(--term-black)'>");
+    prompt = prompt.replaceAll("\\e[4;31m", "<span style='text-decoration: underline; color: var(--term-red)'>");
+    prompt = prompt.replaceAll("\\e[4;32m", "<span style='text-decoration: underline; color: var(--term-green)'>");
+    prompt = prompt.replaceAll("\\e[4;33m", "<span style='text-decoration: underline; color: var(--term-yellow)'>");
+    prompt = prompt.replaceAll("\\e[4;34m", "<span style='text-decoration: underline; color: var(--term-blue)'>");
+    prompt = prompt.replaceAll("\\e[4;35m", "<span style='text-decoration: underline; color: var(--term-purple)'>");
+    prompt = prompt.replaceAll("\\e[4;36m", "<span style='text-decoration: underline; color: var(--term-cyan)'>");
+    prompt = prompt.replaceAll("\\e[4;37m", "<span style='text-decoration: underline; color: var(--term-white)'>");
+
+    // Background colors
+    prompt = prompt.replaceAll("\\e[40m", "<span style='background-color: var(--term-black)'>");
+    prompt = prompt.replaceAll("\\e[41m", "<span style='background-color: var(--term-red)'>");
+    prompt = prompt.replaceAll("\\e[42m", "<span style='background-color: var(--term-green)'>");
+    prompt = prompt.replaceAll("\\e[43m", "<span style='background-color: var(--term-yellow)'>");
+    prompt = prompt.replaceAll("\\e[44m", "<span style='background-color: var(--term-blue)'>");
+    prompt = prompt.replaceAll("\\e[45m", "<span style='background-color: var(--term-purple)'>");
+    prompt = prompt.replaceAll("\\e[46m", "<span style='background-color: var(--term-cyan)'>");
+    prompt = prompt.replaceAll("\\e[47m", "<span style='background-color: var(--term-white)'>");
+
+    // Light/high intensity colors
+    prompt = prompt.replaceAll("\\e[0;90m", "<span style='color: var(--term-light-black)'>");
+    prompt = prompt.replaceAll("\\e[0;91m", "<span style='color: var(--term-light-red)'>");
+    prompt = prompt.replaceAll("\\e[0;92m", "<span style='color: var(--term-light-green)'>");
+    prompt = prompt.replaceAll("\\e[0;93m", "<span style='color: var(--term-light-yellow)'>");
+    prompt = prompt.replaceAll("\\e[0;94m", "<span style='color: var(--term-light-blue)'>");
+    prompt = prompt.replaceAll("\\e[0;95m", "<span style='color: var(--term-light-purple)'>");
+    prompt = prompt.replaceAll("\\e[0;96m", "<span style='color: var(--term-light-cyan)'>");
+    prompt = prompt.replaceAll("\\e[0;97m", "<span style='color: var(--term-light-white)'>");
+
+    // Light/high intensity bold colors
+    prompt = prompt.replaceAll("\\e[1;90m", "<span style='font-weight: bold; color: var(--term-light-black)'>");
+    prompt = prompt.replaceAll("\\e[1;91m", "<span style='font-weight: bold; color: var(--term-light-red)'>");
+    prompt = prompt.replaceAll("\\e[1;92m", "<span style='font-weight: bold; color: var(--term-light-green)'>");
+    prompt = prompt.replaceAll("\\e[1;93m", "<span style='font-weight: bold; color: var(--term-light-yellow)'>");
+    prompt = prompt.replaceAll("\\e[1;94m", "<span style='font-weight: bold; color: var(--term-light-blue)'>");
+    prompt = prompt.replaceAll("\\e[1;95m", "<span style='font-weight: bold; color: var(--term-light-purple)'>");
+    prompt = prompt.replaceAll("\\e[1;96m", "<span style='font-weight: bold; color: var(--term-light-cyan)'>");
+    prompt = prompt.replaceAll("\\e[1;97m", "<span style='font-weight: bold; color: var(--term-light-white)'>");
+
+    // TODO: "dim colors"
+    // TODO: blinking
 
     // Remove color: \e[0m
-    // prompt = prompt.replace("\\e[0m", Style.RESET_ALL)
+    prompt = prompt.replaceAll("\\e[0m", "</span>");
     return prompt;
 }
+
 
 async function main() {
     output_buffer.push(["./steve.sh [Version 0.0.0]"]);

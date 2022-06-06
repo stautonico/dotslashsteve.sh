@@ -1,3 +1,22 @@
+:root {
+    --term-white: #fff;
+    --term-light-white: #fafafa;
+    --term-black: #000;
+    --term-light-black: #333;
+    --term-red: #ff0000;
+    --term-light-red: #ff9999;
+    --term-green: #00ff00;
+    --term-light-green: #99ff99;
+    --term-yellow: #ffff00;
+    --term-light-yellow: #ffff99;
+    --term-blue: #0000ff;
+    --term-light-blue: #9999ff;
+    --term-purple: #ff00ff;
+    --term-light-purple: #ff99ff;
+    --term-cyan: #00ffff;
+    --term-light-cyan: #99ffff;
+}
+
 body {
     background: black;
     color: white;

@@ -98,6 +98,12 @@ class FSBaseObject {
     set_permissions(permissions: InodePermissions): void {
         this.permissions = permissions;
     }
+
+    pwd(): string {
+        if (this.parent === null)
+            return "/";
+        return this.parent.pwd() + "/" + this.name;
+    }
 }
 
 export class FSFile extends FSBaseObject {
