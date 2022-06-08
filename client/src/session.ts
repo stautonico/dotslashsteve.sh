@@ -1,4 +1,4 @@
-import {FSDirectory} from "./fs.js";
+import {FSDirectory} from "./fs/fs.js";
 
 export class Session {
     private real_uid: number;

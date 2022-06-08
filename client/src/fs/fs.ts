@@ -1,10 +1,11 @@
-import {Result, ResultMessages} from "./helpers/result.js";
+import {Result, ResultMessages} from "../helpers/result.js";
 import {
     PROC_DIR_PERMISSIONS,
     ROOT_DIR_PERMISSIONS,
     SYS_DIR_PERMISSIONS,
     TMP_DIR_PERMISSIONS
-} from "./helpers/constants.js";
+} from "../helpers/constants.js";
+import {Path} from "./path.js";
 
 interface Permission {
     read: boolean;
@@ -102,7 +103,11 @@ class FSBaseObject {
     pwd(): string {
         if (this.parent === null)
             return "/";
-        return this.parent.pwd() + "/" + this.name;
+        let current_path =this.parent.pwd() + "/" + this.name;
+        if (current_path.startsWith("//"))
+            current_path = current_path.slice(1);
+
+        return current_path;
     }
 }
 
@@ -179,6 +184,17 @@ export class FSDirectory extends FSBaseObject {
         if (this.parent)
             this.parent.update_size();
     }
+
+    get_child(name: string): FSBaseObject | null {
+        if (this.children[name])
+            return this.children[name];
+        return null;
+    }
+
+    get_children(): FSBaseObject[] {
+        return Object.values(this.children);
+    }
+
 }
 
 export class StandardFS {
@@ -207,7 +223,7 @@ export class StandardFS {
         // Setup the individual directories in the root directory
         //this.setup_bin();
         //this.setup_etc();
-        //this.setup_home();
+        this.setup_home();
         //this.setup_lib();
         //this.setup_mnt();
         //this.setup_opt();
@@ -217,28 +233,36 @@ export class StandardFS {
         //this.setup_tmp();
         //this.setup_usr();
         //this.setup_var();
-
     }
 
-    find(path: string): Result<FSBaseObject | undefined> {
-        // let parts = path.split("/");
-        // let current = this.root;
-        //
-        // for (let i = 0; i < parts.length; i++) {
-        //     if (parts[i] === "")
-        //         continue;
-        //
-        //     if (!current.children[parts[i]])
-        //         return new Result(false, ResultMessages.NOT_FOUND);
-        //
-        //     current = current.children[parts[i]];
-        // }
-
-        // return new Result(true, ResultMessages.SUCCESS, current);
-        return new Result(false);
+    setup_home(): void {
+        // This is only temporary, we'll have the user setup their own home directory
+        // @ts-ignore
+        new FSDirectory("user",this.root.get_child("home"), 1000, 1000);
     }
 
     get_root(): FSDirectory {
         return this.root;
+    }
+
+    find(path: Path) : Result<FSBaseObject> {
+        if (path.get_path() === "/")
+            return new Result(true, ResultMessages.SUCCESS, this.root);
+
+        let can_path = path.canonicalize();
+        let parts = can_path.get_parts();
+
+        let current = this.root;
+
+        for (let part of parts) {
+            let child = current.get_child(part);
+            if (!child)
+                return new Result(false, ResultMessages.NOT_FOUND);
+
+            // @ts-ignore
+            current = child;
+        }
+
+        return new Result(true, ResultMessages.SUCCESS, current);
     }
 }

@@ -37,4 +37,8 @@ export class Result<T> {
     get_data(): T | undefined {
         return this.data;
     }
+
+    get_message(): ResultMessages | undefined {
+        return this.message;
+    }
 }

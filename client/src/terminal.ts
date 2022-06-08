@@ -150,9 +150,8 @@ function generate_prompt() {
     prompt = prompt.replaceAll("\\@", make_backslash_at());
     prompt = prompt.replaceAll("\\u",computer.get_current_user().get_username());
     prompt = prompt.replaceAll("\\w", computer.current_session().get_current_dir().pwd());
-    // prompt = prompt.replaceAll("\\w", self.computers[-1].sessions[-1].current_dir.pwd())
-    // TODO: Current working directory
-    prompt = prompt.replaceAll("\\W", "/");
+    // TODO: Replace home directory with ~
+    prompt = prompt.replaceAll("\\W", computer.current_session().get_current_dir().get_name());
     prompt = prompt.replaceAll("\\$", computer.geteuid() === 0 ? "#" : "$");
     prompt = prompt.replaceAll("\\\\", "\\")
 
@@ -232,7 +231,7 @@ async function main() {
     output_buffer.push(["(c) Steve Tautonico. All rights reserved."]);
     output_buffer.push(["type 'help' for a list of commands."]);
     output_buffer.push([]);
-    const result = await computer.add_user("user", "password");
+    const result = await computer.add_user("user", "password", {home_dir: "/home/user"});
     if (result.ok()) {
         const res = computer.new_session(result.get_data()!.get_uid());
         if (!res) {
