@@ -1,4 +1,4 @@
-import {FSDirectory, StandardFS} from "./fs/fs.js";
+import {Directory, StandardFS} from "./fs/inode.js";
 import {User, Group} from "./user.js";
 import {Result, ResultMessages} from "./helpers/result.js";
 import {Session} from "./session.js";
@@ -55,7 +55,7 @@ export class Computer {
 
     async add_user(username: string, password: string, settings?: NewUserOptions): Promise<Result<User>> {
         if (this.get_user(username))
-            return new Result(false, ResultMessages.ALREADY_EXISTS);
+            return new Result({success:false, message:ResultMessages.ALREADY_EXISTS});
 
         let next_uid = 0;
 
@@ -64,7 +64,7 @@ export class Computer {
             // Check if uid is available
             // @ts-ignore
             if (this.users[settings.uid])
-                return new Result(false, ResultMessages.ALREADY_EXISTS);
+                return new Result({success:false, message:ResultMessages.ALREADY_EXISTS});
             // @ts-ignore
             next_uid = settings.uid;
         } else {
@@ -99,7 +99,7 @@ export class Computer {
         });
 
 
-        return new Result(true, ResultMessages.SUCCESS, this.users[next_uid]);
+        return new Result({success:true, data:this.users[next_uid]});
     }
 
     get_user(username: string): User | null {
@@ -131,8 +131,12 @@ export class Computer {
     }
 
     // Syscalls?
-    geteuid(): number {
+    sys$geteuid(): number {
         return this.current_session().get_effective_uid();
+    }
+
+    sys$getegid(): number {
+        return this.current_session().get_effective_gid();
     }
 
     getcwd(): string {
@@ -145,13 +149,13 @@ export class Computer {
         let parent = path_obj.parent_path();
         let parent_exists = this.fs.find(parent);
         if (!parent_exists.ok())
-            return new Result(false, ResultMessages.NOT_FOUND);
+            return new Result({success:false, message:ResultMessages.NOT_FOUND});
 
         if (parent_exists.get_data()!.is_file())
-            return new Result(false, ResultMessages.IS_FILE);
+            return new Result({success:false, message:ResultMessages.IS_FILE});
 
         // @ts-ignore
         new FSDirectory(path_obj.file_name(), parent_exists.get_data()!, this.geteuid(), this.geteuid());
-        return new Result(true, ResultMessages.SUCCESS);
+        return new Result({success:true});
     }
 }

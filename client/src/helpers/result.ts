@@ -18,12 +18,16 @@ export enum ResultMessages {
 export class Result<T> {
     private readonly success: boolean;
     private readonly message?: ResultMessages;
-    private readonly data?: T ;
+    private readonly data?: T;
 
-    constructor(success: boolean, message?: ResultMessages, data?: any) {
-        this.success = success;
-        this.message = message;
-        this.data = data;
+    constructor(options: {
+        success: boolean;
+        message?: ResultMessages;
+        data?: T;
+    }) {
+        this.success = options.success;
+        this.message = options.message;
+        this.data = options.data;
     }
 
     fail(): boolean {

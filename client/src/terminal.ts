@@ -152,7 +152,7 @@ function generate_prompt() {
     prompt = prompt.replaceAll("\\w", computer.current_session().get_current_dir().pwd());
     // TODO: Replace home directory with ~
     prompt = prompt.replaceAll("\\W", computer.current_session().get_current_dir().get_name());
-    prompt = prompt.replaceAll("\\$", computer.geteuid() === 0 ? "#" : "$");
+    prompt = prompt.replaceAll("\\$", computer.sys$geteuid() === 0 ? "#" : "$");
     prompt = prompt.replaceAll("\\\\", "\\")
 
     // TODO: Support ANSI escape color codes

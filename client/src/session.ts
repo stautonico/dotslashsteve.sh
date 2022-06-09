@@ -1,36 +1,52 @@
-import {FSDirectory} from "./fs/fs.js";
+import {Directory} from "./fs/inode.js";
 
 export class Session {
     private real_uid: number;
+    private real_gid: number;
     private effective_uid: number;
-    private saved_uid: number;
-    private current_dir: FSDirectory;
+    private effective_gid: number;
+    private readonly saved_uid: number;
+    private readonly saved_gid: number;
+    private current_dir: Directory;
     private env: { [key: string]: string } = {"PATH": "/bin:/usr/bin"};
 
-    constructor(real_uid: number, effective_uid: number, saved_uid: number, current_dir: FSDirectory) {
+    constructor(real_uid: number, effective_uid: number, saved_uid: number, current_dir: Directory) {
         this.real_uid = real_uid;
         this.effective_uid = effective_uid;
         this.saved_uid = saved_uid;
         this.current_dir = current_dir;
+
+        // TODO: Make this use named parameters
+        this.real_gid = real_uid;
+        this.effective_gid = effective_uid;
+        this.saved_gid = saved_uid;
     }
 
     get_real_uid(): number {
         return this.real_uid;
     }
 
+    get_real_gid(): number {
+        return this.real_gid;
+    }
+
     get_effective_uid(): number {
         return this.effective_uid;
+    }
+
+    get_effective_gid(): number {
+        return this.effective_gid;
     }
 
     get_saved_uid(): number {
         return this.saved_uid;
     }
 
-    get_current_dir(): FSDirectory {
+    get_current_dir(): Directory {
         return this.current_dir;
     }
 
-    set_current_dir(current_dir: FSDirectory): void {
+    set_current_dir(current_dir: Directory): void {
         this.current_dir = current_dir;
     }
 
