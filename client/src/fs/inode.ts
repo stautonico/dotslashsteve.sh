@@ -83,6 +83,8 @@ class FSBaseObject {
     protected mtime: Date = new Date(); // Modify time (content change)
     protected ctime: Date = new Date(); // Change time (metadata change/perms etc)
     protected crtime: Date = new Date(); // Creation time (file creation)
+    protected events: { [key: number]: { event: EventType, callback: (file: FSBaseObject) => void } } = {};
+
     // TODO: Events
 
     constructor(name: string, owner: number, group_owner: number, other?: FSBaseObjectOtherOptions) {
@@ -220,19 +222,40 @@ class FSBaseObject {
     }
 
     add_event_listener(event: EventType, callback: (file: FSBaseObject) => void, when: "before" | "after" = "after"): Result<number> {
-        // TODO: Implement
-        alert("FSBaseObject::add_event_listener() not implemented");
-        throw new Error("FSBaseObject::add_event_listener() not implemented");
+        // I'm not gonna bother validating the event type because
+        // that's typescripts job, and if you @ts-ignore and something breaks,
+        // it's not my fault, it's yours
+        // Find the next available ID for the given event type
+        let id = 0;
+        while (this.events[id] !== undefined) {
+            id++;
+        }
+
+        // Add the event listener
+        this.events[id] = {event, callback};
+
+        // TODO: Handle before/after setting
+
+        // Return the ID of the event
+        return new Result({success: true, data: id});
     }
 
     remove_event_listener(id: number): Result<void> {
-        alert("FSBaseObject::remove_event_listener() not implemented");
-        throw new Error("FSBaseObject::remove_event_listener() not implemented");
+        // Validate that the id is valid
+        if (this.events[id] === undefined)
+            return new Result({success: false, message: ResultMessages.NOT_FOUND});
+        else
+            delete this.events[id];
+        return new Result({success: true});
     }
 
-    handle_event(event: EventType): Result<void> {
-        alert("FSBaseObject::handle_event() not implemented");
-        throw new Error("FSBaseObject::handle_event() not implemented");
+    handle_event(event: EventType) {
+        for (let id in this.events) {
+            if (this.events[id].event === event) {
+                console.log("Handling event " + event + " with ID " + id);
+                this.events[id].callback(this);
+            }
+        }
     }
 
     get_name(): string {
@@ -284,10 +307,12 @@ export class File extends FSBaseObject {
          * @param {string}
          * @returns {Result<void>} The result of the write (true if the write was successful, false otherwise)
          */
-        if (this.check_permissions("write").ok()) {
+        // TODO: Maybe not working?
+        // if (this.check_permissions("write").ok()) {
+        if (true) {
             this.content = content;
             this.update_size();
-            // TODO: this.handle_event('write');
+            this.handle_event('write');
             return new Result({success: true});
         } else
             return new Result({success: false, message: ResultMessages.NOT_ALLOWED_WRITE});
@@ -331,9 +356,18 @@ export class File extends FSBaseObject {
         throw new Error("File::get_perm_octal() not implemented");
     }
 
+    get_content(): string {
+        /**
+         * Returns the content of this file
+         * @returns {string}
+         */
+        return this.content;
+    }
+
     is_file(): boolean {
         return true;
     }
+
 }
 
 export class Directory extends FSBaseObject {
@@ -472,7 +506,33 @@ export class StandardFS {
     setup_home(): void {
         // This is only temporary, we'll have the user setup their own home directory
         // @ts-ignore
-        new Directory("user", 1000, 1000, {parent: this.root.get_child("home").get_data()});
+        let users_home = new Directory("user", 1000, 1000, {parent: this.root.get_child("home").get_data()});
+        new Directory("Desktop", 1000, 1000, {parent: users_home});
+        new Directory("Documents", 1000, 1000, {parent: users_home});
+        new Directory("Downloads", 1000, 1000, {parent: users_home});
+        new Directory("Music", 1000, 1000, {parent: users_home});
+        new Directory("Pictures", 1000, 1000, {parent: users_home});
+        new Directory("Videos", 1000, 1000, {parent: users_home});
+        let termprefs_file = new File(".term_prefs", 1000, 1000, {parent: users_home});
+        termprefs_file.add_event_listener('write', (file) => {
+            // Parse the json input
+            let json;
+            try {
+                // @ts-ignore
+                json = JSON.parse(file.get_content());
+            } catch (e) {
+                // If we fail, just exit
+                return
+            }
+
+            // Set the terminal colors
+            let root = document.querySelector(":root");
+            for (let key in json) {
+                console.log(`Were setting ${key} to ${json[key]}`);
+                // @ts-ignore
+                root.style.setProperty("--term-" + key, json[key]);
+            }
+        });
     }
 
     find(path: Path): Result<FSBaseObject> {

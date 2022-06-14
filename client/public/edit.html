@@ -1,0 +1,24 @@
+<textarea name="" id="file_content" cols="30" rows="10"></textarea>
+<button id="save">Save</button>
+
+<script>
+    var file_content = document.getElementById('file_content');
+    var save = document.getElementById('save');
+
+    // Listen for messages from the parent window
+    window.addEventListener('message', (event) => {
+        console.log(event);
+        if (event.data.type === "set_file") {
+            console.log("We got a set file: " + event.data)
+            file_content.value = event.data.data;
+        }
+    }, false);
+
+    save.addEventListener('click', () => {
+       let message = {
+           type: 'save_file',
+           data: file_content.value
+       };
+         window.parent.postMessage(message, '*');
+    });
+</script>
