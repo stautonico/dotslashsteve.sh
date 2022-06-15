@@ -3,6 +3,7 @@ import {User, Group} from "./user";
 import {Result, ResultMessages} from "./helpers/result";
 import {Session} from "./session";
 import {Path} from "./fs/path";
+import {sha1hash} from "./helpers/crypto";
 
 interface NewUserOptions {
     uid?: number;
@@ -60,7 +61,7 @@ export class Computer {
         let next_uid = 0;
 
         // @ts-ignore
-        if (settings !== undefined || settings?.uid !== undefined) {
+        if (settings !== undefined && settings?.uid !== undefined) {
             // Check if uid is available
             // @ts-ignore
             if (this.users[settings.uid])
@@ -81,16 +82,10 @@ export class Computer {
             }
         }
 
-        // SHA-1 hash the password
-        const encoder = new TextEncoder();
-        const data = encoder.encode(password);
-        const hash = await crypto.subtle.digest('SHA-1', data);
-        const decoder = new TextDecoder();
-
         this.users[next_uid] = new User({
             uid: next_uid,
             username: username,
-            password: decoder.decode(hash),
+            password: await sha1hash(password),
             full_name: settings?.full_name,
             room_number: settings?.room_number,
             work_phone: settings?.work_phone,

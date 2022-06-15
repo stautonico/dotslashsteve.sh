@@ -19,3 +19,7 @@ cp -r src/ dist
 
 # Remove the typescript files from the dist directory (recursively).
 find dist -name "*.ts" -type f -delete
+
+# Since typescript doesn't append the .js extension to the imports, we have to do it manually.
+# The browser requires the .js extension for all imports.
+find dist -name "*.js" -type f -exec sed -i 's/^\(import { .* } from "\)\(.*\)\(";\)$/\1\2.js\3/' {} \;

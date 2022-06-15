@@ -1,5 +1,5 @@
-import {OUTPUT_FRAME, CURSOR, output_buffer, computer} from "./helpers/globals.js";
-import {make_backslash_d, make_backslash_t, make_backslash_T, make_backslash_at} from "./helpers/date.js";
+import {OUTPUT_FRAME, CURSOR, output_buffer, computer} from "./helpers/globals";
+import {make_backslash_d, make_backslash_t, make_backslash_T, make_backslash_at} from "./helpers/date";
 
 let input_buffer: string[] = [];
 let typing = false;
@@ -248,5 +248,5 @@ async function main() {
     start_intervals();
 }
 
-// @ts-ignore
+// @ts-ignore: Top level await is supported in ES2015(?)
 await main();

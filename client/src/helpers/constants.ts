@@ -1,4 +1,4 @@
-import {InodePermissions} from "../fs/inode.js";
+import {InodePermissions} from "../fs/inode";
 
 
 export const PROC_DIR_PERMISSIONS: InodePermissions = {

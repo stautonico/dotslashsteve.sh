@@ -1,4 +1,4 @@
-import {computer} from "../helpers/globals.js";
+import {computer} from "../helpers/globals";
 
 export class Path {
     private path: string;

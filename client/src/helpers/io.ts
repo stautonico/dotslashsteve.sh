@@ -1,4 +1,4 @@
-import {output_buffer} from "./globals.js";
+import {output_buffer} from "./globals";
 
 export function print(msg: string, sanitize = false) {
     if (sanitize) {

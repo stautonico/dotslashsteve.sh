@@ -1,4 +1,4 @@
-import {Computer} from "../computer.js";
+import {Computer} from "../computer";
 
 export var OUTPUT_FRAME = document.getElementById('text-content');
 export var CURSOR = document.getElementById('cursor');

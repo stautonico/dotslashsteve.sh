@@ -1,4 +1,4 @@
-import {Directory} from "./fs/inode.js";
+import {Directory} from "./fs/inode";
 
 export class Session {
     private real_uid: number;

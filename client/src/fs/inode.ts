@@ -1,12 +1,12 @@
-import {Result, ResultMessages} from "../helpers/result.js";
+import {Result, ResultMessages} from "../helpers/result";
 import {
     PROC_DIR_PERMISSIONS,
     ROOT_DIR_PERMISSIONS,
     SYS_DIR_PERMISSIONS,
     TMP_DIR_PERMISSIONS
-} from "../helpers/constants.js";
-import {Path} from "./path.js";
-import {computer} from "../helpers/globals.js";
+} from "../helpers/constants";
+import {Path} from "./path";
+import {computer} from "../helpers/globals";
 
 type PermissionType = "read" | "write" | "execute";
 type EventType = "read" | "write" | "execute" | "move" | "change_perm" | "change_owner" | "delete";
