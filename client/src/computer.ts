@@ -1,8 +1,8 @@
-import {Directory, StandardFS} from "./fs/inode.js";
-import {User, Group} from "./user.js";
-import {Result, ResultMessages} from "./helpers/result.js";
-import {Session} from "./session.js";
-import {Path} from "./fs/path.js";
+import {Directory, StandardFS} from "./fs/inode";
+import {User, Group} from "./user";
+import {Result, ResultMessages} from "./helpers/result";
+import {Session} from "./session";
+import {Path} from "./fs/path";
 
 interface NewUserOptions {
     uid?: number;
@@ -131,6 +131,34 @@ export class Computer {
     }
 
     // Syscalls?
+    sys$read(filepath: string): Result<string> {
+        let path = new Path(filepath).canonicalize();
+        let find = this.fs.find(path);
+
+        if (find.fail())
+            return new Result({success:false, message:ResultMessages.NOT_FOUND});
+
+        if (find.get_data()!.is_directory())
+            return new Result({success:false, message:ResultMessages.IS_DIRECTORY});
+
+        // @ts-ignore: Class inheritance
+        return new Result({success:true, data:find.get_data()!.read()});
+    }
+
+    sys$write(filepath: string, data: string): Result<void> {
+        let path = new Path(filepath).canonicalize();
+        let find = this.fs.find(path);
+
+        if (find.fail())
+            return new Result({success:false, message:ResultMessages.NOT_FOUND});
+
+        if (find.get_data()!.is_directory())
+            return new Result({success:false, message:ResultMessages.IS_DIRECTORY});
+
+        // @ts-ignore: Class inheritance
+        return new Result({success:true, data:find.get_data()!.write(data)});
+    }
+
     sys$geteuid(): number {
         return this.current_session().get_effective_uid();
     }

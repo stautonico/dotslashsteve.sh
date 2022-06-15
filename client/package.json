@@ -10,8 +10,9 @@
     "dev": "concurrently \"npm run dev:build\" \"npm run watch\"",
     "dev:public": "npm run build && cd dist && ngrok http file:///$(pwd)",
     "dev:build": "nodemon",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --config jest.config.ts"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -36,7 +37,11 @@
     "delay": 500
   },
   "devDependencies": {
+    "@types/jest": "^28.1.1",
+    "jest": "^28.1.1",
     "live-server": "^1.2.2",
-    "nodemon": "^2.0.16"
+    "nodemon": "^2.0.16",
+    "ts-jest": "^28.0.5",
+    "ts-node": "^10.8.1"
   }
 }
