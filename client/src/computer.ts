@@ -137,7 +137,7 @@ export class Computer {
             return new Result({success:false, message:ResultMessages.IS_DIRECTORY});
 
         // @ts-ignore: Class inheritance
-        return new Result({success:true, data:find.get_data()!.read()});
+        return find.get_data()!.read();
     }
 
     sys$write(filepath: string, data: string): Result<void> {
@@ -182,3 +182,57 @@ export class Computer {
         return new Result({success:true});
     }
 }
+
+/*
+Possible commands to implement:
+adduser - 100%
+base32
+base64
+cat - 100%
+cd - 100%
+chmod - 100%
+chown - 100%
+clear - 100%
+commands ?
+cp - 100%
+date
+echo - 100%
+env - 100%
+exit - 100%
+export - 100%
+head
+hostname - 100%
+id - 100%
+ls - 100%
+man
+md5sum
+mkdir - 100%
+mv - 100%
+nano
+passwd - 100%
+poweroff
+printenv - 100%
+pwd - 100%
+reboot
+rmdir - 100%
+rm - 100%
+sha1sum
+sha224sum
+sha256sum
+sha384sum
+sha512sum
+stat - 100%
+sudo
+su - 100%
+tail
+touch - 100%
+tutorial
+uname
+unset - 100%
+uptime - 100%
+users
+wc
+which
+whoami - 100%
+who
+ */

@@ -490,7 +490,7 @@ export class StandardFS {
 
         // Setup the individual directories in the root directory
         //this.setup_bin();
-        //this.setup_etc();
+        this.setup_etc();
         this.setup_home();
         //this.setup_lib();
         //this.setup_mnt();
@@ -501,6 +501,18 @@ export class StandardFS {
         //this.setup_tmp();
         //this.setup_usr();
         //this.setup_var();
+    }
+
+    setup_etc(): void {
+        let etc = this.root.get_child("etc").get_data() as Directory;
+        let passwd = new File("passwd", 0, 0, {parent: etc, content: "root:x:0:0:root:/root:/bin/bash\n"});
+        let shadow = new File("shadow", 0, 0, {
+            parent: etc, content: "root:x/X.X.X.X.:16000:0:99999:7:::\n", permissions: {
+                owner: {read: true, write: true, execute: false},
+                group: {read: false, write: false, execute: false},
+                other: {read: false, write: false, execute: false}
+            }
+        });
     }
 
     setup_home(): void {
