@@ -8,6 +8,7 @@ export function main(args: string[]) {
         description: "print system information",
         description_long: "Print certain system information.  With no OPTION, same as -s.",
         version: "0.0.1",
+        print_function: print,
         args: {
             "all": {
                 description: "print all information, in the following order, except omit -p and -i if unknown:",
