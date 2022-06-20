@@ -111,7 +111,7 @@ export class ArgParser {
         this._args.set(name, options);
     }
 
-    public parse(argv: string[] | string): { [key: string]: any } {
+    public parse(argv: string[] | string): ArgParseResult {
         if (this._did_parse_args) {
             // TODO: Maybe just re-parse or just do nothing?
             throw new Error('ArgParser: parse() called twice');
@@ -130,13 +130,13 @@ export class ArgParser {
                 if (arg.startsWith('--')) {
                     if (!this._has_long_flag(arg.substring(2))) {
                         this._custom_console_log(`${this._name}: Unknown flag ${arg}`);
-                        return {};
+                        return new ArgParseResult({});
                     }
                     arg_name = arg.substring(2);
                 } else {
                     if (!this._has_short_flag(arg.substring(1))) {
                         this._custom_console_log(`${this._name}: Unknown flag ${arg}`);
-                        return {};
+                        return new ArgParseResult({});
                     }
                     arg_name = arg.substring(1);
                 }
@@ -145,7 +145,7 @@ export class ArgParser {
                 // This should never be undefined, but we'll check just in case
                 if (!arg_obj) {
                     this._custom_console_log(`${this._name}: Unknown flag ${arg}`);
-                    return {};
+                    return new ArgParseResult({});
                 }
 
                 arg_name = arg_obj.name!;
@@ -160,7 +160,7 @@ export class ArgParser {
                 } else {
                     // We should never get here
                     this._custom_console_log(`${this._name}: Unknown type ${arg_obj.type}`);
-                    return {};
+                    return new ArgParseResult({});
                 }
 
                 // Now, lets convert the value to the correct type
@@ -190,7 +190,7 @@ export class ArgParser {
         // TODO: implement
         this._did_parse_args = true;
 
-        return output;
+        return new ArgParseResult(output);
     }
 
     private _has_long_flag(flag: string): boolean {
@@ -261,6 +261,22 @@ export class ArgParser {
         let arg = positional_args[this._positional_arg_counter];
         this._positional_arg_counter++;
         return arg;
+    }
+}
+
+class ArgParseResult {
+    private readonly _args: { [key: string]: any };
+
+    constructor(args: { [key: string]: any }) {
+        this._args = args;
+    }
+
+    public get(key: string): any {
+        return this._args[key];
+    }
+
+    public has(key: string): any {
+        return this._args[key] !== undefined;
     }
 }
 
