@@ -1,11 +1,13 @@
-import {print} from "../helpers/io";
+import {print, debug} from "../helpers/io";
 import {computer} from "../helpers/globals";
+import {ArgParser} from "../helpers/argparser";
+import {readdir} from "../lib/dirent";
 
 function make_directory_text(directory: string): string {
     return `<span style="color: var(--term-blue)">${directory}</span>`;
 }
 
-export function main(args: string[]) {
+export function OLD_main(args: string[]) {
     // TODO: Build using "syscalls"
     let to_lookup;
     if (args.length > 0) {
@@ -44,4 +46,49 @@ export function main(args: string[]) {
     // }
 
     print(output);
+}
+
+export function main(args: string[]) {
+    let parser = new ArgParser({
+        name: "ls",
+        description: "list directory contents",
+        description_long: "list directory contents",
+        version: "0.0.1",
+        print_function: print,
+        args: {
+            "directory": {
+                description: "the directory to list",
+                type: "string",
+                required: false,
+                default: computer.getcwd()
+            },
+            "long": {
+                description: "list in long format",
+                type: "boolean",
+                required: false,
+                short: "l",
+            },
+            "all": {
+                description: "list all files, including hidden files",
+                type: "boolean",
+                required: false,
+                short: "a",
+                long: "all"
+            }
+        }
+    });
+
+    let parsed = parser.parse(args);
+
+    debug(parsed);
+
+    let result = readdir(parsed.get("directory")) ?? [];
+
+    if (!parsed.get("all"))
+        // Filter out hidden files
+        result = result.filter(file => file[0] !== ".");
+
+    print(result.join(" "));
+
+    print(`Parsed has long flag? ${parsed.has("long")}`);
 }

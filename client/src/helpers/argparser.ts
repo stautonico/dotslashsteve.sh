@@ -24,8 +24,8 @@ export class ArgParser {
     private _description?: string;
     private _description_long?: string;
     private _args: Map<string, Arg>;
-    private _customHelp: string = '';
-    private _customVersion: string = '';
+    private _help_string: string = '';
+    private _version_string: string = '';
     private _did_parse_args: boolean = false;
     private _custom_console_log: (...args: any[]) => void;
     private _positional_arg_counter: number = 0;
@@ -88,14 +88,45 @@ export class ArgParser {
         this._custom_console_log = options.print_function ?? console.log;
     }
 
+    private generate_help(): void {
+        if (this._help_string === undefined || this._help_string === '') {
+            this._help_string = `Usage: ${this._name} [OPTIONS]`;
+            for (let [name, arg] of this._args) {
+                if (arg.positional) {
+                    this._help_string += ` ${name}`;
+                } else {
+                    if (arg.long) {
+                        if (typeof arg.long === 'string') {
+                            this._help_string += ` [--${arg.long}]`;
+                        } else if (Array.isArray(arg.long)) {
+                            this._help_string += ` [--${arg.long.join('|--')}]`;
+                        }
+                    }
+                    if (arg.short) {
+                        if (typeof arg.short === 'string') {
+                            this._help_string += ` [-${arg.short}]`;
+                        } else if (Array.isArray(arg.short)) {
+                            this._help_string += ` [-${arg.short.join('|-')}]`;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private generate_version(): void {
+        if (this._version_string === undefined || this._version_string === '')
+            this._version_string = `${this._name} v${this._version}`;
+    }
+
     public set_custom_help(help: string) {
         // TODO: Parse help string and add to help
-        this._customHelp = help;
+        this._help_string = help;
     }
 
     public set_custom_version(version: string) {
         // TODO: Parse version string and add to help
-        this._customVersion = version;
+        this._version_string = version;
     }
 
     public add_argument(name: string, options: Arg): void {
@@ -119,7 +150,21 @@ export class ArgParser {
         if (typeof argv === 'string')
             argv = argv.split(' ');
 
+        this.generate_help();
+        this.generate_version();
+
+        // Start by creating a default output object with all the default values
         let output: any = {};
+        for (let [name, arg] of this._args) {
+            if (arg.default)
+                output[name] = arg.default;
+            else {
+                if (arg.type === "boolean")
+                    output[name] = false;
+                else
+                    output[name] = undefined;
+            }
+        }
 
         for (let i = 0; i < argv.length; i++) {
             let arg = argv[i];
@@ -128,6 +173,13 @@ export class ArgParser {
             if (arg.startsWith('-')) {
                 // Check if the argument is a long flag (starts with '--')
                 if (arg.startsWith('--')) {
+                    if (arg.substring(2) === "help") {
+                        this._custom_console_log(this._help_string);
+                        return new ArgParseResult({}, true);
+                    } else if (arg.substring(2) === "version") {
+                        this._custom_console_log(this._version_string);
+                        return new ArgParseResult({}, true);
+                    }
                     if (!this._has_long_flag(arg.substring(2))) {
                         this._custom_console_log(`${this._name}: Unknown flag ${arg}`);
                         return new ArgParseResult({});
@@ -180,14 +232,13 @@ export class ArgParser {
                 // If we have a positional argument, and we're not expecting one, we'll error
                 if (expected_positional_arg === undefined) {
                     this._custom_console_log(`${this._name}: Unexpected argument '${arg}'`);
-                    return {};
+                    return new ArgParseResult({});
                 }
 
                 output[expected_positional_arg.name!] = arg;
             }
         }
 
-        // TODO: implement
         this._did_parse_args = true;
 
         return new ArgParseResult(output);
@@ -266,9 +317,11 @@ export class ArgParser {
 
 class ArgParseResult {
     private readonly _args: { [key: string]: any };
+    private readonly _printed_version_or_help: boolean;
 
-    constructor(args: { [key: string]: any }) {
+    constructor(args: { [key: string]: any }, printed_version_or_help: boolean = false) {
         this._args = args;
+        this._printed_version_or_help = printed_version_or_help;
     }
 
     public get(key: string): any {
@@ -276,7 +329,11 @@ class ArgParseResult {
     }
 
     public has(key: string): any {
-        return this._args[key] !== undefined;
+        return this._args.hasOwnProperty(key) && this._args[key] !== undefined;
+    }
+
+    public printed_version_or_help(): boolean {
+        return this._printed_version_or_help;
     }
 }
 

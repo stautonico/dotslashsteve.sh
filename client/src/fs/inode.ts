@@ -7,6 +7,7 @@ import {
 } from "../helpers/constants";
 import {Path} from "./path";
 import {computer} from "../helpers/globals";
+import {StatStruct} from "../lib/sys/stat";
 
 type PermissionType = "read" | "write" | "execute";
 type EventType = "read" | "write" | "execute" | "move" | "change_perm" | "change_owner" | "delete";
@@ -68,6 +69,29 @@ interface FSBaseObjectOtherOptions {
 
 interface FileOtherOptions extends FSBaseObjectOtherOptions {
     content?: string;
+}
+
+function permission_to_mode(permission: InodePermissions): number {
+    let mode = 0;
+    if (permission.owner.read)
+        mode += 4;
+    if (permission.owner.write)
+        mode += 2;
+    if (permission.owner.execute)
+        mode += 1;
+    if (permission.group.read)
+        mode += 40;
+    if (permission.group.write)
+        mode += 20;
+    if (permission.group.execute)
+        mode += 10;
+    if (permission.other.read)
+        mode += 40;
+    if (permission.other.write)
+        mode += 200;
+    if (permission.other.execute)
+        mode += 100;
+    return mode;
 }
 
 class FSBaseObject {
@@ -273,6 +297,22 @@ class FSBaseObject {
 
     set_permissions(permissions: InodePermissions): void {
         this.permissions = permissions;
+    }
+
+    stat(): StatStruct {
+        return {
+            dev: 0, // ?
+            ino: 0, // ?
+            mode: permission_to_mode(this.permissions),
+            nlink: 1, // ?
+            uid: this.owner,
+            gid: this.group_owner,
+            rdev: 0, // ?
+            size: this.get_size(),
+            atime: new Date().getTime(),
+            mtime: new Date().getTime(),
+            ctime: new Date().getTime(),
+        }
     }
 }
 

@@ -4,6 +4,8 @@ import {Result, ResultMessages} from "./helpers/result";
 import {Session} from "./session";
 import {Path} from "./fs/path";
 import {sha1hash} from "./helpers/crypto";
+import {StatStruct} from "./lib/sys/stat";
+
 
 interface NewUserOptions {
     uid?: number;
@@ -43,9 +45,9 @@ export class Computer {
         if (find_home_dir.fail()) {
             return false;
         } else {
-        // @ts-ignore
-        this.sessions.push(new Session(uid, uid, uid, find_home_dir.get_data()));
-        return true;
+            // @ts-ignore
+            this.sessions.push(new Session(uid, uid, uid, find_home_dir.get_data()));
+            return true;
         }
     }
 
@@ -56,7 +58,7 @@ export class Computer {
 
     async add_user(username: string, password: string, settings?: NewUserOptions): Promise<Result<User>> {
         if (this.get_user(username))
-            return new Result({success:false, message:ResultMessages.ALREADY_EXISTS});
+            return new Result({success: false, message: ResultMessages.ALREADY_EXISTS});
 
         let next_uid = 0;
 
@@ -65,7 +67,7 @@ export class Computer {
             // Check if uid is available
             // @ts-ignore
             if (this.users[settings.uid])
-                return new Result({success:false, message:ResultMessages.ALREADY_EXISTS});
+                return new Result({success: false, message: ResultMessages.ALREADY_EXISTS});
             // @ts-ignore
             next_uid = settings.uid;
         } else {
@@ -94,7 +96,7 @@ export class Computer {
         });
 
 
-        return new Result({success:true, data:this.users[next_uid]});
+        return new Result({success: true, data: this.users[next_uid]});
     }
 
     get_user(username: string): User | null {
@@ -131,10 +133,10 @@ export class Computer {
         let find = this.fs.find(path);
 
         if (find.fail())
-            return new Result({success:false, message:ResultMessages.NOT_FOUND});
+            return new Result({success: false, message: ResultMessages.NOT_FOUND});
 
         if (find.get_data()!.is_directory())
-            return new Result({success:false, message:ResultMessages.IS_DIRECTORY});
+            return new Result({success: false, message: ResultMessages.IS_DIRECTORY});
 
         // @ts-ignore: Class inheritance
         return find.get_data()!.read();
@@ -145,13 +147,13 @@ export class Computer {
         let find = this.fs.find(path);
 
         if (find.fail())
-            return new Result({success:false, message:ResultMessages.NOT_FOUND});
+            return new Result({success: false, message: ResultMessages.NOT_FOUND});
 
         if (find.get_data()!.is_directory())
-            return new Result({success:false, message:ResultMessages.IS_DIRECTORY});
+            return new Result({success: false, message: ResultMessages.IS_DIRECTORY});
 
         // @ts-ignore: Class inheritance
-        return new Result({success:true, data:find.get_data()!.write(data)});
+        return new Result({success: true, data: find.get_data()!.write(data)});
     }
 
     sys$geteuid(): number {
@@ -160,6 +162,36 @@ export class Computer {
 
     sys$getegid(): number {
         return this.current_session().get_effective_gid();
+    }
+
+    sys$stat(filepath: string): Result<StatStruct> {
+        let path = new Path(filepath).canonicalize();
+        let find = this.fs.find(path);
+
+        if (find.fail())
+            return new Result({success: false, message: ResultMessages.NOT_FOUND});
+
+        return new Result({success: true, data: find.get_data()!.stat()});
+    }
+
+    sys$readdir(filepath: string): Result<string[]> {
+        let path = new Path(filepath).canonicalize();
+        let find = this.fs.find(path);
+
+        if (find.fail())
+            return new Result({success: false, message: ResultMessages.NOT_FOUND});
+
+        if (!find.get_data()!.is_directory())
+            return new Result({success: false, message: ResultMessages.IS_FILE});
+
+        let files = [];
+
+        // @ts-ignore: Class inheritance
+        for (let file of find.get_data()!.get_children()) {
+            files.push(file.get_name());
+        }
+
+        return new Result({success: true, data: files});
     }
 
     getcwd(): string {
@@ -172,14 +204,14 @@ export class Computer {
         let parent = path_obj.parent_path();
         let parent_exists = this.fs.find(parent);
         if (!parent_exists.ok())
-            return new Result({success:false, message:ResultMessages.NOT_FOUND});
+            return new Result({success: false, message: ResultMessages.NOT_FOUND});
 
         if (parent_exists.get_data()!.is_file())
-            return new Result({success:false, message:ResultMessages.IS_FILE});
+            return new Result({success: false, message: ResultMessages.IS_FILE});
 
         // @ts-ignore
         new FSDirectory(path_obj.file_name(), parent_exists.get_data()!, this.geteuid(), this.geteuid());
-        return new Result({success:true});
+        return new Result({success: true});
     }
 }
 

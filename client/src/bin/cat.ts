@@ -26,9 +26,10 @@
 //     print(data);
 //
 // }
-import {print}  from "../helpers/io";
-import {computer} from "../helpers/globals";
+import {print, debug}  from "../helpers/io";
+import {read} from "../lib/unistd";
 import {ArgParser} from "../helpers/argparser";
+import {stat} from "../lib/sys/stat";
 
 export function main(args: string[]) {
     let parser = new ArgParser({
@@ -47,5 +48,29 @@ export function main(args: string[]) {
     });
     let parsed = parser.parse(args);
 
-    print(`If this was implemented, we would print ${parsed.file}`);
+    if (parsed.printed_version_or_help())
+        return;
+
+    if (!parsed.has("file")) {
+        print(`cat: a file is required`);
+        return;
+    }
+
+    let filepath = parsed.get("file");
+
+    let stat_result = stat(filepath);
+
+    if (stat_result === undefined) {
+        print(`cat: ${filepath}: No such file or directory`);
+        return;
+    }
+
+    let data = read(filepath);
+
+    if (data === undefined) {
+        print(`cat: ${filepath}: Permission denied`);
+        return;
+    }
+
+    print(data);
 }
