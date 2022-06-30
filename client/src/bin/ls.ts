@@ -2,6 +2,7 @@ import {print, debug} from "../helpers/io";
 import {computer} from "../helpers/globals";
 import {ArgParser} from "../helpers/argparser";
 import {readdir} from "../lib/dirent";
+import {stat, ISDIR} from "../lib/sys/stat";
 
 function make_directory_text(directory: string): string {
     return `<span style="color: var(--term-blue)">${directory}</span>`;
@@ -80,6 +81,9 @@ export function main(args: string[]) {
 
     let parsed = parser.parse(args);
 
+    if (parsed.printed_version_or_help())
+        return;
+
     debug(parsed);
 
     let result = readdir(parsed.get("directory")) ?? [];
@@ -88,7 +92,15 @@ export function main(args: string[]) {
         // Filter out hidden files
         result = result.filter(file => file[0] !== ".");
 
-    print(result.join(" "));
+    let output = "";
 
-    print(`Parsed has long flag? ${parsed.has("long")}`);
+    for (let file of result) {
+        let path = `${parsed.get("directory")}/${file}`;
+        if (ISDIR(path))
+            output += `${make_directory_text(file)} `;
+        else
+            output += `${file} `;
+    }
+
+    print(output, false);
 }

@@ -1,6 +1,7 @@
 import {output_buffer} from "./globals";
 
 export function print(msg: string, sanitize = true) {
+    // TODO: Push message to output buffer to allow for pipes (|) and redirection (< & >)
     if (sanitize) {
         msg = msg.replace(/</g, "&lt;").replace(/>/g, "&gt;");
         msg = msg.replaceAll("\n", "<br />");
