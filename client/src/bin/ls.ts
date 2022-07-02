@@ -83,9 +83,7 @@ export function main(args: string[]) {
 
     if (parsed.printed_version_or_help())
         return;
-
-    debug(parsed);
-
+    
     let result = readdir(parsed.get("directory")) ?? [];
 
     if (!parsed.get("all"))

@@ -194,6 +194,22 @@ export class Computer {
         return new Result({success: true, data: files});
     }
 
+    sys$chdir(filepath: string): Result<void> {
+        let path = new Path(filepath).canonicalize();
+        let find = this.fs.find(path);
+
+        if (find.fail())
+            return new Result({success: false, message: ResultMessages.NOT_FOUND});
+
+        if (!find.get_data()!.is_directory())
+            return new Result({success: false, message: ResultMessages.IS_FILE});
+
+        // @ts-ignore: Class inheritance
+        this.current_session().set_current_dir(find.get_data());
+
+        return new Result({success: true});
+    }
+
     getcwd(): string {
         return this.current_session().get_current_dir().pwd();
     }
