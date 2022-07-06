@@ -42,19 +42,12 @@ export class Path {
     }
 
     canonicalize(): Path {
-        // If we're absolute, we don't need to do anything
-        if (this.path[0] === "/")
-            return this;
-        else {
-            // If we're relative, we need to make it absolute
-            // If we have no dots in the path, we can just prepend the current directory
-            if (this.path.indexOf(".") === -1)
-                return new Path(computer.getcwd() + "/" + this.path);
-            else {
-                alert("TODO: Implement canonicalize");
-                throw new Error("TODO: Implement canonicalize");
-            }
-        }
+        let find_result = computer.find(this.path);
+
+        if (find_result.fail())
+            throw new Error(`Failed to canonicalize path: ${this.path}`);
+
+        return new Path(find_result.get_data()!.pwd());
     }
 
     get_path(): string {

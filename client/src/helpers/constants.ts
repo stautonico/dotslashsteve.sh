@@ -73,6 +73,11 @@ export const TMP_DIR_PERMISSIONS: InodePermissions = {
     }
 }
 
+
+export const TERMINAL_FONTS = ["source-code-pro", "arial", "verdana", "helvetica", "tahoma", "trebuchet-ms",
+    "times-new-roman", "georgia", "haramond", "courier-new", "brush-script-mt", "sans-serif", "serif", "monospace",
+    "cursive"];
+
 /*
 bin and lib and sbin
  */
