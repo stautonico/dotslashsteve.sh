@@ -12,6 +12,7 @@ export interface StatStruct {
     atime: number;
     mtime: number;
     ctime: number;
+    crtime: number;
 }
 
 export function stat(path: string): StatStruct | undefined {

@@ -3,7 +3,8 @@ import {
     PROC_DIR_PERMISSIONS,
     ROOT_DIR_PERMISSIONS,
     SYS_DIR_PERMISSIONS,
-    TMP_DIR_PERMISSIONS
+    TMP_DIR_PERMISSIONS,
+    TERMINAL_FONTS
 } from "../helpers/constants";
 import {Path} from "./path";
 import {computer} from "../helpers/globals";
@@ -94,6 +95,47 @@ function permission_to_mode(permission: InodePermissions): number {
     return mode;
 }
 
+export function mode_to_string(mode: number): string {
+    let str = "";
+    if (mode & 4)
+        str += "r";
+    else
+        str += "-";
+    if (mode & 2)
+        str += "w";
+    else
+        str += "-";
+    if (mode & 1)
+        str += "x";
+    else
+        str += "-";
+    if (mode & 40)
+        str += "r";
+    else
+        str += "-";
+    if (mode & 20)
+        str += "w";
+    else
+        str += "-";
+    if (mode & 10)
+        str += "x";
+    else
+        str += "-";
+    if (mode & 40)
+        str += "r";
+    else
+        str += "-";
+    if (mode & 200)
+        str += "w";
+    else
+        str += "-";
+    if (mode & 100)
+        str += "x";
+    else
+        str += "-";
+    return str;
+}
+
 class FSBaseObject {
     protected name: string;
     protected permissions: InodePermissions;
@@ -108,8 +150,6 @@ class FSBaseObject {
     protected ctime: Date = new Date(); // Change time (metadata change/perms etc)
     protected crtime: Date = new Date(); // Creation time (file creation)
     protected events: { [key: number]: { event: EventType, callback: (file: FSBaseObject) => void } } = {};
-
-    // TODO: Events
 
     constructor(name: string, owner: number, group_owner: number, other?: FSBaseObjectOtherOptions) {
         this.name = name;
@@ -196,7 +236,7 @@ class FSBaseObject {
                 this.group_owner = gid;
             }
 
-            // TODO: Handle event (change owner)
+            this.handle_event("change_owner")
             return new Result({success: true});
         }
         return new Result({success: false, message: ResultMessages.NOT_ALLOWED});
@@ -237,7 +277,7 @@ class FSBaseObject {
         if (this.parent !== undefined) {
             // In unix, we need read+write permission to delete
             if (this.check_permissions("read").ok() && this.check_permissions("write").ok()) {
-                // TODO: this.handle_event('delete');
+                this.handle_event("delete");
                 return this.parent.delete_child(this.name);
             } else
                 return new Result({success: false, message: ResultMessages.NOT_ALLOWED});
@@ -295,6 +335,10 @@ class FSBaseObject {
         this.parent = parent;
     }
 
+    get_parent(): FSBaseObject | undefined {
+        return this.parent;
+    }
+
     set_permissions(permissions: InodePermissions): void {
         this.permissions = permissions;
     }
@@ -312,6 +356,7 @@ class FSBaseObject {
             atime: new Date().getTime(),
             mtime: new Date().getTime(),
             ctime: new Date().getTime(),
+            crtime: new Date().getTime(),
         }
     }
 }
@@ -332,7 +377,7 @@ export class File extends FSBaseObject {
          * @returns {Result<string>} The result of the read (the content of the file)
          */
         if (this.check_permissions("read").ok()) {
-            // TODO: this.handle_event('read');
+            this.handle_event('read');
             return new Result({
                 success: true,
                 data: this.content,
@@ -367,7 +412,7 @@ export class File extends FSBaseObject {
         if (this.check_permissions("write").ok()) {
             this.content += content;
             this.update_size();
-            // TODO: this.handle_event('write');
+            this.handle_event('write');
             return new Result({success: true});
         } else
             return new Result({success: false, message: ResultMessages.NOT_ALLOWED_WRITE});
@@ -433,7 +478,7 @@ export class Directory extends FSBaseObject {
         child.set_parent(this);
         this.update_size();
 
-        // TODO: this.handle_event('write');
+        this.handle_event("write");
 
         return new Result({success: true});
 
@@ -585,27 +630,51 @@ export class StandardFS {
                 root.style.setProperty("--term-" + key, json[key]);
             }
         });
+
+        let local_dir = new Directory(".local", 1000, 1000, {parent: users_home});
+        let local_share_dir = new Directory("share", 1000, 1000, {parent: local_dir});
+        let local_share_fonts_dir = new Directory("fonts", 1000, 1000, {parent: local_share_dir});
+        // Create a pseudo-file for each of the available terminal fonts
+        for (let font of TERMINAL_FONTS)
+            new File(font + ".ttf", 1000, 1000, {parent: local_share_fonts_dir});
     }
 
-    find(path: Path): Result<FSBaseObject> {
-        // TODO: Redo this better
-        if (path.get_path() === "/")
+    find(path: string | Path): Result<FSBaseObject> {
+        if (path instanceof Path)
+            path = path.to_string();
+
+        // Special cases
+        if (path === "/")
             return new Result({success: true, data: this.root});
 
-        let can_path = path.canonicalize();
-        let parts = can_path.get_parts();
+        if (path === ".")
+            return new Result({success: true, data: computer.current_session().get_current_dir()});
 
-        let current = this.root;
+        if (path === "..")
+            return new Result({success: true, data: computer.current_session().get_current_dir().get_parent()});
 
-        for (let part of parts) {
-            let child = current.get_child(part);
-            if (child.fail())
-                return new Result({success: false, message: ResultMessages.NOT_FOUND});
 
+        // Split the path into its components
+        let components = path.split("/");
+        // Remove any empty components
+        components = components.filter(component => component !== "");
+        // Start at root of we have an absolute path, otherwise start at the current directory
+        let current_dir = path[0] === "/" ? this.root : computer.current_session().get_current_dir();
+        for (let i = 0; i < components.length; i++) {
+            let component = components[i];
+            if (component === ".")
+                continue;
+            if (component === "..") {
+                // @ts-ignore
+                current_dir = current_dir.get_parent();
+                continue;
+            }
+            let result = current_dir.get_child(component);
+            if (!result.ok())
+                return result;
             // @ts-ignore
-            current = child.get_data();
+            current_dir = result.data;
         }
-
-        return new Result({success: true, data: current});
+        return new Result({success: true, data: current_dir});
     }
 }

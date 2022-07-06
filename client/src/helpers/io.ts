@@ -4,9 +4,9 @@ export function print(msg: string, sanitize = true) {
     // TODO: Push message to output buffer to allow for pipes (|) and redirection (< & >)
     if (sanitize) {
         msg = msg.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        msg = msg.replaceAll("\n", "<br />");
-        msg = msg.replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
-        msg = msg.replaceAll(" ", "&nbsp;");
+        msg = msg.replace(/\n/g, "<br>");
+        msg = msg.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;");
+        msg = msg.replace(/ /g, "&nbsp;");
     }
 
 
