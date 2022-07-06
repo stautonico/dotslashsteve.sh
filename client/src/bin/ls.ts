@@ -1,52 +1,12 @@
-import {print, debug} from "../helpers/io";
+import {print} from "../helpers/io";
 import {computer} from "../helpers/globals";
 import {ArgParser} from "../helpers/argparser";
 import {readdir} from "../lib/dirent";
 import {stat, ISDIR} from "../lib/sys/stat";
+import {mode_to_string} from "../fs/inode";
 
 function make_directory_text(directory: string): string {
     return `<span style="color: var(--term-blue)">${directory}</span>`;
-}
-
-export function OLD_main(args: string[]) {
-    // TODO: Build using "syscalls"
-    let to_lookup;
-    if (args.length > 0) {
-        to_lookup = computer.find(args[0]);
-    } else {
-        to_lookup = computer.find(computer.getcwd());
-    }
-
-    if (to_lookup.fail()) {
-        print(`${args[0]}: No such file or directory (os error 2)`);
-    }
-
-
-    // TODO: Support args
-    if (to_lookup.get_data()!.is_file()) {
-        print(to_lookup.get_data()!.get_name());
-    }
-
-    // @ts-ignore
-    let files = to_lookup.get_data()!.get_children();
-
-    // @ts-ignore
-    files = files.map((file) => {
-        if (file.get_name() !== "." && file.get_name() !== "..") {
-            if (file.is_directory())
-                return make_directory_text(file.get_name());
-            else
-                return file.get_name();
-        }
-    });
-
-    let output = files.join(" ");
-
-    // for (let file of files) {
-    //     output += file.get_name() + "\n";
-    // }
-
-    print(output);
 }
 
 export function main(args: string[]) {
@@ -83,8 +43,19 @@ export function main(args: string[]) {
 
     if (parsed.printed_version_or_help())
         return;
-    
-    let result = readdir(parsed.get("directory")) ?? [];
+
+    let dir_exists = stat(parsed.get("directory"));
+    if (dir_exists === undefined) {
+        print(`ls: ${parsed.get("directory")}: No such file or directory`);
+        return;
+    }
+
+    let result = readdir(parsed.get("directory"));
+
+    if (result === undefined) {
+        print(`ls: ${parsed.get("directory")}: Permission denied`);
+        return;
+    }
 
     if (!parsed.get("all"))
         // Filter out hidden files
@@ -93,12 +64,25 @@ export function main(args: string[]) {
     let output = "";
 
     for (let file of result) {
-        let path = `${parsed.get("directory")}/${file}`;
-        if (ISDIR(path))
-            output += `${make_directory_text(file)} `;
-        else
-            output += `${file} `;
+        if (parsed.get("long")) {
+            let stat_result = stat(`${parsed.get("directory")}/${file}`);
+            if (stat_result === undefined)
+                continue;
+            console.log(stat_result.mode.toString(8));
+            output += `${mode_to_string(stat_result.mode)} TODO: Permissions ${stat_result.nlink} TODO: Username TODO: Group name ${stat_result.size} TODO: Process ${stat_result.mtime} ${file}<br />`;
+        } else {
+            let path = `${parsed.get("directory")}/${file}`;
+            if (ISDIR(path))
+                output += `${make_directory_text(file)} `;
+            else
+                output += `${file} `;
+        }
     }
 
-    print(output, false);
+    // If we have an extra "<br />" at the end, remove it
+    if (output.endsWith("<br />"))
+        output = output.slice(0, -6);
+
+    if (output !== "")
+        print(output, false);
 }

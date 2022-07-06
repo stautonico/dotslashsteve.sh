@@ -6,7 +6,7 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "sh ./build.sh",
-    "watch": "cd dist && live-server --no-browser --port=5000 --wait=1000",
+    "watch": "cd dist && live-server --no-browser --port=5000 --wait=2500",
     "dev": "concurrently \"npm run dev:build\" \"npm run watch\"",
     "dev:public": "npm run build && cd dist && ngrok http file:///$(pwd)",
     "dev:build": "nodemon",
