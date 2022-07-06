@@ -23,6 +23,8 @@ export class Computer {
     private groups: { [gid: number]: Group } = {};
     private fs: StandardFS = new StandardFS();
     private sessions: Session[] = [];
+    private input_history: string[] = [];
+    // TODO: Sync input history to 'disk'
 
     constructor(hostname: string) {
         this.boot_time = Date.now();
@@ -41,7 +43,7 @@ export class Computer {
 
         if (!user) return false;
         // Find the user's home directory
-        const find_home_dir = this.fs.find(new Path(user.get_home_dir()!));
+        const find_home_dir = this.fs.find(user.get_home_dir()!);
         if (find_home_dir.fail()) {
             return false;
         } else {
@@ -124,13 +126,21 @@ export class Computer {
     }
 
     find(path: string) {
-        return this.fs.find(new Path(path));
+        return this.fs.find(path);
+    }
+
+    get_input_history(index: number): string {
+        // The index is in reverse order
+        return [...this.input_history].reverse()[index];
+    }
+
+    add_input_record(input: string) {
+        this.input_history.push(input);
     }
 
     // Syscalls?
     sys$read(filepath: string): Result<string> {
-        let path = new Path(filepath).canonicalize();
-        let find = this.fs.find(path);
+        let find = this.fs.find(filepath);
 
         if (find.fail())
             return new Result({success: false, message: ResultMessages.NOT_FOUND});
@@ -143,8 +153,7 @@ export class Computer {
     }
 
     sys$write(filepath: string, data: string): Result<void> {
-        let path = new Path(filepath).canonicalize();
-        let find = this.fs.find(path);
+        let find = this.fs.find(filepath);
 
         if (find.fail())
             return new Result({success: false, message: ResultMessages.NOT_FOUND});
@@ -165,8 +174,7 @@ export class Computer {
     }
 
     sys$stat(filepath: string): Result<StatStruct> {
-        let path = new Path(filepath).canonicalize();
-        let find = this.fs.find(path);
+        let find = this.fs.find(filepath);
 
         if (find.fail())
             return new Result({success: false, message: ResultMessages.NOT_FOUND});
@@ -175,8 +183,7 @@ export class Computer {
     }
 
     sys$readdir(filepath: string): Result<string[]> {
-        let path = new Path(filepath).canonicalize();
-        let find = this.fs.find(path);
+        let find = this.fs.find(filepath);
 
         if (find.fail())
             return new Result({success: false, message: ResultMessages.NOT_FOUND});
@@ -195,8 +202,7 @@ export class Computer {
     }
 
     sys$chdir(filepath: string): Result<void> {
-        let path = new Path(filepath).canonicalize();
-        let find = this.fs.find(path);
+        let find = this.fs.find(filepath);
 
         if (find.fail())
             return new Result({success: false, message: ResultMessages.NOT_FOUND});

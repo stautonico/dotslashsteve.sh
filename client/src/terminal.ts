@@ -5,6 +5,9 @@ let input_buffer: string[] = [];
 let typing = false;
 let keydown_timeout = 0;
 let ps1 = "prompt";
+let input_index = -1;
+// A temporary buffer to hold our current line's input so we can go back to it if we press down arrow on the last history item
+let current_line_input_buffer: string[] = [];
 
 function start_scroll() {
     setInterval(() => {
@@ -21,6 +24,7 @@ function start_blinking() {
             CURSOR!.classList.toggle("active");
         }
     }, 500);
+
 }
 
 function start_typing_timeout() {
@@ -44,11 +48,15 @@ function start_keydown_listener() {
             if (input_buffer.length > 0) {
                 output_buffer[output_buffer.length - 1].pop();
                 input_buffer.pop();
+                // Also reset our history position
+                input_index = -1;
             }
         } else if (e.key === "Enter") {
             // Process input
             await handle_input();
 
+            // Reset the input history index
+            input_index = -1;
             output_buffer.push([ps1]);
             // Clear the input buffer
             input_buffer = [];
@@ -56,12 +64,42 @@ function start_keydown_listener() {
             // TODO: Handle tab completion
             alert("Tab completion not implemented yet.");
         } else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
-            // TODO: Handle arrow keys
-            alert("Arrow keys not implemented yet.");
+            // TODO: Handle left and right arrow keys
+            if (e.key === "ArrowUp") {
+                input_index += 1;
+                // If we have a history item, clear the input buffer and add the history item
+                let history_item = computer.get_input_history(input_index);
+                if (history_item !== undefined) {
+                    input_buffer = history_item.split("");
+                    // Remove everything except the first element (the prompt) from the last output buffer line
+                    output_buffer[output_buffer.length - 1] = [ps1, ...input_buffer];
+                } else {
+                    // We've gone past the end of the history, so go make sure the counter doesn't go out of bounds
+                    input_index -= 1;
+                }
+            } else if (e.key === "ArrowDown") {
+                if (input_index > 0) {
+                    input_index -= 1;
+                }
+                let history_item = computer.get_input_history(input_index);
+                if (history_item !== undefined) {
+                    input_buffer = history_item.split("");
+                    output_buffer[output_buffer.length - 1] = [ps1, ...input_buffer];
+                } else {
+                    // We're at the last item, revert to the current line's input
+                    input_buffer = current_line_input_buffer;
+                    output_buffer[output_buffer.length - 1] = [ps1, ...input_buffer];
+                }
+
+            } else {
+                alert("Left and right arrow keys not implemented yet.");
+            }
         } else if (!(["Shift", "Control", "Alt", "OS", "Meta", "Escape"].includes(e.key))) {
             output_buffer[output_buffer.length - 1].push(e.key);
             input_buffer.push(e.key);
+            current_line_input_buffer = input_buffer;
         }
+
 
         render_buffer();
     });
@@ -95,6 +133,9 @@ function render_buffer() {
 async function handle_input() {
     if (input_buffer.length > 0) {
         const joined = input_buffer.join("");
+
+        // Save our current input to the history
+        computer.add_input_record(joined);
 
         const command = joined.split(" ")[0];
         const args = joined.split(" ").slice(1);
@@ -143,12 +184,12 @@ function generate_prompt() {
     // At this point, if someone breaks this, it's their own fault
 
     let prompt = prompt_format;
-    prompt = prompt.replaceAll("\\d",  make_backslash_d());
+    prompt = prompt.replaceAll("\\d", make_backslash_d());
     prompt = prompt.replaceAll("\\h", computer.get_hostname())
     prompt = prompt.replaceAll("\\t", make_backslash_t());
     prompt = prompt.replaceAll("\\T", make_backslash_T());
     prompt = prompt.replaceAll("\\@", make_backslash_at());
-    prompt = prompt.replaceAll("\\u",computer.get_current_user().get_username());
+    prompt = prompt.replaceAll("\\u", computer.get_current_user().get_username());
     prompt = prompt.replaceAll("\\w", computer.current_session().get_current_dir().pwd());
     // TODO: Replace home directory with ~
     prompt = prompt.replaceAll("\\W", computer.current_session().get_current_dir().get_name());
@@ -240,7 +281,7 @@ async function main() {
         }
     }
 
-    ps1=generate_prompt();
+    ps1 = generate_prompt();
     output_buffer.push([ps1]);
 
     render_buffer();
