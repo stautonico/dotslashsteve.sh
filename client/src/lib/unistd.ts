@@ -7,3 +7,7 @@ export function read(path: string): string | undefined {
 export function chdir(path: string): boolean {
     return computer.sys$chdir(path).ok();
 }
+
+export function getcwd(): string {
+    return computer.getcwd();
+}

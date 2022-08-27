@@ -4,11 +4,12 @@ import {
     ROOT_DIR_PERMISSIONS,
     SYS_DIR_PERMISSIONS,
     TMP_DIR_PERMISSIONS,
-    TERMINAL_FONTS
+    TERMINAL_FONTS, DEFAULT_TERM_PREFS
 } from "../helpers/constants";
 import {Path} from "./path";
 import {computer} from "../helpers/globals";
 import {StatStruct} from "../lib/sys/stat";
+import {termprefs_write_handler} from "../helpers/callbacks";
 
 type PermissionType = "read" | "write" | "execute";
 type EventType = "read" | "write" | "execute" | "move" | "change_perm" | "change_owner" | "delete";
@@ -136,7 +137,7 @@ export function mode_to_string(mode: number): string {
     return str;
 }
 
-class FSBaseObject {
+export class FSBaseObject {
     protected name: string;
     protected permissions: InodePermissions;
     protected setuid: boolean; // Maybe unused, we'll see
@@ -316,7 +317,6 @@ class FSBaseObject {
     handle_event(event: EventType) {
         for (let id in this.events) {
             if (this.events[id].event === event) {
-                console.log("Handling event " + event + " with ID " + id);
                 this.events[id].callback(this);
             }
         }
@@ -611,25 +611,10 @@ export class StandardFS {
         new Directory("Pictures", 1000, 1000, {parent: users_home});
         new Directory("Videos", 1000, 1000, {parent: users_home});
         let termprefs_file = new File(".term_prefs", 1000, 1000, {parent: users_home});
-        termprefs_file.add_event_listener('write', (file) => {
-            // Parse the json input
-            let json;
-            try {
-                // @ts-ignore
-                json = JSON.parse(file.get_content());
-            } catch (e) {
-                // If we fail, just exit
-                return
-            }
+        termprefs_file.add_event_listener('write', termprefs_write_handler);
 
-            // Set the terminal colors
-            let root = document.querySelector(":root");
-            for (let key in json) {
-                console.log(`Were setting ${key} to ${json[key]}`);
-                // @ts-ignore
-                root.style.setProperty("--term-" + key, json[key]);
-            }
-        });
+        // Write the default preferences
+        termprefs_file.write(JSON.stringify(DEFAULT_TERM_PREFS, undefined, 4));
 
         let local_dir = new Directory(".local", 1000, 1000, {parent: users_home});
         let local_share_dir = new Directory("share", 1000, 1000, {parent: local_dir});

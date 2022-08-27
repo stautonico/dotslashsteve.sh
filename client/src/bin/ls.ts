@@ -84,5 +84,5 @@ export function main(args: string[]) {
         output = output.slice(0, -6);
 
     if (output !== "")
-        print(output, false);
+        print(output, {sanitize_html: false});
 }

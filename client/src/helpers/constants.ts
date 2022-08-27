@@ -81,3 +81,32 @@ export const TERMINAL_FONTS = ["source-code-pro", "arial", "verdana", "helvetica
 /*
 bin and lib and sbin
  */
+
+
+export const DEFAULT_TERM_PREFS = {
+    "colors": {
+        "background": "#000000",
+        "foreground": "#ffffff",
+
+        "cursor": "#ffffff",
+
+        "white": "#fff",
+        "light-white": "#fafafa",
+        "black": "#000",
+        "light-black": "#333",
+        "red": "#ff0000",
+        "light-red": "#ff9999",
+        "green": "#00ff00",
+        "light-green": "#99ff99",
+        "yellow": "#ffff00",
+        "light-yellow": "#ffff99",
+        "blue": "#0000ff",
+        "light-blue": "#9999ff",
+        "purple": "#ff00ff",
+        "light-purple": "#ff99ff",
+        "cyan": "#00ffff",
+        "light-cyan": "#99ffff",
+    },
+    "font": "Fira Mono",
+    "font-size": "16px",
+}

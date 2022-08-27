@@ -24,6 +24,7 @@ export class Computer {
     private fs: StandardFS = new StandardFS();
     private sessions: Session[] = [];
     private input_history: string[] = [];
+
     // TODO: Sync input history to 'disk'
 
     constructor(hostname: string) {
@@ -129,7 +130,10 @@ export class Computer {
         return this.fs.find(path);
     }
 
-    get_input_history(index: number): string {
+    get_input_history(index?: number): string | string[] {
+        if (index === undefined)
+            // Get the entire input history if no index is provided
+            return this.input_history;
         // The index is in reverse order
         return [...this.input_history].reverse()[index];
     }

@@ -3,14 +3,14 @@ import {computer} from "../helpers/globals";
 
 export function main(args: string[]) {
     if (args.length < 1) {
-        print(`usage: edit [path]`, true);
+        print(`usage: edit [path]`);
         return;
     }
 
     const path = args[0];
     const file = computer.find(path);
     if (file.fail()) {
-        print(`Could not find file ${path}`, true);
+        print(`Could not find file ${path}`);
         return;
     }
 

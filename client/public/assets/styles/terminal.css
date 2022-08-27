@@ -1,4 +1,9 @@
 :root {
+    --term-background: #000;
+    --term-foreground: #fff;
+
+    --term-cursor: #fff;
+
     --term-white: #fff;
     --term-light-white: #fafafa;
     --term-black: #000;
@@ -15,18 +20,24 @@
     --term-light-purple: #ff99ff;
     --term-cyan: #00ffff;
     --term-light-cyan: #99ffff;
+
+    --term-font: 'Fira Mono', monospace;
+
+    --term-font-size: 16px;
 }
 
 body {
-    background: black;
-    color: white;
-    font-family: "Roboto Light", sans-serif, serif;
+    background: var(--term-background);
+    color: var(--term-foreground);
+    font-family: var(--term-font), sans-serif, serif;
+    font-size: var(--term-font-size);
 }
 
 #cursor {
     opacity: 0;
     transition: opacity 0.2s linear;
     scroll-behavior: smooth;
+    color: var(--term-cursor);
 }
 
 #cursor.active {
