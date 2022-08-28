@@ -145,7 +145,7 @@ export class FSBaseObject {
     protected owner: number;
     protected group_owner: number;
     // TODO: Link count?
-    protected size: number = 0;
+    protected size = 0;
     protected atime: Date = new Date(); // Access time
     protected mtime: Date = new Date(); // Modify time (content change)
     protected ctime: Date = new Date(); // Change time (metadata change/perms etc)
@@ -248,10 +248,12 @@ export class FSBaseObject {
          * Returns the full path to this object
          * @returns {string} The full path to this object
          */
-            // Start from ourselves and work our way down the parent chain
+        // Start from ourselves and work our way down the parent chain
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         let current_dir = this;
         let working_dir = [];
 
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             working_dir.push(current_dir.name);
             if (current_dir.parent === undefined) {
@@ -362,7 +364,7 @@ export class FSBaseObject {
 }
 
 export class File extends FSBaseObject {
-    protected content: string = "";
+    protected content = "";
 
     constructor(name: string, owner: number, group_owner: number, other?: FileOtherOptions) {
         super(name, owner, group_owner, other);
@@ -377,7 +379,7 @@ export class File extends FSBaseObject {
          * @returns {Result<string>} The result of the read (the content of the file)
          */
         if (this.check_permissions("read").ok()) {
-            this.handle_event('read');
+            this.handle_event("read");
             return new Result({
                 success: true,
                 data: this.content,
@@ -394,10 +396,11 @@ export class File extends FSBaseObject {
          */
         // TODO: Maybe not working?
         // if (this.check_permissions("write").ok()) {
+        // eslint-disable-next-line no-constant-condition
         if (true) {
             this.content = content;
             this.update_size();
-            this.handle_event('write');
+            this.handle_event("write");
             return new Result({success: true});
         } else
             return new Result({success: false, message: ResultMessages.NOT_ALLOWED_WRITE});
@@ -412,7 +415,7 @@ export class File extends FSBaseObject {
         if (this.check_permissions("write").ok()) {
             this.content += content;
             this.update_size();
-            this.handle_event('write');
+            this.handle_event("write");
             return new Result({success: true});
         } else
             return new Result({success: false, message: ResultMessages.NOT_ALLOWED_WRITE});
@@ -611,7 +614,7 @@ export class StandardFS {
         new Directory("Pictures", 1000, 1000, {parent: users_home});
         new Directory("Videos", 1000, 1000, {parent: users_home});
         let termprefs_file = new File(".term_prefs", 1000, 1000, {parent: users_home});
-        termprefs_file.add_event_listener('write', termprefs_write_handler);
+        termprefs_file.add_event_listener("write", termprefs_write_handler);
 
         // Write the default preferences
         termprefs_file.write(JSON.stringify(DEFAULT_TERM_PREFS, undefined, 4));

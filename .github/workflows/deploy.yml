@@ -25,6 +25,11 @@ jobs:
           npm install
           npm run build --if-present
 
+      - name: Run ESLint
+        run: |
+          cd client
+          npm run lint
+
       - name: Run Jest Tests
         run: |
           cd client

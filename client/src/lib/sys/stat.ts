@@ -20,7 +20,7 @@ export function stat(path: string): StatStruct | undefined {
 }
 
 export function ISDIR(path: string): boolean {
-    let find_result = computer.find(path);
+    const find_result = computer.find(path);
 
     if (find_result.fail())
         return false;
@@ -29,7 +29,7 @@ export function ISDIR(path: string): boolean {
 }
 
 export function ISREG(path: string): boolean {
-    let find_result = computer.find(path);
+    const find_result = computer.find(path);
 
     if (find_result.fail())
         return false;

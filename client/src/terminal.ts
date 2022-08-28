@@ -33,6 +33,10 @@ export class Terminal {
     }
 
     constructor() {
+        this.start_scroll();
+        this.start_blinking();
+        this.start_typing_timeout();
+        this.start_keydown_listener();
     }
 
     start_scroll() {
@@ -93,7 +97,7 @@ export class Terminal {
                 if (e.key === "ArrowUp") {
                     this.input_index += 1;
                     // If we have a history item, clear the input buffer and add the history item
-                    let history_item = computer.get_input_history(this.input_index);
+                    const history_item = computer.get_input_history(this.input_index);
                     if (history_item !== undefined) {
                         // @ts-ignore: This will always have split as we provided an index
                         this.input_buffer = history_item.split("");
@@ -107,7 +111,7 @@ export class Terminal {
                     if (this.input_index > 0) {
                         this.input_index -= 1;
                     }
-                    let history_item = computer.get_input_history(this.input_index);
+                    const history_item = computer.get_input_history(this.input_index);
                     if (history_item !== undefined) {
                         // @ts-ignore: This will always have split as we provided an index
                         this.input_buffer = history_item.split("");
@@ -132,13 +136,6 @@ export class Terminal {
 
             this.render_buffer();
         });
-    }
-
-    start_intervals() {
-        this.start_scroll();
-        this.start_blinking();
-        this.start_typing_timeout();
-        this.start_keydown_listener();
     }
 
     render_buffer() {
@@ -182,7 +179,7 @@ export class Terminal {
                         output_buffer.push([`shell: command not found: ${command}`]);
                         console.error(e);
                     } else {
-                        output_buffer.push([`Something went wrong, check the console for more details.`]);
+                        output_buffer.push(["Something went wrong, check the console for more details."]);
                         console.error(e);
                     }
                 }
@@ -195,7 +192,7 @@ export class Terminal {
 
     generate_prompt() {
         // TODO: Support $PS1 environment variable
-        let prompt_format = "\\e[0;31m\\u\\e[0m@\\e[0;32m\\h\\e[0m:\\e[0;34m\\w\\\\e[0m\\$ ";
+        const prompt_format = "\\e[0;31m\\u\\e[0m@\\e[0;32m\\h\\e[0m:\\e[0;34m\\w\\\\e[0m\\$ ";
 
         // Default shell prompt is <USERNAME>@<HOSTNAME>:<WORKING DIR><$/#>
 
@@ -318,14 +315,11 @@ export class Terminal {
         output_buffer.push([this.ps1]);
 
         this.render_buffer();
-
-        this.start_intervals();
     }
 
 }
 
-
-let terminal = new Terminal();
+const terminal = new Terminal();
 // @ts-ignore: Top level await is supported in ES2015(?)
 await terminal.main();
 

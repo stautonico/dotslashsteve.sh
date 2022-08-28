@@ -5,8 +5,8 @@ import {output_buffer, computer} from "./helpers/globals";
 import {stat, ISDIR} from "./lib/sys/stat";
 import {chdir, getcwd} from "./lib/unistd";
 
-export function cd(args: string[], terminal: Terminal): number {
-    let parser = new ArgParser({
+export function cd(args: string[], _terminal: Terminal): number {
+    const parser = new ArgParser({
         name: "cd",
         description: "change working directory",
         description_long: "change working directory",
@@ -21,13 +21,13 @@ export function cd(args: string[], terminal: Terminal): number {
         }
     });
 
-    let parsed = parser.parse(args);
+    const parsed = parser.parse(args);
 
     if (parsed.printed_version_or_help())
         return 0;
 
     // Make sure the directory exists
-    let stat_result = stat(parsed.get("directory"));
+    const stat_result = stat(parsed.get("directory"));
 
     if (stat_result === undefined) {
         print(`cd: ${parsed.get("directory")}: No such file or directory`);
@@ -39,7 +39,7 @@ export function cd(args: string[], terminal: Terminal): number {
         return 1;
     }
 
-    let result = chdir(parsed.get("directory"));
+    const result = chdir(parsed.get("directory"));
 
     if (!result) {
         print(`cd: ${parsed.get("directory")}: Permission denied`);
@@ -50,15 +50,15 @@ export function cd(args: string[], terminal: Terminal): number {
 }
 
 
-export function clear(args: string[], terminal: Terminal): number {
-    let parser = new ArgParser({
+export function clear(args: string[], _terminal: Terminal): number {
+    const parser = new ArgParser({
         name: "clear",
         description: "clear the terminal screen",
         description_long: "clear the terminal screen",
         version: "0.0.1",
         print_function: print,
     });
-    let parsed = parser.parse(args);
+    const parsed = parser.parse(args);
 
     if (parsed.printed_version_or_help())
         return 0;
@@ -69,10 +69,10 @@ export function clear(args: string[], terminal: Terminal): number {
     return 0;
 }
 
-export function history(args: string[], terminal: Terminal): number {
+export function history(_args: string[], _terminal: Terminal): number {
     // TODO: Implement some of history's arguments
 
-    let history = computer.get_input_history();
+    const history = computer.get_input_history();
 
     for (let i = 0; i < history.length; i++)
         print(`${i + 1} ${history[i]}`);
@@ -81,15 +81,15 @@ export function history(args: string[], terminal: Terminal): number {
 }
 
 
-export function pwd(args: string[], terminal: Terminal): number {
-    let parser = new ArgParser({
+export function pwd(args: string[], _terminal: Terminal): number {
+    const parser = new ArgParser({
         name: "pwd",
         description: "print name of current/working directory",
         description_long: "print name of current/working directory",
         version: "0.0.1",
         print_function: print,
     });
-    let parsed = parser.parse(args);
+    const parsed = parser.parse(args);
 
     if (parsed.printed_version_or_help())
         return 0;

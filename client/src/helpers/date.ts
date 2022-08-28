@@ -72,7 +72,7 @@ export function make_backslash_d(): string {
             break;
     }
 
-    return `${day} ${month} ${current_date.getDate() > 9 ? '' : '0'}${current_date.getDate()}`;
+    return `${day} ${month} ${current_date.getDate() > 9 ? "" : "0"}${current_date.getDate()}`;
 }
 
 export function make_backslash_t(): string {
@@ -131,7 +131,7 @@ export function make_backslash_at(): string {
     const current_time = new Date();
     let hour = current_time.getHours();
     let minute = current_time.getMinutes();
-    let am_pm = hour >= 12 ? 'pm' : 'am';
+    const am_pm = hour >= 12 ? "pm" : "am";
 
     // 0 pad the hour, minute, and second if they are less than 10
     if (hour < 10) {

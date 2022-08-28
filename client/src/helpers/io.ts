@@ -51,7 +51,7 @@ export function print(msg: string, options: PrintOptions = {}) {
     }
 }
 
-export function debug(msg: any) {
+export function debug(msg: object | string | number | boolean) {
     if (typeof msg === "object")
         msg = JSON.stringify(msg); // So we can see objects without seeing "[object Object]"
     print(`<span style="color: #7b00ff;">[DEBUG]</span>: ${msg}`, {sanitize: false});

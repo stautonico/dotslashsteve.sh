@@ -1,5 +1,4 @@
 import {print}  from "../helpers/io";
-import {computer} from "../helpers/globals";
 import {ArgParser} from "../helpers/argparser";
 
 export function main(args: string[]) {

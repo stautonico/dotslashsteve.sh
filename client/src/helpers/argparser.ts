@@ -15,6 +15,7 @@ interface ArgParserOptions {
     description?: string,
     description_long?: string,
     args?: { [key: string]: Arg },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     print_function?: (...args: any[]) => void,
 }
 
@@ -24,11 +25,12 @@ export class ArgParser {
     private _description?: string;
     private _description_long?: string;
     private _args: Map<string, Arg>;
-    private _help_string: string = '';
-    private _version_string: string = '';
-    private _did_parse_args: boolean = false;
+    private _help_string = "";
+    private _version_string = "";
+    private _did_parse_args = false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private _custom_console_log: (...args: any[]) => void;
-    private _positional_arg_counter: number = 0;
+    private _positional_arg_counter = 0;
 
     constructor(options: ArgParserOptions) {
         this._name = options.name;
@@ -45,11 +47,11 @@ export class ArgParser {
 
             // If we don't have a type, and it's not a positional, we'll assume it's a boolean
             if (!arg.type && !arg.positional)
-                arg.type = 'boolean';
+                arg.type = "boolean";
 
             // If we don't have a type, and it's a positional, we'll assume it's a string
             if (!arg.type && arg.positional)
-                arg.type = 'string';
+                arg.type = "string";
 
             // If positional wasn't set, but we have a long/short, we'll assume it's a flag
             if (arg.positional === undefined && (arg.long || arg.short))
@@ -74,7 +76,7 @@ export class ArgParser {
             }
 
             // If our type is boolean, and we don't have a default, we'll assume it's false
-            if (arg.type === 'boolean' && !arg.default)
+            if (arg.type === "boolean" && !arg.default)
                 arg.default = false;
 
             // If required wasn't set, we'll assume it's false
@@ -89,24 +91,24 @@ export class ArgParser {
     }
 
     private generate_help(): void {
-        if (this._help_string === undefined || this._help_string === '') {
+        if (this._help_string === undefined || this._help_string === "") {
             this._help_string = `Usage: ${this._name} [OPTIONS]`;
             for (let [name, arg] of this._args) {
                 if (arg.positional) {
                     this._help_string += ` ${name}`;
                 } else {
                     if (arg.long) {
-                        if (typeof arg.long === 'string') {
+                        if (typeof arg.long === "string") {
                             this._help_string += ` [--${arg.long}]`;
                         } else if (Array.isArray(arg.long)) {
-                            this._help_string += ` [--${arg.long.join('|--')}]`;
+                            this._help_string += ` [--${arg.long.join("|--")}]`;
                         }
                     }
                     if (arg.short) {
-                        if (typeof arg.short === 'string') {
+                        if (typeof arg.short === "string") {
                             this._help_string += ` [-${arg.short}]`;
                         } else if (Array.isArray(arg.short)) {
-                            this._help_string += ` [-${arg.short.join('|-')}]`;
+                            this._help_string += ` [-${arg.short.join("|-")}]`;
                         }
                     }
                 }
@@ -115,7 +117,7 @@ export class ArgParser {
     }
 
     private generate_version(): void {
-        if (this._version_string === undefined || this._version_string === '')
+        if (this._version_string === undefined || this._version_string === "")
             this._version_string = `${this._name} v${this._version}`;
     }
 
@@ -145,15 +147,16 @@ export class ArgParser {
     public parse(argv: string[] | string): ArgParseResult {
         if (this._did_parse_args) {
             // TODO: Maybe just re-parse or just do nothing?
-            throw new Error('ArgParser: parse() called twice');
+            throw new Error("ArgParser: parse() called twice");
         }
-        if (typeof argv === 'string')
-            argv = argv.split(' ');
+        if (typeof argv === "string")
+            argv = argv.split(" ");
 
         this.generate_help();
         this.generate_version();
 
         // Start by creating a default output object with all the default values
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let output: any = {};
         for (let [name, arg] of this._args) {
             if (arg.default)
@@ -170,9 +173,9 @@ export class ArgParser {
             let arg = argv[i];
             let arg_name;
             // Check if the argument is a flag (starts with '-' or '--' and is not surrounded by quotes)
-            if (arg.startsWith('-')) {
+            if (arg.startsWith("-")) {
                 // Check if the argument is a long flag (starts with '--')
-                if (arg.startsWith('--')) {
+                if (arg.startsWith("--")) {
                     if (arg.substring(2) === "help") {
                         this._custom_console_log(this._help_string);
                         return new ArgParseResult({}, true);
@@ -202,10 +205,10 @@ export class ArgParser {
 
                 arg_name = arg_obj.name!;
 
-                if (arg_obj.type === 'boolean')
+                if (arg_obj.type === "boolean")
                     output[arg_name] = true;
                 else if (["string", "int", "float", ""].includes(arg_obj.type!)) {
-                    if (argv[i + 1] && !argv[i + 1].startsWith('-'))
+                    if (argv[i + 1] && !argv[i + 1].startsWith("-"))
                         output[arg_name] = argv[i + 1];
                     else
                         this._custom_console_log(`${this._name}: Missing value for flag ${arg}`);
@@ -216,12 +219,12 @@ export class ArgParser {
                 }
 
                 // Now, lets convert the value to the correct type
-                if (arg_obj.type === 'int')
+                if (arg_obj.type === "int")
                     output[arg_name] = parseInt(output[arg_name]);
-                else if (arg_obj.type === 'float')
+                else if (arg_obj.type === "float")
                     output[arg_name] = parseFloat(output[arg_name]);
 
-                if (['string', 'int', 'float'].includes(arg_obj.type!))
+                if (["string", "int", "float"].includes(arg_obj.type!))
                     // Increment the index to skip the next argument
                     i++;
 
@@ -247,7 +250,7 @@ export class ArgParser {
     private _has_long_flag(flag: string): boolean {
         for (let [_, arg] of this._args) {
             if (arg.long) {
-                if (typeof arg.long === 'string') {
+                if (typeof arg.long === "string") {
                     if (arg.long === flag)
                         return true;
                 } else if (Array.isArray(arg.long)) {
@@ -262,7 +265,7 @@ export class ArgParser {
     private _has_short_flag(flag: string): boolean {
         for (let [_, arg] of this._args) {
             if (arg.short) {
-                if (typeof arg.short === 'string') {
+                if (typeof arg.short === "string") {
                     if (arg.short === flag)
                         return true;
                 } else if (Array.isArray(arg.short)) {
@@ -277,7 +280,7 @@ export class ArgParser {
     private _get_arg_from_flag(flag: string): Arg | undefined {
         for (let [_, arg] of this._args) {
             if (arg.long) {
-                if (typeof arg.long === 'string') {
+                if (typeof arg.long === "string") {
                     if (arg.long === flag)
                         return arg;
                 } else if (Array.isArray(arg.long)) {
@@ -287,7 +290,7 @@ export class ArgParser {
             }
 
             if (arg.short) {
-                if (typeof arg.short === 'string') {
+                if (typeof arg.short === "string") {
                     if (arg.short === flag)
                         return arg;
                 } else if (Array.isArray(arg.short)) {
@@ -316,19 +319,24 @@ export class ArgParser {
 }
 
 class ArgParseResult {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly _args: { [key: string]: any };
     private readonly _printed_version_or_help: boolean;
 
-    constructor(args: { [key: string]: any }, printed_version_or_help: boolean = false) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    constructor(args: { [key: string]: any }, printed_version_or_help = false) {
         this._args = args;
         this._printed_version_or_help = printed_version_or_help;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public get(key: string): any {
         return this._args[key];
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public has(key: string): any {
+        // eslint-disable-next-line no-prototype-builtins
         return this._args.hasOwnProperty(key) && this._args[key] !== undefined;
     }
 

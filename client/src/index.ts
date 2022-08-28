@@ -1,5 +1,5 @@
-const TERMINAL_IFRAME = document.getElementById('terminal');
-const SITE_IFRAME = document.getElementById('site');
+const TERMINAL_IFRAME = document.getElementById("terminal");
+const SITE_IFRAME = document.getElementById("site");
 
 // Message handler from iframes
 window.onmessage = (e) => {
@@ -8,7 +8,7 @@ window.onmessage = (e) => {
     }
 
     if (e.data === "site" || e.data === "exit") {
-        SITE_IFRAME!.classList.add('animate');
+        SITE_IFRAME!.classList.add("animate");
         // alert("Activating site...");
     }
 }

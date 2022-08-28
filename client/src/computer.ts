@@ -236,7 +236,7 @@ export class Computer {
             return new Result({success: false, message: ResultMessages.IS_FILE});
 
         // @ts-ignore
-        new FSDirectory(path_obj.file_name(), parent_exists.get_data()!, this.geteuid(), this.geteuid());
+        new Directory(path_obj.file_name(), parent_exists.get_data()!, this.geteuid(), this.geteuid());
         return new Result({success: true});
     }
 }

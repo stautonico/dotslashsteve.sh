@@ -1,4 +1,4 @@
-import {print, debug}  from "../helpers/io";
+import {print}  from "../helpers/io";
 import {read} from "../lib/unistd";
 import {ArgParser} from "../helpers/argparser";
 import {stat} from "../lib/sys/stat";
@@ -24,7 +24,7 @@ export function main(args: string[]) {
         return;
 
     if (!parsed.has("file")) {
-        print(`cat: a file is required`);
+        print("cat: a file is required");
         return;
     }
 

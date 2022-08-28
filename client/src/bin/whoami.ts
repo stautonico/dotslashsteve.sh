@@ -1,7 +1,7 @@
 import {print}  from "../helpers/io";
 import {computer} from "../helpers/globals";
 
-export function main(args: string[]) {
+export function main(_args: string[]) {
     const current_session = computer.current_session();
 
     const uid = current_session.get_effective_uid();

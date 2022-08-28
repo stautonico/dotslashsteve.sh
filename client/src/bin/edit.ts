@@ -1,9 +1,9 @@
-import {print}  from "../helpers/io";
+import {print} from "../helpers/io";
 import {computer} from "../helpers/globals";
 
 export function main(args: string[]) {
     if (args.length < 1) {
-        print(`usage: edit [path]`);
+        print("usage: edit [path]");
         return;
     }
 
@@ -38,15 +38,17 @@ export function main(args: string[]) {
         iframe.contentWindow!.postMessage(message, "*");
     }
 
-    // Wait for the iframe to send a message back to us
-    window.addEventListener("message", (event) => {
+    const message_handler = (event: MessageEvent) => {
         if (event.data.type === "save_file") {
             // @ts-ignore
             file.get_data().write(event.data.data);
             // Remove the iframe
             document.body.removeChild(iframe);
             // Remove the event listener
-            window.removeEventListener("message", (event) => {});
+            window.removeEventListener("message", message_handler);
         }
-    });
+    }
+
+    // Wait for the iframe to send a message back to us
+    window.addEventListener("message", message_handler);
 }

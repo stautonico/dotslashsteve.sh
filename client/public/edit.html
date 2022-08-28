@@ -1,3 +1,5 @@
+<div id="titlebar">Editor</div>
+
 <textarea name="" id="file_content" cols="30" rows="10"></textarea>
 <button id="save">Save</button>
 
@@ -22,3 +24,15 @@
          window.parent.postMessage(message, '*');
     });
 </script>
+
+<style>
+    #titlebar {
+        height: 25px;
+        width: calc(30 * 16px);
+        background-color: #f5f5f5;
+        border-bottom: 1px solid #e5e5e5;
+        padding: 5px;
+        font-size: 16px;
+        text-align: center;
+    }
+</style>

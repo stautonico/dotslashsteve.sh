@@ -5,14 +5,15 @@ import {encode, decode} from "./encode";
 
 export async function sha1hash(text: string): Promise<string> {
     return new Promise(async (resolve) => {
-        if (typeof crypto !== 'undefined') {
+        if (typeof crypto !== "undefined") {
             // @ts-ignore
             const hash = await crypto.subtle.digest("SHA-1", encode(text));
             // @ts-ignore
             resolve(decode(hash));
         } else {
-            const crypto = require('crypto');
-            resolve(crypto.createHash('sha1').update(text).digest('hex'));
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const crypto = require("crypto");
+            resolve(crypto.createHash("sha1").update(text).digest("hex"));
         }
     });
 }
