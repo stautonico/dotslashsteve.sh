@@ -12,9 +12,9 @@ on:
 
 
 jobs:
-  run_tests:
-    name: Run Jest Tests
-    runs-on: ubuntu-18.04
+  run_tests_and_lint:
+    name: Run Jest Tests & Lint
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:

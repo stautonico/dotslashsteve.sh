@@ -1,8 +1,8 @@
 import {Directory} from "./fs/inode";
 
 export class Session {
-    private real_uid: number;
-    private real_gid: number;
+    private readonly real_uid: number;
+    private readonly real_gid: number;
     private effective_uid: number;
     private effective_gid: number;
     private readonly saved_uid: number;
@@ -36,6 +36,14 @@ export class Session {
 
     get_effective_gid(): number {
         return this.effective_gid;
+    }
+
+    set_effective_uid(effective_uid: number): void {
+        this.effective_uid = effective_uid;
+    }
+
+    set_effective_gid(effective_gid: number): void {
+        this.effective_gid = effective_gid;
     }
 
     get_saved_uid(): number {

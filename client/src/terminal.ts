@@ -3,14 +3,16 @@ import {make_backslash_d, make_backslash_t, make_backslash_T, make_backslash_at}
 import {escape_html} from "./helpers/html";
 import {cd, clear, history, pwd} from "./terminal_builtins";
 
+import {Buffer} from "./helpers/io";
+
 export class Terminal {
-    input_buffer: string[] = [];
+    input_buffer: Buffer;
     typing = false;
     keydown_timeout = 0;
     ps1 = "prompt";
     input_index = -1;
     // A temporary buffer to hold our current line's input so we can go back to it if we press down arrow on the last history item
-    current_line_input_buffer: string[] = [];
+    current_line_input_buffer: Buffer;
 
     // List of builtins to implement
     // TODO: alias: Create an alias for a command
@@ -33,6 +35,8 @@ export class Terminal {
     }
 
     constructor() {
+        this.input_buffer = new Buffer();
+        this.current_line_input_buffer = new Buffer();
         this.start_scroll();
         this.start_blinking();
         this.start_typing_timeout();
@@ -157,7 +161,7 @@ export class Terminal {
     }
 
     async handle_input() {
-        if (this.input_buffer.length > 0) {
+        if (this.input_buffer.length() > 0) {
             const joined = this.input_buffer.join("");
 
             // Save our current input to the history
@@ -322,4 +326,3 @@ export class Terminal {
 const terminal = new Terminal();
 // @ts-ignore: Top level await is supported in ES2015(?)
 await terminal.main();
-
