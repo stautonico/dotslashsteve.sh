@@ -78,7 +78,7 @@ export class Terminal {
             this.keydown_timeout = 75;
             this.typing = true;
             if (e.key === "Backspace") {
-                if (this.input_buffer.length > 0) {
+                if (this.input_buffer.length() > 0) {
                     output_buffer[output_buffer.length - 1].pop();
                     this.input_buffer.pop();
                     // Also reset our history position
@@ -92,7 +92,7 @@ export class Terminal {
                 this.input_index = -1;
                 output_buffer.push([this.ps1]);
                 // Clear the input buffer
-                this.input_buffer = [];
+                this.input_buffer.empty();
             } else if (e.key === "Tab") {
                 // TODO: Handle tab completion
                 alert("Tab completion not implemented yet.");
@@ -106,7 +106,7 @@ export class Terminal {
                         // @ts-ignore: This will always have split as we provided an index
                         this.input_buffer = history_item.split("");
                         // Remove everything except the first element (the prompt) from the last output buffer line
-                        output_buffer[output_buffer.length - 1] = [this.ps1, ...this.input_buffer];
+                        output_buffer.push([this.ps1, ...this.input_buffer.all()]);
                     } else {
                         // We've gone past the end of the history, so go make sure the counter doesn't go out of bounds
                         this.input_index -= 1;
@@ -119,11 +119,11 @@ export class Terminal {
                     if (history_item !== undefined) {
                         // @ts-ignore: This will always have split as we provided an index
                         this.input_buffer = history_item.split("");
-                        output_buffer[output_buffer.length - 1] = [this.ps1, ...this.input_buffer];
+                        output_buffer.push([this.ps1, ...this.input_buffer.all()])
                     } else {
                         // We're at the last item, revert to the current line's input
                         this.input_buffer = this.current_line_input_buffer;
-                        output_buffer[output_buffer.length - 1] = [this.ps1, ...this.input_buffer];
+                        output_buffer.push([this.ps1, ...this.input_buffer.all()])
                     }
 
                 } else {

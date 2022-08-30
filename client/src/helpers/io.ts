@@ -64,6 +64,37 @@ export class Buffer {
         this._buffer = [];
     }
 
+    public concat(other: any[] | Buffer, other_goes_before=false): Buffer {
+        let new_buf = new Buffer();
+
+
+        if (!other_goes_before) {
+            new_buf._buffer = this.all();
+        }
+
+
+        // OMG PLEASE FIND A BETTER WAY TO DO THIS 🤮
+        if (typeof other === "object") {
+            if (other_goes_before) {
+                // @ts-ignore: The multiple possible types are breaking this (even though they're type checked)
+                new_buf._buffer = other.concat(this.all());
+            } else {
+                // @ts-ignore: The multiple possible types are breaking this (even though they're type checked)
+                new_buf._buffer = this.all().concat(other);
+            }
+        } else {
+            if (other_goes_before) {
+                // @ts-ignore: The multiple possible types are breaking this (even though they're type checked)
+                new_buf._buffer = other._buffer.concat(this.all());
+            } else {
+                // @ts-ignore: The multiple possible types are breaking this (even though they're type checked)
+                new_buf._buffer = this.all().concat(other._buffer);
+            }
+        }
+
+        return new_buf;
+    }
+
     public forEach(callback: (msg: string, index: number) => void) {
         this._buffer.forEach(callback);
     }
