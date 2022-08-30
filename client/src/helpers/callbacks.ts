@@ -21,7 +21,6 @@ export function termprefs_write_handler(file: FSBaseObject) {
 
     // Set the font (if it's there)
     if ("font" in json) {
-        console.log(`Setting --term-font to ${json["font"]}`);
         // @ts-ignore
         root.style.setProperty("--term-font", json["font"]);
     }

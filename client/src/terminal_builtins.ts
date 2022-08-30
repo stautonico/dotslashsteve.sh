@@ -1,7 +1,7 @@
 import {print} from "./helpers/io";
 import {ArgParser} from "./helpers/argparser";
 import {Terminal} from "./terminal";
-import {output_buffer, computer} from "./helpers/globals";
+import {computer, OUTPUT_BUFFER} from "./helpers/globals";
 import {stat, ISDIR} from "./lib/sys/stat";
 import {chdir, getcwd} from "./lib/unistd";
 
@@ -64,7 +64,7 @@ export function clear(args: string[], _terminal: Terminal): number {
         return 0;
 
 
-    output_buffer.splice(0, output_buffer.length);
+    OUTPUT_BUFFER.clear();
 
     return 0;
 }

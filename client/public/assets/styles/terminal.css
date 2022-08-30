@@ -21,6 +21,8 @@
     --term-cyan: #00ffff;
     --term-light-cyan: #99ffff;
 
+    --term-debug-color: #7b00ff;
+
     --term-font: 'Fira Mono', monospace;
 
     --term-font-size: 16px;
@@ -42,4 +44,13 @@ body {
 
 #cursor.active {
     opacity: 1;
+}
+
+#passthrough-mode {
+    display: none;
+    color: var(--term-red);
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.5em;
 }

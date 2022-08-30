@@ -248,8 +248,8 @@ export class FSBaseObject {
          * Returns the full path to this object
          * @returns {string} The full path to this object
          */
-        // Start from ourselves and work our way down the parent chain
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
+            // Start from ourselves and work our way down the parent chain
+            // eslint-disable-next-line @typescript-eslint/no-this-alias
         let current_dir = this;
         let working_dir = [];
 

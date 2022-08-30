@@ -1,62 +1,88 @@
-import {OUTPUT_FRAME, CURSOR, output_buffer, computer} from "./helpers/globals";
-import {make_backslash_d, make_backslash_t, make_backslash_T, make_backslash_at} from "./helpers/date";
-import {escape_html} from "./helpers/html";
+import {print} from "./helpers/io";
+import {Buffer} from "./helpers/buffer";
 import {cd, clear, history, pwd} from "./terminal_builtins";
+import {CURSOR, OUTPUT_BUFFER, OUTPUT_FRAME, PASS_THROUGH_INDICATOR} from "./helpers/globals";
+import {make_backslash_at, make_backslash_d, make_backslash_T, make_backslash_t} from "./helpers/date";
+import {computer} from "./helpers/globals";
 
-import {Buffer} from "./helpers/io";
 
 export class Terminal {
-    input_buffer: Buffer;
-    typing = false;
-    keydown_timeout = 0;
-    ps1 = "prompt";
-    input_index = -1;
-    // A temporary buffer to hold our current line's input so we can go back to it if we press down arrow on the last history item
-    current_line_input_buffer: Buffer;
+    // The buffer that stores what the user has typed in/is currently typing in
+    // This is used to be able to backspace and use the arrow keys to navigate the buffer.
+    // Each sub-buffer is an inputted line
+    // input_buffer: Buffer<Buffer<string>>;
+    input_buffer: Buffer<string>;
 
-    // List of builtins to implement
-    // TODO: alias: Create an alias for a command
-    // DONE: cd: Change the current working directory
-    // TODO: chdir: Change the current working directory (maybe won't do)
-    // DONE: clear: Clear the terminal screen
-    // TODO: exit: Exit the terminal
-    // TODO: export: Export a variable to the environment
-    // TODO: history: Show the history of commands
-    // TODO: logout: Log out of the current session
-    // TODO: printf: Print formatted output to the terminal
-    // DONE: pwd: Print the current working directory
-    // TODO: where: Print the location of all matching commands
-    // TODO: which: Print the path of the command
+    // Whether the user is currently typing in something (used to control the cursor blinking)
+    typing = false;
+
+    // The time left before the user isn't typing anymore. This is used to make the cursor blink.
+    keydown_timeout = 0;
+
+    // Keeps track of how far back the user has pressed the arrow keys to navigate the command history
+    input_index = -1;
+
+    pressed_buttons: { [button: string]: boolean } = {};
+
+    // Pass through mode allows key presses to act as they normally would (in the browser)
+    // instead of being handled by the terminal
+    pass_through_enabled = false;
+
+    /* List of builtins to implement
+    TODO: alias: Create an alias for a command
+    DONE: cd: Change the current working directory
+    TODO: chdir: Change the current working directory (maybe won't do)
+    DONE: clear: Clear the terminal screen
+    TODO: exit: Exit the terminal
+    TODO: export: Export a variable to the environment
+    TODO: history: Show the history of commands
+    TODO: logout: Log out of the current session
+    TODO: printf: Print formatted output to the terminal
+    DONE: pwd: Print the current working directory
+    TODO: where: Print the location of all matching commands
+    TODO: which: Print the path of the command
+
+    idk if you would consider these builtins but they're special commands
+    !! - Runs last command
+    !* - Runs previous command except its first word
+    !*:p - Displays what !* substitutes
+    !x - Runs recent command in the bash history that begins with x
+    !x:p - Displays the x command and adds it as the recent command in history
+    !$ - Same as OPTION+., brings forth last argument of the previous command
+    !^ - Substitutes first argument of last command in the current command
+    !$:p - Displays the word that !$ substitutes
+    ^123^abc - Replaces 123 with abc
+    !n:m - Repeats argument within a range (i.e, m 2-3)
+    !fi - Repeats latest command in history that begins with fi
+    !n - Run nth command from the bash history (by index)
+    !n:p - Prints the command !n executes
+    !n:$ - Repeat arguments from the last command (i.e, from argument n to $)
+     */
     builtins: { [name: string]: (args: string[], terminal: Terminal) => number } = {
         cd,
         clear,
         history,
-        pwd
+        pwd,
     }
 
     constructor() {
         this.input_buffer = new Buffer();
-        this.current_line_input_buffer = new Buffer();
-        this.start_scroll();
+
+        // Start intervals
         this.start_blinking();
         this.start_typing_timeout();
+        this.start_render_buffer_listener();
         this.start_keydown_listener();
+        this.start_keyup_listener();
     }
 
-    start_scroll() {
-        setInterval(() => {
-            // Problem: You can't manually scroll
-            CURSOR!.scrollIntoView();
-        }, 100);
-    }
-
+    // Intervals
     start_blinking() {
         setInterval(() => {
-            if (this.typing) {
+            if (this.typing)
                 CURSOR!.classList.add("active");
-            } else {
+            else
                 CURSOR!.classList.toggle("active");
-            }
         }, 500);
     }
 
@@ -64,6 +90,7 @@ export class Terminal {
         setInterval(() => {
             // As long as the user is not typing, remove one millisecond from the timeout
             // Once the timeout hits 0, the user is no longer typing, and we can start the cursor blinking
+            // Aka, if the user stops typing for 75ms, the cursor will begin to blink
             if (this.keydown_timeout > 0) {
                 this.keydown_timeout -= 1;
             } else {
@@ -72,126 +99,161 @@ export class Terminal {
         }, 1);
     }
 
-    start_keydown_listener() {
-        // We're going use our buffer to handle key input
-        document.body.addEventListener("keydown", async (e) => {
-            this.keydown_timeout = 75;
-            this.typing = true;
-            if (e.key === "Backspace") {
-                if (this.input_buffer.length() > 0) {
-                    output_buffer[output_buffer.length - 1].pop();
-                    this.input_buffer.pop();
-                    // Also reset our history position
-                    this.input_index = -1;
-                }
-            } else if (e.key === "Enter") {
-                // Process input
-                await this.handle_input();
-
-                // Reset the input history index
-                this.input_index = -1;
-                output_buffer.push([this.ps1]);
-                // Clear the input buffer
-                this.input_buffer.empty();
-            } else if (e.key === "Tab") {
-                // TODO: Handle tab completion
-                alert("Tab completion not implemented yet.");
-            } else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
-                // TODO: Handle left and right arrow keys
-                if (e.key === "ArrowUp") {
-                    this.input_index += 1;
-                    // If we have a history item, clear the input buffer and add the history item
-                    const history_item = computer.get_input_history(this.input_index);
-                    if (history_item !== undefined) {
-                        // @ts-ignore: This will always have split as we provided an index
-                        this.input_buffer = history_item.split("");
-                        // Remove everything except the first element (the prompt) from the last output buffer line
-                        output_buffer.push([this.ps1, ...this.input_buffer.all()]);
-                    } else {
-                        // We've gone past the end of the history, so go make sure the counter doesn't go out of bounds
-                        this.input_index -= 1;
-                    }
-                } else if (e.key === "ArrowDown") {
-                    if (this.input_index > 0) {
-                        this.input_index -= 1;
-                    }
-                    const history_item = computer.get_input_history(this.input_index);
-                    if (history_item !== undefined) {
-                        // @ts-ignore: This will always have split as we provided an index
-                        this.input_buffer = history_item.split("");
-                        output_buffer.push([this.ps1, ...this.input_buffer.all()])
-                    } else {
-                        // We're at the last item, revert to the current line's input
-                        this.input_buffer = this.current_line_input_buffer;
-                        output_buffer.push([this.ps1, ...this.input_buffer.all()])
-                    }
-
-                } else {
-                    alert("Left and right arrow keys not implemented yet.");
-                }
-            } else if (!(["Shift", "Control", "Alt", "OS", "Meta", "Escape"].includes(e.key))) {
-                // We're entering a standard key, but we need to escape it first (so the user can't enter HTML and break
-                // the terminal)
-                output_buffer[output_buffer.length - 1].push(escape_html(e.key));
-                this.input_buffer.push(escape_html(e.key));
-                this.current_line_input_buffer = this.input_buffer;
-            }
-
-
-            this.render_buffer();
+    start_render_buffer_listener() {
+        OUTPUT_BUFFER.onChange((old_value, new_value) => {
+            // TODO: Maybe implement some buffering so that the terminal doesn't update every time we make a change
+            // This would probably speed up the app as we don't have to re-render the entire terminal every time we make a change
+            // Whenever the output buffer changes, we need to update the output frame
+            this.render_output_buffer();
         });
     }
 
-    render_buffer() {
-        let output = "";
-
-        for (const line of output_buffer)
-            output += line.map((c) => {
-                if (c === " ") {
-                    return "&nbsp;";
-                } else {
-                    return c;
-                }
-            }).join("") + "<br />";
-
-        // Remove the last line break
-        output = output.slice(0, -6); // 6 = length of "<br />"
-
-        OUTPUT_FRAME!.innerHTML = output;
+    start_keyup_listener() {
+        // Set up a listener for keyup events so we can release modifier keys
+        document.body.addEventListener("keyup", (e) => {
+            if (["Control", "Shift", "Alt", "Super"].includes(e.key)) {
+                this.pressed_buttons[e.key] = false;
+            }
+        });
     }
 
-    async handle_input() {
-        if (this.input_buffer.length() > 0) {
-            const joined = this.input_buffer.join("");
+    start_keydown_listener() {
+        document.body.addEventListener("keydown", async (e) => {
+            this.keydown_timeout = 75;
+            this.typing = true;
 
-            // Save our current input to the history
-            computer.add_input_record(joined);
+            if (!this.pass_through_enabled) e.preventDefault();
+            // Handle some special keys
+            switch (e.key) {
+                case "Backspace":
+                    this.handle_key_backspace();
+                    break;
 
-            const command = joined.split(" ")[0];
-            const args = joined.split(" ").slice(1);
+                case "Enter":
+                    this.handle_key_enter();
+                    break;
 
-            // Check if we're running a builtin command
-            if (this.builtins[command] !== undefined) {
-                this.builtins[command](args, this);
-            } else {
-                try {
-                    const module = await import(`./bin/${command}.js`);
-                    module.main(args);
-                } catch (e) {
-                    // @ts-ignore
-                    if (e.name === "TypeError") {
-                        output_buffer.push([`shell: command not found: ${command}`]);
-                        console.error(e);
-                    } else {
-                        output_buffer.push(["Something went wrong, check the console for more details."]);
-                        console.error(e);
-                    }
-                }
+                case "Tab":
+                    this.handle_key_tab();
+                    break;
+
+                case "ArrowUp":
+                case "ArrowDown":
+                case "ArrowLeft":
+                case "ArrowRight":
+                    this.handle_key_arrow(e.key);
+                    break;
+
+                default:
+                    this.handle_other_key(e.key);
+                    break;
+            }
+        });
+    }
+
+    // Button handler functions
+    handle_key_backspace() {
+        let popped_value = this.input_buffer.pop();
+        if (popped_value) OUTPUT_BUFFER.pop();
+        // Reset our history position
+        if (this.input_buffer.length()) this.input_index = -1;
+    }
+
+    handle_key_enter() {
+
+        // At the end, the last thing we want to do is reprint the prompt and reset the input buffer
+        // We're also going to do what zsh does and print a newline if one wasn't already there (with the little %)
+        console.log(OUTPUT_BUFFER);
+        //     if (OUTPUT_BUFFER.last() !== "\n") {
+        alert(`The user submitted ${this.input_buffer.join("")}`);
+    }
+
+    handle_key_tab() {
+        alert("User pressed tab");
+    }
+
+    handle_key_arrow(arrow: string) {
+        alert(`User pressed ${arrow}`);
+    }
+
+    // https://www.toptal.com/developers/keycode/table-of-all-keycodes
+    handle_other_key(key: string) {
+        if (["Control", "Shift", "Alt", "Super"].includes(key)) {
+            this.pressed_buttons[key] = true;
+        } else {
+            // Try to run keyboard shortcuts
+            let handled = this.handle_keyboard_shortcut(key);
+
+            if (!handled) {
+                this.input_buffer.push(key);
+                OUTPUT_BUFFER.push(key);
             }
         }
-        this.ps1 = this.generate_prompt();
-        // We make a new prompt regardless of the existence of input or not
-        // This is so we can update the time and date if we enter anything
+    }
+
+    /* Shortcuts to implement:
+        * Ctrl + L: Clear the screen (DONE)
+        * Ctrl + U: Clear the input buffer (DONE)
+        * Ctrl + A: Move the cursor to the start of the input buffer
+        * Ctrl + E: Move the cursor to the end of the input buffer
+        * Ctrl + W: Delete the word before the cursor
+        * Ctrl + P: Same thing as the up arrow key
+        * Ctrl + R: Search for the last command that starts with the input buffer
+        * Ctrl + Shift + C: Copy the input buffer to the clipboard
+        * Ctrl + Shift + V: Paste the clipboard into the input buffer
+        * Alt + F: Move the cursor to the beginning of the next word
+        * Alt + B: Move the cursor to the beginning of the previous word
+        * Ctrl + J: Same as the enter key
+        * Ctrl + G: Exit the search mode and revert the buffer to its initial state (before search)
+        * Home: Move the cursor to the beginning of the input buffer
+        * End: Move the cursor to the end of the input buffer
+     */
+    handle_keyboard_shortcut(key: string): boolean {
+        // TODO: Prevent shortcuts from being held down and triggering multiple times
+        // Possible solution: When a shortcut is handled, set the value of each pressed button to false
+        // This will prevent the shortcut from being handled again until all buttons are released
+        // Control + l - clear the screen
+        if (this.pressed_buttons["Control"] && key == "l") {
+            OUTPUT_BUFFER.clear();
+            this.input_buffer.clear();
+            return true;
+        }
+
+        // Control + u - clear the input buffer
+        if (this.pressed_buttons["Control"] && key == "u") {
+            // Count the characters in the input buffer and remove that many from the output buffer
+            let count = this.input_buffer.length();
+            this.input_buffer.clear();
+
+            for (let i = 0; i < count; i++) {
+                OUTPUT_BUFFER.pop();
+            }
+
+            return true;
+        }
+
+        // Control + Alt + Escape - toggle pass-through mode
+        if (this.pressed_buttons["Control"] && this.pressed_buttons["Alt"] && key == "Escape") {
+            this.pass_through_enabled = !this.pass_through_enabled;
+            PASS_THROUGH_INDICATOR!.style.display = this.pass_through_enabled ? "block" : "none";
+            return true;
+        }
+
+
+        return false;
+    }
+
+    print_prompt() {
+        print(this.generate_prompt(), {sanitize: false, newline: false});
+    }
+
+    clear() {
+        OUTPUT_BUFFER.clear();
+        this.print_prompt();
+    }
+
+    render_output_buffer() {
+        OUTPUT_FRAME!.innerHTML = OUTPUT_BUFFER.join("");
     }
 
     generate_prompt() {
@@ -302,23 +364,25 @@ export class Terminal {
     }
 
     async main() {
-        output_buffer.push(["./steve.sh [Version 0.0.0]"]);
-        output_buffer.push(["(c) Steve Tautonico. All rights reserved."]);
-        output_buffer.push(["type 'help' for a list of commands."]);
-        output_buffer.push([]);
         const result = await computer.add_user("user", "password", {home_dir: "/home/user"});
         if (result.ok()) {
             const res = computer.new_session(result.get_data()!.get_uid());
             if (!res) {
-                alert("Failed to create new session, terminating.");
+                print("[<span style='color: red; font-weight: bold;'>FAIL</span>]: Failed to create new session. Check console for details.", {sanitize_html: false});
                 return;
             }
+        } else {
+            console.error(`Failed to create new user: ${result.get_message()}`);
+            print("[<span style='color: red; font-weight: bold;'>FAIL</span>]: Failed to create new user. Check console for details.", {sanitize_html: false});
+            return;
         }
 
-        this.ps1 = this.generate_prompt();
-        output_buffer.push([this.ps1]);
+        print("./steve.sh [Version 0.0.0]");
+        print("(c) Steve Tautonico. All rights reserved.");
+        print("type 'help' for a list of commands.");
+        print(); // Newline
 
-        this.render_buffer();
+        this.print_prompt();
     }
 
 }

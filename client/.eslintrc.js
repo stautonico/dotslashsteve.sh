@@ -32,7 +32,8 @@ module.exports = {
         "no-var": "off", // var is required in some places
         "prefer-const": "off", // Not having everything be constants is fine
         "no-async-promise-executor": "off", // I really don't care about this
-        "quotes": ["error", "double"]
+        "quotes": ["error", "double"],
+        "camelcase": ["error", {properties: "always"}],
     },
     "env": {
         "browser": true,
