@@ -1,5 +1,5 @@
 import {OUTPUT_BUFFER} from "./globals";
-import {EscapedElement} from "../html_tags";
+// import {EscapedElement} from "../html_tags";
 
 interface PrintOptions {
     sanitize_html?: boolean, // Whether to sanitize the message (Remove html tags) |  Default - True

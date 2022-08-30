@@ -4,7 +4,15 @@ import {cd, clear, history, pwd} from "./terminal_builtins";
 import {CURSOR, OUTPUT_BUFFER, OUTPUT_FRAME, PASS_THROUGH_INDICATOR} from "./helpers/globals";
 import {make_backslash_at, make_backslash_d, make_backslash_T, make_backslash_t} from "./helpers/date";
 import {computer} from "./helpers/globals";
+import {escape_html} from "./helpers/html";
+import {KeyboardShortcut} from "./helpers/keyboard";
 
+/*
+Frame buffer to hold output ready for terminal.
+Backspace single char is fine.
+Append when using print so no full recalculation.
+Recalculate when erasing more that one char
+ */
 
 export class Terminal {
     // The buffer that stores what the user has typed in/is currently typing in
@@ -27,6 +35,8 @@ export class Terminal {
     // Pass through mode allows key presses to act as they normally would (in the browser)
     // instead of being handled by the terminal
     pass_through_enabled = false;
+
+    keyboard_shortcuts: KeyboardShortcut[] = [];
 
     /* List of builtins to implement
     TODO: alias: Create an alias for a command
@@ -74,6 +84,7 @@ export class Terminal {
         this.start_render_buffer_listener();
         this.start_keydown_listener();
         this.start_keyup_listener();
+        this.create_keyboard_shortcuts()
     }
 
     // Intervals
@@ -154,7 +165,9 @@ export class Terminal {
     // Button handler functions
     handle_key_backspace() {
         let popped_value = this.input_buffer.pop();
-        if (popped_value) OUTPUT_BUFFER.pop();
+        if (popped_value) {
+            OUTPUT_BUFFER.pop();
+        }
         // Reset our history position
         if (this.input_buffer.length()) this.input_index = -1;
     }
@@ -181,14 +194,55 @@ export class Terminal {
         if (["Control", "Shift", "Alt", "Super"].includes(key)) {
             this.pressed_buttons[key] = true;
         } else {
-            // Try to run keyboard shortcuts
-            let handled = this.handle_keyboard_shortcut(key);
+            // If we have no modifier keys, don't bother checking
+            // because the computation is expensive
+            let has_modifier = false;
+            for (let mod in this.pressed_buttons) {
+                if (this.pressed_buttons.hasOwnProperty(mod)) {
+                    // If we have even just one modifier, we can try to run keyboard shortcuts
+                    if (this.pressed_buttons[mod]) {
+                        has_modifier = true;
+                        break;
+                    }
+                }
+            }
+
+            let handled = false;
+            if (has_modifier) {
+                // Try to run keyboard shortcuts
+                handled = this.handle_keyboard_shortcut(key);
+            }
 
             if (!handled) {
                 this.input_buffer.push(key);
-                OUTPUT_BUFFER.push(key);
+                OUTPUT_BUFFER.push(escape_html(key));
             }
         }
+    }
+
+    create_keyboard_shortcuts() {
+        // Control + L - Clear the screen
+        this.keyboard_shortcuts.push(new KeyboardShortcut("Control + L", (term) => {
+            OUTPUT_BUFFER.clear();
+            term.input_buffer.clear();
+            term.print_prompt();
+        }, this));
+
+        // Control + U - Clear the current input line
+        this.keyboard_shortcuts.push(new KeyboardShortcut("Control + U", (term) => {
+            // Count the characters in the input buffer and remove that many from the output buffer
+            let count = term.input_buffer.length();
+            term.input_buffer.clear();
+
+            for (let i = 0; i < count; i++) {
+                OUTPUT_BUFFER.pop();
+            }
+        }, this));
+
+        this.keyboard_shortcuts.push(new KeyboardShortcut("Control + Alt + Escape", (term) => {
+            term.pass_through_enabled = !term.pass_through_enabled;
+            PASS_THROUGH_INDICATOR!.style.display = term.pass_through_enabled ? "block" : "none";
+        }, this));
     }
 
     /* Shortcuts to implement:
@@ -212,35 +266,18 @@ export class Terminal {
         // TODO: Prevent shortcuts from being held down and triggering multiple times
         // Possible solution: When a shortcut is handled, set the value of each pressed button to false
         // This will prevent the shortcut from being handled again until all buttons are released
-        // Control + l - clear the screen
-        if (this.pressed_buttons["Control"] && key == "l") {
-            OUTPUT_BUFFER.clear();
-            this.input_buffer.clear();
-            return true;
-        }
 
-        // Control + u - clear the input buffer
-        if (this.pressed_buttons["Control"] && key == "u") {
-            // Count the characters in the input buffer and remove that many from the output buffer
-            let count = this.input_buffer.length();
-            this.input_buffer.clear();
-
-            for (let i = 0; i < count; i++) {
-                OUTPUT_BUFFER.pop();
+        find: {
+            for (let shortcut of this.keyboard_shortcuts) {
+                if (shortcut.isPressed(this.pressed_buttons, key)) break find;
             }
 
-            return true;
+            // Else our for loop (like python)
+            return false;
         }
 
-        // Control + Alt + Escape - toggle pass-through mode
-        if (this.pressed_buttons["Control"] && this.pressed_buttons["Alt"] && key == "Escape") {
-            this.pass_through_enabled = !this.pass_through_enabled;
-            PASS_THROUGH_INDICATOR!.style.display = this.pass_through_enabled ? "block" : "none";
-            return true;
-        }
-
-
-        return false;
+        // If we sucessully make it out of the "find" label, our shortcut was handled
+        return true;
     }
 
     print_prompt() {

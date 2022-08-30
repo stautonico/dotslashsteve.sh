@@ -1,3 +1,3 @@
 export function escape_html(msg: string): string {
-    return msg.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return msg.replaceAll(/</g, "&lt;").replace(/>/g, "&gt;");
 }

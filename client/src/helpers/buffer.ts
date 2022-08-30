@@ -6,9 +6,9 @@ export class Buffer<T> {
         this._buffer = [];
     }
 
-    protected callOnChangeHandler(old_value: T[], new_value: T[]) {
+    protected callOnChangeHandler(old_value: Buffer<T>, new_value: Buffer<T>) {
         if (this.onChangeHandler) {
-            this.onChangeHandler(old_value, new_value);
+            this.onChangeHandler(old_value.all(), new_value.all());
         }
     }
 
@@ -39,7 +39,7 @@ export class Buffer<T> {
             else
                 return_value = this._buffer.splice(index, 1)[0];
 
-            this.callOnChangeHandler(old_value.all(), this.all());
+            this.callOnChangeHandler(old_value, this);
 
             return return_value;
         }
@@ -54,7 +54,7 @@ export class Buffer<T> {
             this._buffer.splice(index, 0, data);
         }
 
-        this.callOnChangeHandler(old_value.all(), this.all());
+        this.callOnChangeHandler(old_value, this);
     }
 
     public get(index: number) {
@@ -72,7 +72,7 @@ export class Buffer<T> {
 
         // Check if the buffer has changed
         if (this.hasBufferChanged(old_value.all(), this.all())) {
-            this.callOnChangeHandler(old_value.all(), this.all());
+            this.callOnChangeHandler(old_value, this);
         }
     }
 
@@ -83,7 +83,7 @@ export class Buffer<T> {
     public clear() {
         let old_value = this.clone();
         this._buffer = [];
-        this.callOnChangeHandler(old_value.all(), this.all());
+        this.callOnChangeHandler(old_value, this);
     }
 
     public join(separator: string) {
@@ -96,7 +96,7 @@ export class Buffer<T> {
             // @ts-ignore
             this._buffer[index] += content;
 
-            this.callOnChangeHandler(old_value.all(), this.all());
+            this.callOnChangeHandler(old_value, this);
         }
 
         throw new Error("Cannot use appendToElement on a non-string (type: " + typeof content + ")");
@@ -120,13 +120,5 @@ export class OutputBuffer extends Buffer<string> {
     // It stores individual characters used for manipulating the content on screen
     constructor() {
         super();
-    }
-    
-    public backspace() {
-        let old_value = this.clone();
-        if (this.length() > 0) {
-            this.pop();
-        }
-        this.callOnChangeHandler(old_value.all(), this.all());
     }
 }
