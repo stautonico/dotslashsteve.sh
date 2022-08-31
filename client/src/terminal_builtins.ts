@@ -1,7 +1,7 @@
 import {print} from "./helpers/io";
 import {ArgParser} from "./helpers/argparser";
 import {Terminal} from "./terminal";
-import {computer, OUTPUT_BUFFER} from "./helpers/globals";
+import {computer, OUTPUT_BUFFER, PASS_THROUGH_INDICATOR} from "./helpers/globals";
 import {stat, ISDIR} from "./lib/sys/stat";
 import {chdir, getcwd} from "./lib/unistd";
 
@@ -49,26 +49,6 @@ export function cd(args: string[], _terminal: Terminal): number {
     return 0;
 }
 
-
-export function clear(args: string[], _terminal: Terminal): number {
-    const parser = new ArgParser({
-        name: "clear",
-        description: "clear the terminal screen",
-        description_long: "clear the terminal screen",
-        version: "0.0.1",
-        print_function: print,
-    });
-    const parsed = parser.parse(args);
-
-    if (parsed.printed_version_or_help())
-        return 0;
-
-
-    OUTPUT_BUFFER.clear();
-
-    return 0;
-}
-
 export function history(_args: string[], _terminal: Terminal): number {
     // TODO: Implement some of history's arguments
 
@@ -96,6 +76,27 @@ export function pwd(args: string[], _terminal: Terminal): number {
 
 
     print(getcwd());
+
+    return 0;
+}
+
+export function passthrough(args: string[], terminal: Terminal): number {
+    const parser = new ArgParser({
+        name: "passthrough",
+        description: "Toggle the terminal pass-through mode",
+        description_long: "Toggle the terminal's pass-through mode which allows keystrokes to be" +
+            "passed through to the browser, rather than being intercepted",
+        version: "0.0.1",
+        print_function: print,
+    });
+    const parsed = parser.parse(args);
+
+    if (parsed.printed_version_or_help())
+        return 0;
+
+
+    terminal.pass_through_enabled = !terminal.pass_through_enabled;
+    PASS_THROUGH_INDICATOR!.style.display = terminal.pass_through_enabled ? "block" : "none";
 
     return 0;
 }

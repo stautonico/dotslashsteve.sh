@@ -92,7 +92,7 @@ export class ArgParser {
 
     private generate_help(): void {
         if (this._help_string === undefined || this._help_string === "") {
-            this._help_string = `Usage: ${this._name} [OPTIONS]`;
+            this._help_string = `Usage: ${this._name} `;
             for (let [name, arg] of this._args) {
                 if (arg.positional) {
                     this._help_string += ` ${name}`;

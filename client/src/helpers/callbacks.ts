@@ -1,5 +1,6 @@
 import {FSBaseObject} from "../fs/inode";
 
+// File listener callbacks
 export function termprefs_write_handler(file: FSBaseObject) {
     // Parse the json input
     let json;

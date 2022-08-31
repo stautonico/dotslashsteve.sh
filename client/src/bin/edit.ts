@@ -1,17 +1,17 @@
 import {print} from "../helpers/io";
 import {computer} from "../helpers/globals";
 
-export function main(args: string[]) {
+export function main(args: string[]): number {
     if (args.length < 1) {
         print("usage: edit [path]");
-        return;
+        return 0;
     }
 
     const path = args[0];
     const file = computer.find(path);
     if (file.fail()) {
         print(`Could not find file ${path}`);
-        return;
+        return 1;
     }
 
     // Open a new iframe with "edit.html" as the source
@@ -51,4 +51,6 @@ export function main(args: string[]) {
 
     // Wait for the iframe to send a message back to us
     window.addEventListener("message", message_handler);
+
+    return 0;
 }

@@ -1,6 +1,6 @@
-import {print} from "./helpers/io";
+import {debug, print} from "./helpers/io";
 import {Buffer} from "./helpers/buffer";
-import {cd, clear, history, pwd} from "./terminal_builtins";
+import {cd, history, pwd, passthrough} from "./terminal_builtins";
 import {CURSOR, OUTPUT_BUFFER, OUTPUT_FRAME, PASS_THROUGH_INDICATOR} from "./helpers/globals";
 import {make_backslash_at, make_backslash_d, make_backslash_T, make_backslash_t} from "./helpers/date";
 import {computer} from "./helpers/globals";
@@ -38,11 +38,16 @@ export class Terminal {
 
     keyboard_shortcuts: KeyboardShortcut[] = [];
 
+    // After we handle a shortcut, all modifiers will be forced to be released
+    // however, the non-modifier key will still be spammed into the terminal.
+    // This variable will be set to the key the terminal is waiting to be released
+    // Once this key is released, the terminal can resume recieving input
+    waiting_for_release? = "";
+
     /* List of builtins to implement
     TODO: alias: Create an alias for a command
     DONE: cd: Change the current working directory
     TODO: chdir: Change the current working directory (maybe won't do)
-    DONE: clear: Clear the terminal screen
     TODO: exit: Exit the terminal
     TODO: export: Export a variable to the environment
     TODO: history: Show the history of commands
@@ -70,9 +75,9 @@ export class Terminal {
      */
     builtins: { [name: string]: (args: string[], terminal: Terminal) => number } = {
         cd,
-        clear,
         history,
         pwd,
+        passthrough
     }
 
     constructor() {
@@ -127,6 +132,9 @@ export class Terminal {
             if (["Control", "Shift", "Alt", "Super"].includes(e.key)) {
                 this.pressed_buttons[e.key] = false;
             }
+
+            if (e.key === this.waiting_for_release)
+                this.waiting_for_release = undefined;
         });
     }
 
@@ -193,7 +201,9 @@ export class Terminal {
             } else {
                 try {
                     const module = await import(`./bin/${command}.js`);
-                    module.main(args);
+                    // TODO: Make all "binaries" return a status code
+                    const status_code = module.main(args);
+                    debug(`Command status code: ${status_code}`)
                 } catch (e) {
                     // @ts-ignore
                     if (e.name === "TypeError") {
@@ -209,7 +219,9 @@ export class Terminal {
             // At the end, the last thing we want to do is reprint the prompt and reset the input buffer
             // We're also going to do what zsh does and print a newline if one wasn't already there (with the little %)
             // Check if the last thing in the output buffer is a newline
-            if (OUTPUT_BUFFER.last() !== "<br />") {
+            // This is kinda hacky, but I can't think of a better solution
+            // Running clear makes the terminal print the '%' and insert a newline
+            if (OUTPUT_BUFFER.last() !== "<br />" && command != "clear") {
                 // Black text, white background, character '%' and then reset
                 print("\\e[47m\\e[0;30m%\\e[0m\\e[0m");
             }
@@ -233,58 +245,44 @@ export class Terminal {
 
     // https://www.toptal.com/developers/keycode/table-of-all-keycodes
     handle_other_key(key: string) {
-        if (["Control", "Shift", "Alt", "Super"].includes(key)) {
-            this.pressed_buttons[key] = true;
-        } else {
-            // If we have no modifier keys, don't bother checking
-            // because the computation is expensive
-            let has_modifier = false;
-            for (let mod in this.pressed_buttons) {
-                if (this.pressed_buttons.hasOwnProperty(mod)) {
-                    // If we have even just one modifier, we can try to run keyboard shortcuts
-                    if (this.pressed_buttons[mod]) {
-                        has_modifier = true;
-                        break;
+        // We can't do anything while we're waiting for a key to be released
+        if (!this.waiting_for_release) {
+            if (["Control", "Shift", "Alt", "Super"].includes(key)) {
+                this.pressed_buttons[key] = true;
+            } else {
+                // If we have no modifier keys, don't bother checking
+                // because the computation is expensive
+                let has_modifier = false;
+                for (let mod in this.pressed_buttons) {
+                    if (this.pressed_buttons.hasOwnProperty(mod)) {
+                        // If we have even just one modifier, we can try to run keyboard shortcuts
+                        if (this.pressed_buttons[mod]) {
+                            has_modifier = true;
+                            break;
+                        }
                     }
                 }
-            }
 
-            let handled = false;
-            if (has_modifier) {
-                // Try to run keyboard shortcuts
-                handled = this.handle_keyboard_shortcut(key);
-            }
+                let handled = false;
+                // Find a better way to do this, but basically we can try to run keyboard shortcuts if we have a modifier
+                // and if pass-through mode is enabled, the only shortcut we'll respond to is Control + Shift + Escape
+                if (has_modifier && (!this.pass_through_enabled || (this.pressed_buttons["Control"] && this.pressed_buttons["Shift"] && key === "Escape"))) {
+                    // Try to run keyboard shortcuts
+                    handled = this.handle_keyboard_shortcut(key);
+                }
 
-            if (!handled) {
-                this.input_buffer.push(key);
-                OUTPUT_BUFFER.push(escape_html(key));
+                if (handled) {
+                    this.waiting_for_release = key;
+                }
+
+                // If we haven't already handled a shortcut and we either don't have pass-through enabled
+                // or we're not trying to enter a shortcut (normal typing), we can allow characters to be entered
+                if (!handled && (!this.pass_through_enabled || !has_modifier)) {
+                    this.input_buffer.push(key);
+                    OUTPUT_BUFFER.push(escape_html(key));
+                }
             }
         }
-    }
-
-    create_keyboard_shortcuts() {
-        // Control + L - Clear the screen
-        this.keyboard_shortcuts.push(new KeyboardShortcut("Control + L", (term) => {
-            OUTPUT_BUFFER.clear();
-            term.input_buffer.clear();
-            term.print_prompt();
-        }, this));
-
-        // Control + U - Clear the current input line
-        this.keyboard_shortcuts.push(new KeyboardShortcut("Control + U", (term) => {
-            // Count the characters in the input buffer and remove that many from the output buffer
-            let count = term.input_buffer.length();
-            term.input_buffer.clear();
-
-            for (let i = 0; i < count; i++) {
-                OUTPUT_BUFFER.pop();
-            }
-        }, this));
-
-        this.keyboard_shortcuts.push(new KeyboardShortcut("Control + Alt + Escape", (term) => {
-            term.pass_through_enabled = !term.pass_through_enabled;
-            PASS_THROUGH_INDICATOR!.style.display = term.pass_through_enabled ? "block" : "none";
-        }, this));
     }
 
     /* Shortcuts to implement:
@@ -304,11 +302,36 @@ export class Terminal {
         * Home: Move the cursor to the beginning of the input buffer
         * End: Move the cursor to the end of the input buffer
      */
+    // TODO: Maybe separate these callback functions into a separate file?
+    create_keyboard_shortcuts() {
+        // Control + L - Clear the screen
+        this.keyboard_shortcuts.push(new KeyboardShortcut("Control + L", (term) => {
+            OUTPUT_BUFFER.clear();
+            term.input_buffer.clear();
+            term.print_prompt();
+        }, this));
+
+        // Control + U - Clear the current input line
+        this.keyboard_shortcuts.push(new KeyboardShortcut("Control + U", (term) => {
+            // Count the characters in the input buffer and remove that many from the output buffer
+            let count = term.input_buffer.length();
+            term.input_buffer.clear();
+
+            for (let i = 0; i < count; i++) {
+                OUTPUT_BUFFER.pop();
+            }
+        }, this));
+
+        this.keyboard_shortcuts.push(new KeyboardShortcut("Control + Shift + Escape", (term) => {
+            term.pass_through_enabled = !term.pass_through_enabled;
+            PASS_THROUGH_INDICATOR!.style.display = term.pass_through_enabled ? "block" : "none";
+        }, this));
+    }
+
     handle_keyboard_shortcut(key: string): boolean {
         // TODO: Prevent shortcuts from being held down and triggering multiple times
         // Possible solution: When a shortcut is handled, set the value of each pressed button to false
         // This will prevent the shortcut from being handled again until all buttons are released
-
         find: {
             for (let shortcut of this.keyboard_shortcuts) {
                 if (shortcut.isPressed(this.pressed_buttons, key)) break find;
@@ -318,7 +341,7 @@ export class Terminal {
             return false;
         }
 
-        // If we sucessully make it out of the "find" label, our shortcut was handled
+        // If we successfully make it out of the "find" label, our shortcut was handled
         return true;
     }
 

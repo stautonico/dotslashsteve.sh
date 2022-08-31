@@ -1,8 +1,9 @@
 import {print} from "../helpers/io";
 import {ArgParser} from "../helpers/argparser";
 import {stat, ISDIR} from "../lib/sys/stat";
+import {computer} from "../helpers/globals";
 
-export function main(args: string[]) {
+export function main(args: string[]): number {
     let parser = new ArgParser({
         name: "stat",
         description: "display file or file system status",
@@ -21,24 +22,29 @@ export function main(args: string[]) {
     let parsed = parser.parse(args);
 
     if (parsed.printed_version_or_help())
-        return;
+        return 0;
 
     // Make sure the directory exists
     let stat_result = stat(parsed.get("file"));
 
     if (stat_result === undefined) {
         print(`cd: ${parsed.get("file")}: No such file or directory`);
-        return;
+        return 1;
     }
+
+    let username_result = computer.get_user_by_uid(stat_result.uid);
+    let username = username_result?.get_username() || "?";
 
     let output = `File: ${parsed.get("file")}
 Size: ${stat_result.size}\tBlocks: 0\tIO Blocks: 0    ${ISDIR(parsed.get("file")) ? "directory" : "regular file"}
 Device: ${stat_result.dev}\tInode: ${stat_result.ino}\tLinks: ${stat_result.nlink}
-Access: (${(stat_result.mode & 0o777).toString(8)}/TODO: Convert to string)\tUid: (${stat_result.uid}/TODO: Username)\tGid: (${stat_result.gid}/TODO: Group)}
+Access: (${(stat_result.mode & 0o777).toString(8)}/TODO: Convert to string)\tUid: (${stat_result.uid}/${username})\tGid: (${stat_result.gid}/TODO: Group)
 Access: ${stat_result.atime}
 Modify: ${stat_result.mtime}
 Change: ${stat_result.ctime}
 Birth: ${stat_result.crtime}`;
-
+    // TODO: Format the Access/modify/change/birth times (2022-01-28 03:28:32.212352072 -0500)
     print(output);
+
+    return 0
 }

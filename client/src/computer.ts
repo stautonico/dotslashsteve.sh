@@ -49,7 +49,7 @@ export class Computer {
             return false;
         } else {
             // @ts-ignore
-            this.sessions.push(new Session(uid, uid, uid, find_home_dir.get_data()));
+            this.sessions.push(new Session({real_uid: uid, current_dir: find_home_dir.get_data()}));
             return true;
         }
     }

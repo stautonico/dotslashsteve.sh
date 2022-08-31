@@ -1,7 +1,7 @@
 import {print}  from "../helpers/io";
 import {computer} from "../helpers/globals";
 
-export function main(_args: string[]) {
+export function main(_args: string[]): number {
     const current_session = computer.current_session();
 
     const uid = current_session.get_effective_uid();
@@ -13,4 +13,6 @@ export function main(_args: string[]) {
     } else {
         print("?");
     }
+
+    return 0;
 }

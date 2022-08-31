@@ -1,4 +1,17 @@
 import {Directory} from "./fs/inode";
+import {computer} from "./helpers/globals";
+
+interface SessionArguments {
+    real_uid: number,
+    effective_uid?: number, // Default - real uid
+    saved_uid?: number, // Default - real uid
+
+    real_gid?: number, // Default - real uid
+    effective_gid?: number, // Default - real gid
+    saved_gid?: number, // Default - real gid
+
+    current_dir?: Directory // Default - ~ (User's home directory, or worst case: '/')
+}
 
 export class Session {
     private readonly real_uid: number;
@@ -10,16 +23,16 @@ export class Session {
     private current_dir: Directory;
     private env: { [key: string]: string } = {"PATH": "/bin:/usr/bin"};
 
-    constructor(real_uid: number, effective_uid: number, saved_uid: number, current_dir: Directory) {
-        this.real_uid = real_uid;
-        this.effective_uid = effective_uid;
-        this.saved_uid = saved_uid;
-        this.current_dir = current_dir;
+    constructor(args: SessionArguments) {
+        this.real_uid = args.real_uid;
+        this.effective_uid = args.effective_uid || args.real_uid;
+        this.saved_uid = args.saved_uid || args.real_uid;
+        // @ts-ignore
+        this.current_dir = args.current_dir || computer.find("/").get_data(); // TODO: Set default if not provided
 
-        // TODO: Make this use named parameters
-        this.real_gid = real_uid;
-        this.effective_gid = effective_uid;
-        this.saved_gid = saved_uid;
+        this.real_gid = args.real_gid || this.real_uid;
+        this.effective_gid = args.effective_uid || this.real_gid;
+        this.saved_gid = args.saved_gid || this.real_gid;
     }
 
     get_real_uid(): number {

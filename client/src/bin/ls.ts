@@ -9,7 +9,7 @@ function make_directory_text(directory: string): string {
     return `<span style="color: var(--term-blue)">${directory}</span>`;
 }
 
-export function main(args: string[]) {
+export function main(args: string[]): number {
     let parser = new ArgParser({
         name: "ls",
         description: "list directory contents",
@@ -42,19 +42,19 @@ export function main(args: string[]) {
     let parsed = parser.parse(args);
 
     if (parsed.printed_version_or_help())
-        return;
+        return 0;
 
     let dir_exists = stat(parsed.get("directory"));
     if (dir_exists === undefined) {
         print(`ls: ${parsed.get("directory")}: No such file or directory`);
-        return;
+        return 1;
     }
 
     let result = readdir(parsed.get("directory"));
 
     if (result === undefined) {
         print(`ls: ${parsed.get("directory")}: Permission denied`);
-        return;
+        return 1;
     }
 
     if (!parsed.get("all"))
@@ -85,4 +85,6 @@ export function main(args: string[]) {
 
     if (output !== "")
         print(output, {escape_html: false});
+
+    return 0;
 }

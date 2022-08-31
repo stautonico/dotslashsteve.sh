@@ -20,9 +20,14 @@ function get_gpu() {
     let gl = canvas.getContext("experimental-webgl");
     if (gl) {
         // @ts-ignore
+        // TODO: Maybe remove, firefox says this is "deprecated and will be removed. Please use RENDERER."
         let dbgRenderInfo = gl.getExtension("WEBGL_debug_renderer_info");
         // @ts-ignore
         let renderer = gl.getParameter(dbgRenderInfo.UNMASKED_RENDERER_WEBGL);
+        // Add some exceptions for some cards
+        if (renderer.indexOf("(R)") !== -1) // Intel integrated
+            return renderer;
+
         // If we have parentheses, extract the contents
         if (renderer.indexOf("(") !== -1)
             renderer = renderer.substring(renderer.indexOf("(") + 1, renderer.indexOf(")"));
@@ -55,7 +60,28 @@ function get_memory() {
     return `${Math.round(used)}MiB / ${Math.round(max)}MiB`;
 }
 
-export function main(args: string[]) {
+function get_uptime() {
+    let uptime_secs = (Date.now() - computer.boot_time) / 1000;
+    let d = Math.floor(uptime_secs / (3600 * 24));
+    let h = Math.floor(uptime_secs % (3600 * 24) / 3600);
+    let m = Math.floor(uptime_secs % 3600 / 60);
+    let s = Math.floor(uptime_secs % 60);
+
+    let dDisplay = d > 0 ? d + (d == 1 ? " day, " : " days, ") : "";
+    let hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+    let mDisplay = m > 0 ? m + (m == 1 ? " min, " : " mins, ") : "";
+    // Only display the seconds view if we're < 1 full minute of uptime
+    let sDisplay = (m <= 0 && h <= 0 && d <= 0) ? (s > 0 ? s + (s == 1 ? " second" : " seconds") : "") : "";
+
+    let output = dDisplay + hDisplay + mDisplay + sDisplay;
+
+    // Use regex to remove any garbage whitespace or leading commas
+    output = output.replace(/,\s*$/, "");
+
+    return output;
+}
+
+export function main(args: string[]): number {
     let parser = new ArgParser({
         name: "neofetch",
         description: "A fast, highly customizable system info script",
@@ -68,7 +94,7 @@ export function main(args: string[]) {
     const parsed = parser.parse(args);
 
     if (parsed.printed_version_or_help()) {
-        return;
+        return 0;
     }
 
     const ascii = [
@@ -130,8 +156,9 @@ export function main(args: string[]) {
     const username = get_username();
     const shell = SHELLS[Math.floor(Math.random() * SHELLS.length)];
     const terminal = TERMINALS[Math.floor(Math.random() * TERMINALS.length)];
-    const gpu = get_gpu();
+    const gpu = get_gpu(); // TODO: Fix this, its unreliable (doesn't work on my laptop)
     const memory = get_memory();
+    const uptime = get_uptime();
 
 
     const info_lines = {
@@ -139,7 +166,7 @@ export function main(args: string[]) {
         2: "",
         3: `OS: ./steve.sh ${arch()}`,
         4: "Kernel: 5.18.9-hardened1-2-hardened",
-        5: `Uptime: ${(Date.now() - computer.boot_time) / 1000} seconds`, // TODO: Format this
+        5: `Uptime: ${uptime}`, // TODO: Format this
         6: `Shell: ${shell}`,
         7: `Resolution: ${screen.width}x${screen.height}`,
         8: `Terminal: ${terminal}`,
@@ -170,4 +197,6 @@ export function main(args: string[]) {
         // @ts-ignore: Its hard coded, it'll be fine
         print(info_lines[i + 1], {sanitize: true, escape_html: false});
     }
+
+    return 0;
 }

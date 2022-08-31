@@ -1,7 +1,9 @@
 import {print}  from "../helpers/io";
 import {ArgParser} from "../helpers/argparser";
+import {computer} from "../helpers/globals";
+import {arch} from "../helpers/arch";
 
-export function main(args: string[]) {
+export function main(args: string[]): number {
     let parser = new ArgParser({
         name: "uname",
         description: "print system information",
@@ -65,5 +67,22 @@ export function main(args: string[]) {
             }
         }
     });
+    const UNAME_VALUES = {
+        kernel_name: "Linux",
+        nodename: computer.get_hostname(), // TODO: "Syscall"
+        kernel_release: "0.0.1",
+        kernel_version: "v1",
+        machine: arch(),
+        processor: "unknown",
+        hardware_platform: "unknown",
+        operating_system: "Steve/Linux"
+    };
+
+    // If no option was provided, return just the kernel name
+
+
+
     console.log(parser.parse(args));
+
+    return 0;
 }
