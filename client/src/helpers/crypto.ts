@@ -4,6 +4,8 @@
 import {encode, decode} from "./encode";
 
 export async function sha1hash(text: string): Promise<string> {
+    // TODO: Solve this, crypto.subtle only works in a 'secure' context (localhost, https, wss, etc)
+    return "";
     return new Promise(async (resolve) => {
         if (typeof crypto !== "undefined") {
             // @ts-ignore

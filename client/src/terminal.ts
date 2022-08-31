@@ -84,7 +84,9 @@ export class Terminal {
         this.start_render_buffer_listener();
         this.start_keydown_listener();
         this.start_keyup_listener();
-        this.create_keyboard_shortcuts()
+        this.create_keyboard_shortcuts();
+
+        focus();
     }
 
     // Intervals
@@ -141,7 +143,7 @@ export class Terminal {
                     break;
 
                 case "Enter":
-                    this.handle_key_enter();
+                    await this.handle_key_enter();
                     break;
 
                 case "Tab":
@@ -172,13 +174,53 @@ export class Terminal {
         if (this.input_buffer.length()) this.input_index = -1;
     }
 
-    handle_key_enter() {
+    async handle_key_enter() {
+        if (this.input_buffer.length() > 0) {
+            const joined = this.input_buffer.join("");
 
-        // At the end, the last thing we want to do is reprint the prompt and reset the input buffer
-        // We're also going to do what zsh does and print a newline if one wasn't already there (with the little %)
-        console.log(OUTPUT_BUFFER);
-        //     if (OUTPUT_BUFFER.last() !== "\n") {
-        alert(`The user submitted ${this.input_buffer.join("")}`);
+            // Save our current input to the history
+            computer.add_input_record(joined);
+
+            const command = joined.split(" ")[0];
+            const args = joined.split(" ").slice(1);
+
+            // Print a newline before running the command
+            print();
+
+            // Check if we're running a builtin command
+            if (this.builtins[command] !== undefined) {
+                this.builtins[command](args, this);
+            } else {
+                try {
+                    const module = await import(`./bin/${command}.js`);
+                    module.main(args);
+                } catch (e) {
+                    // @ts-ignore
+                    if (e.name === "TypeError") {
+                        print(`shell: command not found: ${command}`);
+                        console.error(e);
+                    } else {
+                        print("Something went wrong, check the console for more details.");
+                        console.error(e);
+                    }
+                }
+            }
+
+            // At the end, the last thing we want to do is reprint the prompt and reset the input buffer
+            // We're also going to do what zsh does and print a newline if one wasn't already there (with the little %)
+            // Check if the last thing in the output buffer is a newline
+            if (OUTPUT_BUFFER.last() !== "<br />") {
+                // Black text, white background, character '%' and then reset
+                print("\\e[47m\\e[0;30m%\\e[0m\\e[0m");
+            }
+        } else {
+            // If we have no input, just go down a line and reprint the prompt
+            print();
+        }
+
+        this.input_buffer.clear();
+
+        this.print_prompt();
     }
 
     handle_key_tab() {
@@ -405,12 +447,12 @@ export class Terminal {
         if (result.ok()) {
             const res = computer.new_session(result.get_data()!.get_uid());
             if (!res) {
-                print("[<span style='color: red; font-weight: bold;'>FAIL</span>]: Failed to create new session. Check console for details.", {sanitize_html: false});
+                print("[<span style='color: red; font-weight: bold;'>FAIL</span>]: Failed to create new session. Check console for details.", {escape_html: false});
                 return;
             }
         } else {
             console.error(`Failed to create new user: ${result.get_message()}`);
-            print("[<span style='color: red; font-weight: bold;'>FAIL</span>]: Failed to create new user. Check console for details.", {sanitize_html: false});
+            print("[<span style='color: red; font-weight: bold;'>FAIL</span>]: Failed to create new user. Check console for details.", {escape_html: false});
             return;
         }
 

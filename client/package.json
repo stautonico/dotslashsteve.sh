@@ -49,5 +49,8 @@
     "nodemon": "^2.0.16",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.1"
+  },
+  "dependencies": {
+    "arch": "^2.2.0"
   }
 }

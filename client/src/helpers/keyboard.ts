@@ -39,9 +39,6 @@ export class KeyboardShortcut {
     }
 
     public isPressed(modifiers: {[key: string]: boolean}, key: string): boolean {
-        console.log(`We're checking `);
-        console.log(modifiers);
-        console.log(key);
         // For now, the key is not case-sensitive as shift is handled as an individual key
         key = key.toLowerCase();
         for (let mod of this._required_keys.modifiers) {
