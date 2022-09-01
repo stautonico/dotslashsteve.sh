@@ -46,5 +46,5 @@ Birth: ${stat_result.crtime}`;
     // TODO: Format the Access/modify/change/birth times (2022-01-28 03:28:32.212352072 -0500)
     print(output);
 
-    return 0
+    return 0;
 }

@@ -9,7 +9,7 @@ export function termprefs_write_handler(file: FSBaseObject) {
         json = JSON.parse(file.get_content());
     } catch (e) {
         // If we fail, just exit
-        return
+        return;
     }
 
     // Set the terminal colors

@@ -98,7 +98,7 @@ export function make_backslash_t(): string {
     return `${hour}:${minute}:${second}`;
 }
 
-export function make_backslash_T(): string {
+export function make_backslash_capital_t(): string {
     const current_date = new Date();
     let hour;
     let minute = current_date.getMinutes();

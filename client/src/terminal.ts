@@ -2,7 +2,7 @@ import {debug, print} from "./helpers/io";
 import {Buffer} from "./helpers/buffer";
 import {cd, history, pwd, passthrough} from "./terminal_builtins";
 import {CURSOR, OUTPUT_BUFFER, OUTPUT_FRAME, PASS_THROUGH_INDICATOR} from "./helpers/globals";
-import {make_backslash_at, make_backslash_d, make_backslash_T, make_backslash_t} from "./helpers/date";
+import {make_backslash_at, make_backslash_d, make_backslash_capital_t, make_backslash_t} from "./helpers/date";
 import {computer} from "./helpers/globals";
 import {escape_html} from "./helpers/html";
 import {KeyboardShortcut} from "./helpers/keyboard";
@@ -78,7 +78,7 @@ export class Terminal {
         history,
         pwd,
         passthrough
-    }
+    };
 
     constructor() {
         this.input_buffer = new Buffer();
@@ -118,7 +118,7 @@ export class Terminal {
     }
 
     start_render_buffer_listener() {
-        OUTPUT_BUFFER.onChange((old_value, new_value) => {
+        OUTPUT_BUFFER.onChange((_old_value, _new_value) => {
             // TODO: Maybe implement some buffering so that the terminal doesn't update every time we make a change
             // This would probably speed up the app as we don't have to re-render the entire terminal every time we make a change
             // Whenever the output buffer changes, we need to update the output frame
@@ -197,23 +197,12 @@ export class Terminal {
 
             // Check if we're running a builtin command
             if (this.builtins[command] !== undefined) {
+                // Terminal builtins do return a status code
+                // we're just not doing anything with it atm
                 this.builtins[command](args, this);
             } else {
-                try {
-                    const module = await import(`./bin/${command}.js`);
-                    // TODO: Make all "binaries" return a status code
-                    const status_code = module.main(args);
-                    debug(`Command status code: ${status_code}`)
-                } catch (e) {
-                    // @ts-ignore
-                    if (e.name === "TypeError") {
-                        print(`shell: command not found: ${command}`);
-                        console.error(e);
-                    } else {
-                        print("Something went wrong, check the console for more details.");
-                        console.error(e);
-                    }
-                }
+                const status_code = await computer.run_command(command, args);
+                debug(`Command status code: ${status_code}`);
             }
 
             // At the end, the last thing we want to do is reprint the prompt and reset the input buffer
@@ -254,6 +243,7 @@ export class Terminal {
                 // because the computation is expensive
                 let has_modifier = false;
                 for (let mod in this.pressed_buttons) {
+                    // eslint-disable-next-line no-prototype-builtins
                     if (this.pressed_buttons.hasOwnProperty(mod)) {
                         // If we have even just one modifier, we can try to run keyboard shortcuts
                         if (this.pressed_buttons[mod]) {
@@ -302,6 +292,7 @@ export class Terminal {
         * Home: Move the cursor to the beginning of the input buffer
         * End: Move the cursor to the end of the input buffer
      */
+
     // TODO: Maybe separate these callback functions into a separate file?
     create_keyboard_shortcuts() {
         // Control + L - Clear the screen
@@ -384,16 +375,16 @@ export class Terminal {
 
         let prompt = prompt_format;
         prompt = prompt.replaceAll("\\d", make_backslash_d());
-        prompt = prompt.replaceAll("\\h", computer.get_hostname())
+        prompt = prompt.replaceAll("\\h", computer.get_hostname());
         prompt = prompt.replaceAll("\\t", make_backslash_t());
-        prompt = prompt.replaceAll("\\T", make_backslash_T());
+        prompt = prompt.replaceAll("\\T", make_backslash_capital_t());
         prompt = prompt.replaceAll("\\@", make_backslash_at());
         prompt = prompt.replaceAll("\\u", computer.get_current_user().get_username());
         prompt = prompt.replaceAll("\\w", computer.current_session().get_current_dir().pwd());
         // TODO: Replace home directory with ~
         prompt = prompt.replaceAll("\\W", computer.current_session().get_current_dir().get_name());
         prompt = prompt.replaceAll("\\$", computer.sys$geteuid() === 0 ? "#" : "$");
-        prompt = prompt.replaceAll("\\\\", "\\")
+        prompt = prompt.replaceAll("\\\\", "\\");
 
         // TODO: Support ANSI escape color codes
 

@@ -185,13 +185,13 @@ export class ArgParser {
                     }
                     if (!this._has_long_flag(arg.substring(2))) {
                         this._custom_console_log(`${this._name}: Unknown flag ${arg}`);
-                        return new ArgParseResult({});
+                        return new ArgParseResult({}, true);
                     }
                     arg_name = arg.substring(2);
                 } else {
                     if (!this._has_short_flag(arg.substring(1))) {
                         this._custom_console_log(`${this._name}: Unknown flag ${arg}`);
-                        return new ArgParseResult({});
+                        return new ArgParseResult({}, true);
                     }
                     arg_name = arg.substring(1);
                 }
@@ -200,7 +200,7 @@ export class ArgParser {
                 // This should never be undefined, but we'll check just in case
                 if (!arg_obj) {
                     this._custom_console_log(`${this._name}: Unknown flag ${arg}`);
-                    return new ArgParseResult({});
+                    return new ArgParseResult({}, true);
                 }
 
                 arg_name = arg_obj.name!;
@@ -215,7 +215,7 @@ export class ArgParser {
                 } else {
                     // We should never get here
                     this._custom_console_log(`${this._name}: Unknown type ${arg_obj.type}`);
-                    return new ArgParseResult({});
+                    return new ArgParseResult({}, true);
                 }
 
                 // Now, lets convert the value to the correct type
@@ -329,6 +329,10 @@ class ArgParseResult {
         this._printed_version_or_help = printed_version_or_help;
     }
 
+    public arguments(): string[] {
+        return Object.keys(this._args);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public get(key: string): any {
         return this._args[key];
@@ -338,6 +342,19 @@ class ArgParseResult {
     public has(key: string): any {
         // eslint-disable-next-line no-prototype-builtins
         return this._args.hasOwnProperty(key) && this._args[key] !== undefined;
+    }
+
+    public has_none(): boolean {
+        // Loop through each of our possible arguments and check if any of them were provided
+        for (let key in this._args) {
+            // eslint-disable-next-line no-prototype-builtins
+            if (this._args.hasOwnProperty(key)) {
+                if (this._args[key])
+                    return false;
+            }
+        }
+
+        return true;
     }
 
     public printed_version_or_help(): boolean {

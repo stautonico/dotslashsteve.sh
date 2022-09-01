@@ -5,6 +5,7 @@ import {Session} from "./session";
 import {Path} from "./fs/path";
 import {sha1hash} from "./helpers/crypto";
 import {StatStruct} from "./lib/sys/stat";
+import {print} from "./helpers/io";
 
 
 interface NewUserOptions {
@@ -140,6 +141,58 @@ export class Computer {
 
     add_input_record(input: string) {
         this.input_history.push(input);
+    }
+
+    async run_command(command: string, args: string[]): Promise<number> {
+        // Step 1: List all directories in the $PATH
+        // Step 2: Loop through each directory and search for our command name
+        // Step 3a: If we find it at some point, run the command
+        // Step 3b: If we didn't find it, return a "command not found" and exit (127)
+
+        return new Promise<number>(async (resolve) => {
+
+            let path = this.current_session().get_env("PATH");
+
+            if (path === undefined) {
+                print(`shell: command not found: ${command}`);
+                return resolve(127);
+            }
+
+            let bin_dirs = path.split(":");
+
+            for (let dir of bin_dirs) {
+                let find_dir = this.find(dir);
+                if (find_dir.ok()) {
+                    let dir_obj = find_dir.get_data() as Directory;
+
+                    // Try to find our executable inside our directory
+                    let has_executable = dir_obj.get_child(command);
+                    if (has_executable.ok()) {
+                        let module;
+                        try {
+                            module = await import(`./bin/${command}.js`);
+                        } catch (e) {
+                            print("Something went wrong, check the console for more details.");
+                            console.error(e);
+                            return resolve(127);
+                        }
+
+                        try {
+                            return resolve(module.main(args));
+                        } catch (e) {
+                            // Fake segfault (well, the program did really crash lol)
+                            print(`[1]    <FAKEPID> segmentation fault (core dumped)  ${command}`);
+                            console.error(e);
+                            return resolve(139);
+                        }
+                    }
+                }
+            }
+
+            // At this point, we are yet to find our executable, so we need to fail
+            print(`shell: command not found: ${command}`);
+            return resolve(127);
+        });
     }
 
     // Syscalls?
@@ -285,7 +338,7 @@ su - 100%
 tail
 touch - 100%
 tutorial
-uname
+uname (DONE)
 unset - 100%
 uptime - 100%
 users

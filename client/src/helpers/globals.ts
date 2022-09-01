@@ -1,4 +1,4 @@
-import {Buffer, OutputBuffer} from "./buffer";
+import {OutputBuffer} from "./buffer";
 import {Computer} from "../computer";
 
 

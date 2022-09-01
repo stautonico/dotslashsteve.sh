@@ -36,7 +36,7 @@ export function main(args: string[]): number {
     // Wait for the iframe to load, and then send the message
     iframe.onload = () => {
         iframe.contentWindow!.postMessage(message, "*");
-    }
+    };
 
     const message_handler = (event: MessageEvent) => {
         if (event.data.type === "save_file") {
@@ -47,7 +47,7 @@ export function main(args: string[]): number {
             // Remove the event listener
             window.removeEventListener("message", message_handler);
         }
-    }
+    };
 
     // Wait for the iframe to send a message back to us
     window.addEventListener("message", message_handler);

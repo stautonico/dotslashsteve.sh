@@ -67,22 +67,52 @@ export function main(args: string[]): number {
             }
         }
     });
+
+    let parsed = parser.parse(args);
+
+    /* eslint-disable */
+    // We're disabling eslint here because these keys directly correlate to argparse results
     const UNAME_VALUES = {
-        kernel_name: "Linux",
-        nodename: computer.get_hostname(), // TODO: "Syscall"
-        kernel_release: "0.0.1",
-        kernel_version: "v1",
-        machine: arch(),
-        processor: "unknown",
-        hardware_platform: "unknown",
-        operating_system: "Steve/Linux"
+        "kernel-name": "Linux",
+        "nodename": computer.get_hostname(), // TODO: "Syscall"
+        "kernel-release": "0.0.1",
+        "kernel-version": "v1",
+        "machine": arch(),
+        "processor": "unknown",
+        "hardware-platform": "unknown",
+        "operating-system": "Steve/Linux"
     };
+    /* eslint-enable */
+
+    if (parsed.printed_version_or_help())
+        return 0;
 
     // If no option was provided, return just the kernel name
+    if (parsed.has_none()) {
+        print(UNAME_VALUES["kernel-name"]);
+        return 0;
+    }
+
+    if (parsed.get("all")) {
+        print(`${UNAME_VALUES["kernel-name"]} ${UNAME_VALUES["nodename"]} ${UNAME_VALUES["kernel-release"]} ${UNAME_VALUES["kernel-version"]} ${UNAME_VALUES["machine"]} ${UNAME_VALUES["operating-system"]}`);
+        return 0;
+    }
+
+    let output = "";
+
+    for (let key of parsed.arguments()) {
+        if (parsed.get(key)) {
+            // @ts-ignore: We know this value exists because its hardcoded
+            output += `${UNAME_VALUES[key]} `;
+        }
+    }
+
+    // Remove the leftover space
+    if (output.charAt(output.length -1) === " ") {
+        output = output.slice(0, -1);
+    }
 
 
-
-    console.log(parser.parse(args));
-
+    print(output);
     return 0;
 }

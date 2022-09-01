@@ -1,7 +1,7 @@
 import {print} from "./helpers/io";
 import {ArgParser} from "./helpers/argparser";
 import {Terminal} from "./terminal";
-import {computer, OUTPUT_BUFFER, PASS_THROUGH_INDICATOR} from "./helpers/globals";
+import {computer, PASS_THROUGH_INDICATOR} from "./helpers/globals";
 import {stat, ISDIR} from "./lib/sys/stat";
 import {chdir, getcwd} from "./lib/unistd";
 

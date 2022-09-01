@@ -8,7 +8,7 @@ const SHELLS = ["Trout", "Bish"];
 const TERMINALS = ["Puppy"];
 
 function get_username() {
-    const current_session = computer.current_session()
+    const current_session = computer.current_session();
     const uid = current_session.get_effective_uid();
     const user = computer.get_user_by_uid(uid);
     return user ? user.get_username() : "?";
@@ -62,18 +62,19 @@ function get_memory() {
 
 function get_uptime() {
     let uptime_secs = (Date.now() - computer.boot_time) / 1000;
-    let d = Math.floor(uptime_secs / (3600 * 24));
-    let h = Math.floor(uptime_secs % (3600 * 24) / 3600);
-    let m = Math.floor(uptime_secs % 3600 / 60);
-    let s = Math.floor(uptime_secs % 60);
+    let day = Math.floor(uptime_secs / (3600 * 24));
+    let hour = Math.floor(uptime_secs % (3600 * 24) / 3600);
+    let minute = Math.floor(uptime_secs % 3600 / 60);
+    let second = Math.floor(uptime_secs % 60);
 
-    let dDisplay = d > 0 ? d + (d == 1 ? " day, " : " days, ") : "";
-    let hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-    let mDisplay = m > 0 ? m + (m == 1 ? " min, " : " mins, ") : "";
+    let dayString = day > 0 ? day + (day == 1 ? " day, " : " days, ") : "";
+    let hourString = hour > 0 ? hour + (hour == 1 ? " hour, " : " hours, ") : "";
+    let minuteString = minute > 0 ? minute + (minute == 1 ? " min, " : " mins, ") : "";
+
     // Only display the seconds view if we're < 1 full minute of uptime
-    let sDisplay = (m <= 0 && h <= 0 && d <= 0) ? (s > 0 ? s + (s == 1 ? " second" : " seconds") : "") : "";
+    let secondString = (minute <= 0 && hour <= 0 && day <= 0) ? (second > 0 ? second + (second == 1 ? " second" : " seconds") : "") : "";
 
-    let output = dDisplay + hDisplay + mDisplay + sDisplay;
+    let output = dayString + hourString + minuteString + secondString;
 
     // Use regex to remove any garbage whitespace or leading commas
     output = output.replace(/,\s*$/, "");
@@ -181,19 +182,7 @@ export function main(args: string[]): number {
     info_lines[2] = `${"-".repeat(info_lines[1].length)}`;
 
     for (let i = 0; i < ascii.length; i++) {
-        // print(ascii[i], {font: "Liberation Mono", newline: false});
         print(ascii[i], {newline: false, escape_html: false, sanitize: true});
-        // // print(ascii[i], {newline: false, sanitize: true, escape_html: false});
-        // // @ts-ignore
-        // info_lines[i+1] = info_lines[i+1].replaceAll(/\n/g, "<br>");
-        // // @ts-ignore
-        // info_lines[i+1] = info_lines[i+1].replaceAll(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;");
-        // // @ts-ignore
-        // console.log(info_lines[i+1].match(/ /g));
-        // // @ts-ignore
-        // // info_lines[i+1] = info_lines[i+1].replaceAll(/ (?![^<]*>)/g, " ");
-        // // console.log()
-        // info_lines[i+1] = info_lines[i+1].replaceAll(/ /g, "&nbsp;");
         // @ts-ignore: Its hard coded, it'll be fine
         print(info_lines[i + 1], {sanitize: true, escape_html: false});
     }

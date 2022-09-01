@@ -11,7 +11,7 @@ window.onmessage = (e) => {
         SITE_IFRAME!.classList.add("animate");
         // alert("Activating site...");
     }
-}
+};
 
 // var win = window.open("", "Title", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=780,height=200,top="+(screen.height-400)+",left="+(screen.width-840));
 // @ts-ignore

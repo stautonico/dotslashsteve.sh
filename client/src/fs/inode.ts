@@ -43,7 +43,7 @@ const DEFAULT_FILE_PERMISSIONS: InodePermissions = {
         write: false,
         execute: false
     }
-}
+};
 
 const DEFAULT_DIR_PERMISSIONS: InodePermissions = {
     owner: {
@@ -61,7 +61,7 @@ const DEFAULT_DIR_PERMISSIONS: InodePermissions = {
         write: false,
         execute: true
     }
-}
+};
 
 interface FSBaseObjectOtherOptions {
     permissions?: InodePermissions;
@@ -237,7 +237,7 @@ export class FSBaseObject {
                 this.group_owner = gid;
             }
 
-            this.handle_event("change_owner")
+            this.handle_event("change_owner");
             return new Result({success: true});
         }
         return new Result({success: false, message: ResultMessages.NOT_ALLOWED});
@@ -288,7 +288,8 @@ export class FSBaseObject {
         return new Result({success: false, message: ResultMessages.NOT_ALLOWED});
     }
 
-    add_event_listener(event: EventType, callback: (file: FSBaseObject) => void, when: "before" | "after" = "after"): Result<number> {
+    // TODO: Implement the 'when' argument
+    add_event_listener(event: EventType, callback: (file: FSBaseObject) => void, _when: "before" | "after" = "after"): Result<number> {
         // I'm not gonna bother validating the event type because
         // that's typescripts job, and if you @ts-ignore and something breaks,
         // it's not my fault, it's yours
@@ -359,7 +360,7 @@ export class FSBaseObject {
             mtime: new Date().getTime(),
             ctime: new Date().getTime(),
             crtime: new Date().getTime(),
-        }
+        };
     }
 }
 
@@ -577,7 +578,7 @@ export class StandardFS {
         }
 
         // Setup the individual directories in the root directory
-        //this.setup_bin();
+        this.setup_bin();
         this.setup_etc();
         this.setup_home();
         //this.setup_lib();
@@ -591,10 +592,30 @@ export class StandardFS {
         //this.setup_var();
     }
 
+    setup_bin(): void {
+        // It would be really nice if this was automatic, but since we can't read files on disk, we'll have to do it manually
+        const AVAILABLE_BINS = ["mkdir", "id", "neofetch", "uname", "ls", "stat", "uptime", "whoami", "cd", "edit", "cat", "clear"];
+
+        let bin = this.root.get_child("bin").get_data() as Directory;
+
+        for (let file of AVAILABLE_BINS) {
+            new File(file, 0, 0, {
+                parent: bin, content: "[BINARY CONTENT]", permissions: {
+                    owner: {read: true, write: true, execute: true},
+                    group: {read: true, write: false, execute: true},
+                    other: {read: true, write: false, execute: true}
+                }
+            });
+        }
+
+    }
+
     setup_etc(): void {
         let etc = this.root.get_child("etc").get_data() as Directory;
-        let passwd = new File("passwd", 0, 0, {parent: etc, content: "root:x:0:0:root:/root:/bin/bash\n"});
-        let shadow = new File("shadow", 0, 0, {
+        // We're saving these files as variables so that we can add read/write event hooks to them
+        // TODO: Add read/write event hook to update the local machine when these files are updated
+        let _passwd = new File("passwd", 0, 0, {parent: etc, content: "root:x:0:0:root:/root:/bin/bash\n"});
+        let _shadow = new File("shadow", 0, 0, {
             parent: etc, content: "root:x/X.X.X.X.:16000:0:99999:7:::\n", permissions: {
                 owner: {read: true, write: true, execute: false},
                 group: {read: false, write: false, execute: false},

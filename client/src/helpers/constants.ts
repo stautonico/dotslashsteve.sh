@@ -17,7 +17,7 @@ export const PROC_DIR_PERMISSIONS: InodePermissions = {
         write: false,
         execute: true,
     }
-}
+};
 
 export const ROOT_DIR_PERMISSIONS: InodePermissions = {
     owner: {
@@ -35,7 +35,7 @@ export const ROOT_DIR_PERMISSIONS: InodePermissions = {
         write: false,
         execute: false,
     }
-}
+};
 
 export const SYS_DIR_PERMISSIONS: InodePermissions = {
     owner: {
@@ -53,7 +53,7 @@ export const SYS_DIR_PERMISSIONS: InodePermissions = {
         write: false,
         execute: true,
     }
-}
+};
 
 export const TMP_DIR_PERMISSIONS: InodePermissions = {
     owner: {
@@ -71,7 +71,7 @@ export const TMP_DIR_PERMISSIONS: InodePermissions = {
         write: true,
         execute: true,
     }
-}
+};
 
 
 export const TERMINAL_FONTS = ["source-code-pro", "arial", "verdana", "helvetica", "tahoma", "trebuchet-ms",
@@ -82,7 +82,9 @@ export const TERMINAL_FONTS = ["source-code-pro", "arial", "verdana", "helvetica
 bin and lib and sbin
  */
 
-
+/* eslint-disable */
+// We need to disable eslint here because it complains about the naming conventions of these keys
+// We have to name them like this on purpose because they directly correlate to css variables
 export const DEFAULT_TERM_PREFS = {
     "colors": {
         "background": "#000000",
@@ -110,3 +112,4 @@ export const DEFAULT_TERM_PREFS = {
     "font": "Fira Mono",
     "font-size": "16px",
 }
+/* eslint-enable */

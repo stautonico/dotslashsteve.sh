@@ -16,7 +16,7 @@ export class KeyboardShortcut {
     private _required_keys: RequiredKeys = {
         modifiers: [],
         key: ""
-    }
+    };
 
     constructor(shortcut: string, callback: KeyboardShortcutCallback, callback_argument: Terminal) {
         this._callback = callback;
@@ -47,6 +47,7 @@ export class KeyboardShortcut {
 
         // Make sure we're not pressing any keys that we shouldn't (so Control + Shift + C doesn't activate Control + C)
         for (let mod in modifiers) {
+            // eslint-disable-next-line no-prototype-builtins
             if (modifiers.hasOwnProperty(key)) {
                 // If the key is pressed, and it's not in our required modifiers, return false
                 if (modifiers[mod] && !this._required_keys.modifiers.includes(mod)) return false;
