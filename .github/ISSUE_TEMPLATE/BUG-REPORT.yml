@@ -20,7 +20,7 @@ body:
       label: "Is this a regression?"
       description: "A regression is a feature that worked (or was fixed) in the past but doesn't work anymore."
       options:
-        - label: Yes
+        - label: "Yes"
 
   - type: checkboxes
     id: has_issue
@@ -28,7 +28,7 @@ body:
       label: "Does this feature request have an existing issue?"
       description: "If so, please provide the issue number in the additional information field"
       options:
-        - label: Yes
+        - label: "Yes"
 
   - type: textarea
     id: reproduce
@@ -61,9 +61,8 @@ body:
         - Opera
         - Other
         - All
-        - None
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: additional_info

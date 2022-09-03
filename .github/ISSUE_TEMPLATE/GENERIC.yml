@@ -24,9 +24,8 @@ body:
         - Opera
         - Other
         - All
-        - None
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: additional_info
