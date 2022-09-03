@@ -1,0 +1,74 @@
+name: "🐞 Bug Report"
+description: Report a bug or issue.
+title: "🐞 [BUG] - <title>"
+labels: [
+  "bug"
+]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Summary"
+      description: Provide a brief explanation of the issue
+      placeholder: Describe your issue in a few lines
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: is_regression
+    attributes:
+      label: "Is this a regression?"
+      description: "A regression is a feature that worked (or was fixed) in the past but doesn't work anymore."
+      options:
+        - label: "Yes"
+
+  - type: checkboxes
+    id: has_issue
+    attributes:
+      label: "Does this feature request have an existing issue?"
+      description: "If so, please provide the issue number in the additional information field"
+      options:
+        - label: "Yes"
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: "Steps to Reproduce"
+      description: Describe the steps to reproduce the issue
+      placeholder: "1. Do this\n2. Do that\n3. Do the other thing"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: "Expected Behavior"
+      description: Describe the expected behavior
+      placeholder: "The program should do this..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser_select
+    attributes:
+      label: "Which browser does this issue affect?"
+      multiple: true
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Opera
+        - Other
+        - All
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "Additional Information"
+      description: Provide additional information about the issue. Also include any media here (photos, videos, etc).
+      placeholder: Enter any additional information here
+    validations:
+      required: false

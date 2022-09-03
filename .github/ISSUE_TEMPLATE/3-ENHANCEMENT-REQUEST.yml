@@ -1,0 +1,32 @@
+name: "📉 Failing Test"
+description: Report a failing test
+title: "📉 [TEST FAIL] - <title>"
+labels: [
+  "test"
+]
+body:
+  - type: input
+    id: which_test
+    attributes:
+      label: "Failing Test"
+      description: Which test(s) is failing?
+      placeholder: "e.g. `test1`, `test2`, `test3`"
+    validations:
+      required: true
+
+  - type: textarea
+    id: fail_reason
+    attributes:
+      label: "Possible Reason for Failure / General Description"
+      description: Explain why the test(s) is/are failing and/or provide a general description of the results
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "Additional Information"
+      description: Provide additional information
+      placeholder: Enter any additional information here
+    validations:
+      required: false
