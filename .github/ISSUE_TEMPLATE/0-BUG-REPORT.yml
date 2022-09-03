@@ -1,6 +1,6 @@
 name: "🐞 Bug Report"
 description: Report a bug or issue.
-title: "🐞 [BUG] - <title>"
+title: "🐞 [BUG] <title>"
 labels: [
   "bug"
 ]

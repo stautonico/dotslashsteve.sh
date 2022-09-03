@@ -1,26 +1,33 @@
-name: "📉 Failing Test"
-description: Report a failing test
-title: "📉 [TEST FAIL] - <title>"
+name: "🚀 Enhancement"
+description: Request an enhancement
+title: "🚀 [ENHANCEMENT] <title>"
 labels: [
-  "test"
+  "enhancement"
 ]
 body:
-  - type: input
-    id: which_test
+  - type: textarea
+    id: description
     attributes:
-      label: "Failing Test"
-      description: Which test(s) is failing?
-      placeholder: "e.g. `test1`, `test2`, `test3`"
+      label: "Describe the enhancement you would like"
     validations:
       required: true
 
   - type: textarea
-    id: fail_reason
+    id: possible_solution
     attributes:
-      label: "Possible Reason for Failure / General Description"
-      description: Explain why the test(s) is/are failing and/or provide a general description of the results
+      label: "Possible Solution"
+      description: Describe the solution you would like to see
+      placeholder: Describe in a few lines a possible solution
     validations:
       required: true
+
+  - type: checkboxes
+    id: has_issue
+    attributes:
+      label: "Does this enhancement request have an existing issue?"
+      description: "If so, please provide the issue number in the additional information field"
+      options:
+        - label: "Yes"
 
   - type: textarea
     id: additional_info

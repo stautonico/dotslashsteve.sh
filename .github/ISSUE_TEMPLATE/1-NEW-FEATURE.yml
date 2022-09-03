@@ -1,6 +1,6 @@
 name: "💡 Feature Request"
 description: Create a new ticket for a new feature request
-title: "💡 [REQUEST] - <title>"
+title: "💡 [REQUEST] <title>"
 labels: [
   "enhancement"
 ]
@@ -15,7 +15,7 @@ body:
       required: true
 
   - type: textarea
-    id: basic_example
+    id: possible_solution
     attributes:
       label: "Possible Solution"
       description: Describe the solution you would like to see

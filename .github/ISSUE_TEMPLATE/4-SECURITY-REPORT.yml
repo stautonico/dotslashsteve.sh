@@ -1,34 +1,18 @@
-name: "🐞 Bug Report"
+name: "⚠ Security Report"
 description: Report a bug or issue.
-title: "🐞 [BUG] - <title>"
+title: "⚠ [SECURITY] <title>"
 labels: [
-  "bug"
+  "security"
 ]
 body:
   - type: textarea
     id: summary
     attributes:
       label: "Summary"
-      description: Provide a brief explanation of the issue
+      description: Provide a brief explanation of the security issue
       placeholder: Describe your issue in a few lines
     validations:
       required: true
-
-  - type: checkboxes
-    id: is_regression
-    attributes:
-      label: "Is this a regression?"
-      description: "A regression is a feature that worked (or was fixed) in the past but doesn't work anymore."
-      options:
-        - label: "Yes"
-
-  - type: checkboxes
-    id: has_issue
-    attributes:
-      label: "Does this feature request have an existing issue?"
-      description: "If so, please provide the issue number in the additional information field"
-      options:
-        - label: "Yes"
 
   - type: textarea
     id: reproduce
@@ -63,6 +47,15 @@ body:
         - All
     validations:
       required: false
+
+  - type: checkboxes
+    id: has_issue
+    attributes:
+      label: "Does this feature request have an existing issue?"
+      description: "If so, please provide the issue number in the additional information field"
+      options:
+        - label: "Yes"
+
 
   - type: textarea
     id: additional_info
