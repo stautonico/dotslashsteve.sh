@@ -1,0 +1,41 @@
+name: "💡 Feature Request"
+description: Create a new ticket for a new feature request
+title: "💡 [REQUEST] - <title>"
+labels: [
+  "enhancement"
+]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Summary"
+      description: Provide a brief explanation of the feature
+      placeholder: Describe in a few lines your feature request
+    validations:
+      required: true
+      
+  - type: textarea
+    id: basic_example
+    attributes:
+      label: "Possible Solution"
+      description: Describe the solution you would like to see
+      placeholder: Describe in a few lines a possible solution
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: has_issue
+    attributes:
+      label: "Does this feature request have an existing issue?"
+      description: "If so, please provide the issue number in the additional information field"
+      options:
+        - label: Yes
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "Additional Information"
+      description: Provide additional information about the feature
+      placeholder: Enter any additional information here
+    validations:
+      required: false

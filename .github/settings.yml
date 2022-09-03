@@ -1,0 +1,103 @@
+repository:
+  has_issues: true
+  has_wiki: false
+  has_downloads: false
+
+# Labels: define labels for Issues and Pull Requests
+labels:
+  - name: 'Type: Bug'
+    color: e80c0c
+    description: Something isn't working as expected.
+
+  - name: 'Type: Enhancement'
+    color: 54b2ff
+    description: Suggest an improvement for an existing feature.
+
+  - name: 'Type: Feature'
+    color: 54b2ff
+    description: Suggest a new feature.
+
+  - name: 'Type: Security'
+    color: fbff00
+    description: A problem or enhancement related to a security issue.
+
+  - name: 'Type: Test'
+    color: ce54e3
+    description: A problem or enhancement related to a test.
+
+  - name: 'Status: Awaiting Review'
+    color: 24d15d
+    description: Ready for review.
+
+  - name: 'Status: WIP'
+    color: 07b340
+    description: Currently being worked on.
+
+  - name: 'Status: Waiting'
+    color: 38C968
+    description: Waiting on something else to be ready.
+
+  - name: 'Status: Stale'
+    color: 66b38a
+    description: Has had no activity for some time.
+
+  - name: 'Duplicate'
+    color: EB862D
+    description: Duplicate of another issue.
+
+  - name: 'Invalid'
+    color: faef50
+    description: This issue doesn't seem right.
+
+  - name: 'Priority: High +'
+    color: ff008c
+    description: Task is considered higher-priority.
+
+  - name: 'Priority: Low -'
+    color: 690a34
+    description: Task is considered lower-priority.
+
+  - name: 'Documentation'
+    color: 2fbceb
+    description: An issue/change with the documentation.
+
+  - name: "Won't fix"
+    color: C8D9E6
+    description: Reported issue is working as intended.
+
+  - name: '3rd party issue'
+    color: e88707
+    description: This issue might be caused by a 3rd party script/package/other reasons
+
+  branches:
+    - name: main
+      # https://developer.github.com/v3/repos/branches/#update-branch-protection
+      # Branch Protection settings. Set to null to disable
+      protection:
+        # Required. Require at least one approving review on a pull request, before merging. Set to null to disable.
+        required_pull_request_reviews:
+          # The number of approvals required. (1-6)
+          required_approving_review_count: 1
+          # Dismiss approved reviews automatically when a new commit is pushed.
+          dismiss_stale_reviews: true
+          # Blocks merge until code owners have reviewed.
+          require_code_owner_reviews: true
+          # Specify which users and teams can dismiss pull request reviews. Pass an empty dismissal_restrictions object to disable. User and team dismissal_restrictions are only available for organization-owned repositories. Omit this parameter for personal repositories.
+          dismissal_restrictions:
+            users: [ ]
+            teams: [ ]
+        # Required. Require status checks to pass before merging. Set to null to disable
+        required_status_checks:
+          # Required. Require branches to be up-to-date before merging.
+          strict: true
+          # Required. The list of status checks to require in order to merge into this branch
+          contexts: [ ]
+        # Required. Enforce all configured restrictions for administrators. Set to true to enforce required status checks for repository administrators. Set to null to disable.
+        enforce_admins: true
+        # Prevent merge commits from being pushed to matching branches
+        required_linear_history: true
+        # Required. Restrict who can push to this branch. Team and user restrictions are only available for organization-owned repositories. Set to null to disable.
+        restrictions:
+          apps: [ ]
+          users: [ ]
+          teams: [ ]

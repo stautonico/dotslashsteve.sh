@@ -1,0 +1,38 @@
+name: "Generic Issue"
+description: Use this template if none of the other templates fit your needs.
+title: "<title>"
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Summary"
+      description: Provide a brief explanation of the issue
+      placeholder: Describe your issue in a few lines
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser_select
+    attributes:
+      label: "Which browser does this issue affect?"
+      multiple: true
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Opera
+        - Other
+        - All
+        - None
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "Additional Information"
+      description: Provide additional information about the issue. Also include any media here (photos, videos, etc).
+      placeholder: Enter any additional information here
+    validations:
+      required: false
