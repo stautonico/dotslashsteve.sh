@@ -1,6 +1,6 @@
-import {print}  from "../helpers/io";
+import {print}  from "../util/io";
 import {read} from "../lib/unistd";
-import {ArgParser} from "../helpers/argparser";
+import {ArgParser} from "../util/argparser";
 import {stat} from "../lib/sys/stat";
 
 export function main(args: string[]): number {
@@ -14,7 +14,8 @@ export function main(args: string[]): number {
             "file": {
                 description: "the file to print",
                 type: "string",
-                required: true
+                required: true,
+                positional: true
             }
         }
     });

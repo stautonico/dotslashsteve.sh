@@ -1,4 +1,4 @@
-import {computer} from "../../helpers/globals";
+import {computer} from "../../util/globals";
 
 export interface StatStruct {
     dev: number;

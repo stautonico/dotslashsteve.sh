@@ -1,5 +1,5 @@
-import {print}  from "../helpers/io";
-import {computer} from "../helpers/globals";
+import {print, perror}  from "../util/io";
+import {computer} from "../util/globals";
 
 export function main(_args: string[]): number {
     const current_session = computer.current_session();

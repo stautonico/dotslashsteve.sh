@@ -1,4 +1,4 @@
-import {computer} from "../helpers/globals";
+import {computer} from "../util/globals";
 
 export class Path {
     private path: string;
@@ -43,6 +43,10 @@ export class Path {
 
     canonicalize(): Path {
         let find_result = computer.find(this.path);
+
+        const absolute = this.path.charAt(0) === '/';
+
+
 
         if (find_result.fail())
             throw new Error(`Failed to canonicalize path: ${this.path}`);

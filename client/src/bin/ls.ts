@@ -1,6 +1,6 @@
-import {print} from "../helpers/io";
-import {computer} from "../helpers/globals";
-import {ArgParser} from "../helpers/argparser";
+import {print} from "../util/io";
+import {computer} from "../util/globals";
+import {ArgParser} from "../util/argparser";
 import {readdir} from "../lib/dirent";
 import {stat, ISDIR} from "../lib/sys/stat";
 import {mode_to_string} from "../fs/inode";

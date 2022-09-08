@@ -1,5 +1,5 @@
-import {print} from "../helpers/io";
-import {computer} from "../helpers/globals";
+import {print} from "../util/io";
+import {computer} from "../util/globals";
 
 function format_uptime() {
     // Example output:
