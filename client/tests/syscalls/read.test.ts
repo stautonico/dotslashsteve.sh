@@ -1,4 +1,4 @@
-import {computer} from "../../src/helpers/globals";
+import {computer} from "../../src/util/globals";
 
 beforeAll(async () => {
     const result = await computer.add_user("user", "password", {home_dir: "/home/user"});

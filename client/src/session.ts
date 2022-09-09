@@ -1,5 +1,5 @@
 import {Directory} from "./fs/inode";
-import {computer} from "./helpers/globals";
+import {computer} from "./util/globals";
 
 interface SessionArguments {
     real_uid: number,

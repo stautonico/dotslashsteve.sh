@@ -1,6 +1,6 @@
-import {ArgParser} from "../helpers/argparser";
-import {print} from "../helpers/io";
-import {OUTPUT_BUFFER} from "../helpers/globals";
+import {ArgParser} from "../util/argparser";
+import {print} from "../util/io";
+import {OUTPUT_BUFFER} from "../util/globals";
 
 export function main(args: string[]): number {
     const parser = new ArgParser({

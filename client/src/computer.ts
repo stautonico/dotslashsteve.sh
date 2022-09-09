@@ -1,11 +1,12 @@
 import {Directory, StandardFS} from "./fs/inode";
-import {User, Group} from "./user";
-import {Result, ResultMessages} from "./helpers/result";
+import {Group, User} from "./user";
+import {Result, ResultMessages} from "./util/result";
 import {Session} from "./session";
 import {Path} from "./fs/path";
-import {sha1hash} from "./helpers/crypto";
+import {sha1hash} from "./util/crypto";
 import {StatStruct} from "./lib/sys/stat";
-import {print} from "./helpers/io";
+import {print} from "./util/io";
+import {Errno, errno_messages} from "./util/errno";
 
 
 interface NewUserOptions {
@@ -25,6 +26,7 @@ export class Computer {
     private fs: StandardFS = new StandardFS();
     private sessions: Session[] = [];
     private input_history: string[] = [];
+    public errno: Errno | undefined;
 
     // TODO: Sync input history to 'disk'
 
@@ -222,6 +224,21 @@ export class Computer {
         return new Result({success: true, data: find.get_data()!.write(data)});
     }
 
+    sys$chown(filepath: string, owner: number, group: number): Result<void> {
+        let find = this.fs.find(filepath);
+
+        if (find.fail())
+            return new Result({success: false, message: ResultMessages.NOT_FOUND});
+
+        let file = find.get_data();
+
+        let change_perms = file?.change_owner(owner, group);
+
+        if (change_perms?.fail()) return change_perms;
+
+        return new Result({success: true});
+    }
+
     sys$geteuid(): number {
         return this.current_session().get_effective_uid();
     }
@@ -261,11 +278,15 @@ export class Computer {
     sys$chdir(filepath: string): Result<void> {
         let find = this.fs.find(filepath);
 
-        if (find.fail())
+        if (find.fail()) {
+            this.errno = errno_messages.ENOENT;
             return new Result({success: false, message: ResultMessages.NOT_FOUND});
+        }
 
-        if (!find.get_data()!.is_directory())
+        if (!find.get_data()!.is_directory()) {
+            this.errno = errno_messages.ENOTDIR;
             return new Result({success: false, message: ResultMessages.IS_FILE});
+        }
 
         // @ts-ignore: Class inheritance
         this.current_session().set_current_dir(find.get_data());
@@ -280,6 +301,7 @@ export class Computer {
     mkdir(path: string) {
         // TODO: Check if the user has permission to create a directory and if the directory already exists
         let path_obj = new Path(path).canonicalize();
+        console.log(path_obj.to_string());
         let parent = path_obj.parent_path();
         let parent_exists = this.fs.find(parent);
         if (!parent_exists.ok())

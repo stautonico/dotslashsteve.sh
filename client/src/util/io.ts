@@ -1,4 +1,6 @@
-import {OUTPUT_BUFFER} from "./globals";
+import {computer, OUTPUT_BUFFER} from "./globals";
+import {errno_messages} from "./errno";
+import advanceTimersByTime = jest.advanceTimersByTime;
 
 // import {EscapedElement} from "../html_tags";
 
@@ -117,4 +119,17 @@ export function debug(msg: object | string | number | boolean) {
     if (typeof msg === "object")
         msg = JSON.stringify(msg); // So we can see objects without seeing "[object Object]"
     print(`<span style="color: var(--term-debug-color);">[DEBUG]</span>: ${msg}`, {sanitize: false});
+}
+
+export function perror(msg: string) {
+    // Look up our current errno value
+    let errno_message = "";
+
+    if (computer.errno == undefined) {
+        errno_message = "Success";
+    } else {
+        errno_message = computer.errno.message;
+    }
+
+    print(`${msg}: ${errno_message}`);
 }

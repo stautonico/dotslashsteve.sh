@@ -1,11 +1,11 @@
-import {debug, print} from "./helpers/io";
-import {Buffer} from "./helpers/buffer";
+import {debug, print} from "./util/io";
+import {Buffer} from "./util/buffer";
 import {cd, history, pwd, passthrough} from "./terminal_builtins";
-import {CURSOR, OUTPUT_BUFFER, OUTPUT_FRAME, PASS_THROUGH_INDICATOR} from "./helpers/globals";
-import {make_backslash_at, make_backslash_d, make_backslash_capital_t, make_backslash_t} from "./helpers/date";
-import {computer} from "./helpers/globals";
-import {escape_html} from "./helpers/html";
-import {KeyboardShortcut} from "./helpers/keyboard";
+import {CURSOR, OUTPUT_BUFFER, OUTPUT_FRAME, PASS_THROUGH_INDICATOR} from "./util/globals";
+import {make_backslash_at, make_backslash_d, make_backslash_capital_t, make_backslash_t} from "./util/date";
+import {computer} from "./util/globals";
+import {escape_html} from "./util/html";
+import {KeyboardShortcut} from "./util/keyboard";
 
 /*
 Frame buffer to hold output ready for terminal.

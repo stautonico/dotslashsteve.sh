@@ -1,7 +1,7 @@
-import {print} from "../helpers/io";
-import {ArgParser} from "../helpers/argparser";
+import {print} from "../util/io";
+import {ArgParser} from "../util/argparser";
 import {stat, ISDIR} from "../lib/sys/stat";
-import {computer} from "../helpers/globals";
+import {computer} from "../util/globals";
 
 export function main(args: string[]): number {
     let parser = new ArgParser({

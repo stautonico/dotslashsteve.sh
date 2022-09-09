@@ -1,5 +1,5 @@
-import {print}  from "../helpers/io";
-import {computer} from "../helpers/globals";
+import {print}  from "../util/io";
+import {computer} from "../util/globals";
 
 export function main(args: string[]): number {
     // TODO: Build using "syscalls"

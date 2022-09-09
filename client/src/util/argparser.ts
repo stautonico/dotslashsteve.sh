@@ -92,7 +92,7 @@ export class ArgParser {
 
     private generate_help(): void {
         if (this._help_string === undefined || this._help_string === "") {
-            this._help_string = `Usage: ${this._name} `;
+            this._help_string = `Usage: ${this._name}`;
             for (let [name, arg] of this._args) {
                 if (arg.positional) {
                     this._help_string += ` ${name}`;
@@ -169,6 +169,8 @@ export class ArgParser {
             }
         }
 
+        // FIXME: Required for positional arguments doesn't work
+
         for (let i = 0; i < argv.length; i++) {
             let arg = argv[i];
             let arg_name;
@@ -232,14 +234,37 @@ export class ArgParser {
                 // This is a positional argument
                 // Get the positional arguments in order
                 let expected_positional_arg = this._get_next_positional_arg();
+
                 // If we have a positional argument, and we're not expecting one, we'll error
                 if (expected_positional_arg === undefined) {
                     this._custom_console_log(`${this._name}: Unexpected argument '${arg}'`);
                     return new ArgParseResult({});
                 }
 
+                console.log(`Setting ${expected_positional_arg.name!} to ${arg}`);
+
                 output[expected_positional_arg.name!] = arg;
             }
+        }
+
+        // Let's double-check that we have all the required arguments
+        let missing_arg;
+        this._args.forEach(arg => {
+            // If our arg is required, check that it exists in our output
+            if (arg.required) {
+                console.log(`${arg.name} is required, let's check if we have it`);
+                // @ts-ignore: arg.name is never undefined
+                if (!(arg.name in output) || (output[arg.name] === undefined)) {
+                    console.log(`WE'RE MISSING REQUIRED ${arg.name}`);
+                    missing_arg = arg.name;
+                    return;
+                }
+            }
+        });
+
+        if (missing_arg) {
+            // Do something
+            throw new Error(`${this._name}: Missing required argument '${missing_arg}'`);
         }
 
         this._did_parse_args = true;

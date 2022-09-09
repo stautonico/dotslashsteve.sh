@@ -1,7 +1,7 @@
-import {print} from "../helpers/io";
-import {ArgParser} from "../helpers/argparser";
-import {computer} from "../helpers/globals";
-import {arch} from "../helpers/arch";
+import {print} from "../util/io";
+import {ArgParser} from "../util/argparser";
+import {computer} from "../util/globals";
+import {arch} from "../util/arch";
 
 // TODO: Make these not change every time it's run
 const SHELLS = ["Trout", "Bish"];

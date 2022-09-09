@@ -1,15 +1,15 @@
-import {Result, ResultMessages} from "../helpers/result";
+import {Result, ResultMessages} from "../util/result";
 import {
     PROC_DIR_PERMISSIONS,
     ROOT_DIR_PERMISSIONS,
     SYS_DIR_PERMISSIONS,
     TMP_DIR_PERMISSIONS,
     TERMINAL_FONTS, DEFAULT_TERM_PREFS
-} from "../helpers/constants";
+} from "../util/constants";
 import {Path} from "./path";
-import {computer} from "../helpers/globals";
+import {computer} from "../util/globals";
 import {StatStruct} from "../lib/sys/stat";
-import {termprefs_write_handler} from "../helpers/callbacks";
+import {termprefs_write_handler} from "../util/callbacks";
 
 type PermissionType = "read" | "write" | "execute";
 type EventType = "read" | "write" | "execute" | "move" | "change_perm" | "change_owner" | "delete";
@@ -594,7 +594,7 @@ export class StandardFS {
 
     setup_bin(): void {
         // It would be really nice if this was automatic, but since we can't read files on disk, we'll have to do it manually
-        const AVAILABLE_BINS = ["mkdir", "id", "neofetch", "uname", "ls", "stat", "uptime", "whoami", "cd", "edit", "cat", "clear"];
+        const AVAILABLE_BINS = ["mkdir", "id", "neofetch", "uname", "ls", "stat", "uptime", "whoami", "edit", "cat", "clear"];
 
         let bin = this.root.get_child("bin").get_data() as Directory;
 
