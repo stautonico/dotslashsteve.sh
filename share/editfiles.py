@@ -4,7 +4,7 @@ import os
 
 # Only root can run
 if os.geteuid() != 0:
-    exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
+    sys.exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
 
 # Setup db
 if os.getenv("EDITFILES_DB") is None:
@@ -29,7 +29,7 @@ while True:
             print("Invalid input")
 
     if operation == 0:
-        exit()
+        sys.exit()
 
     if operation == 1:
         print("Listing Files")
@@ -38,7 +38,7 @@ while True:
         data = []
 
         for row in cursor:
-            data.append([row[1], row[4], row[2], True if row[3] == 1 else False])
+             data.append([row[1], row[4], row[2], row[3] == 1])
 
         print(tabulate.tabulate(data, headers, tablefmt="pretty"))
 
@@ -75,7 +75,7 @@ while True:
         file = db.execute("SELECT * FROM files WHERE filename=?", (filename,)).fetchone()
         if file is None:
             print("File does not exist")
-            exit()
+            sys.exit()
 
         password = input("New Password: ")
         if password == "":
@@ -98,8 +98,8 @@ while True:
         archived = db.execute("SELECT archived FROM files WHERE filename=?", (filename,)).fetchone()
         if not archived:
             print("File not found")
-            exit()
-        archived = True if archived[0] == 1 else False
+            sys.exit()
+        archived = archived[0] == 1
 
         # Update db
         result = db.execute("UPDATE files SET archived=NOT archived WHERE filename=?", (filename,))

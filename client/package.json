@@ -48,7 +48,8 @@
     "live-server": "^1.2.2",
     "nodemon": "^2.0.16",
     "ts-jest": "^28.0.5",
-    "ts-node": "^10.8.1"
+    "ts-node": "^10.8.1",
+    "typescript": "^4.8.3"
   },
   "dependencies": {
     "arch": "^2.2.0"

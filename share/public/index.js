@@ -8,7 +8,6 @@ let $syncing = document.getElementsByClassName("syncing")[0];
 let $done = document.getElementsByClassName("done")[0];
 let $bar = document.getElementsByClassName("bar")[0];
 let $filenameElement = document.getElementsByClassName("filename")[0];
-let timeOut;
 let $inputField = document.getElementsByClassName("input")[0];
 let doneUploading = false;
 
@@ -65,7 +64,7 @@ function upload() {
         fetch("http://localhost:3000/upload/", {
             method: "POST",
             body: formData,
-        }).then(function (response) {
+        }).then(() => {
                 doneUploading = true;
                 showDone();
                 setTimeout(resetAfterUpload, 7500);

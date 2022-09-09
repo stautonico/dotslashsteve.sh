@@ -244,7 +244,7 @@ export class Terminal {
                 let has_modifier = false;
                 for (let mod in this.pressed_buttons) {
                     // eslint-disable-next-line no-prototype-builtins
-                    if (this.pressed_buttons.hasOwnProperty(mod)) {
+                    if (this.pressed_buttons.prototype.hasOwnProperty(mod)) {
                         // If we have even just one modifier, we can try to run keyboard shortcuts
                         if (this.pressed_buttons[mod]) {
                             has_modifier = true;

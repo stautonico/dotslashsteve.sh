@@ -341,14 +341,14 @@ class ArgParseResult {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public has(key: string): any {
         // eslint-disable-next-line no-prototype-builtins
-        return this._args.hasOwnProperty(key) && this._args[key] !== undefined;
+        return this._args.prototype.hasOwnProperty(key) && this._args[key] !== undefined;
     }
 
     public has_none(): boolean {
         // Loop through each of our possible arguments and check if any of them were provided
         for (let key in this._args) {
             // eslint-disable-next-line no-prototype-builtins
-            if (this._args.hasOwnProperty(key)) {
+            if (this._args.prototype.hasOwnProperty(key)) {
                 if (this._args[key])
                     return false;
             }
