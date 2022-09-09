@@ -1,8 +1,4 @@
 import {computer, OUTPUT_BUFFER} from "./globals";
-import {errno_messages} from "./errno";
-import advanceTimersByTime = jest.advanceTimersByTime;
-
-// import {EscapedElement} from "../html_tags";
 
 interface PrintOptions {
     escape_html?: boolean, // Whether to sanitize the message (Remove html tags) |  Default - True
@@ -125,10 +121,10 @@ export function perror(msg: string) {
     // Look up our current errno value
     let errno_message = "";
 
-    if (computer.errno == undefined) {
+    if (computer.get_errno().number == 0) {
         errno_message = "Success";
     } else {
-        errno_message = computer.errno.message;
+        errno_message = computer.get_errno().message;
     }
 
     print(`${msg}: ${errno_message}`);

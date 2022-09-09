@@ -63,7 +63,7 @@ export function cd(args: string[], _terminal: Terminal): number {
 export function history(_args: string[], _terminal: Terminal): number {
     // TODO: Implement some of history's arguments
 
-    const history = computer.get_input_history();
+    const history = computer.get_shell_history();
 
     for (let i = 0; i < history.length; i++)
         print(`${i + 1} ${history[i]}`);

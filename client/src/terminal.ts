@@ -6,6 +6,7 @@ import {make_backslash_at, make_backslash_d, make_backslash_capital_t, make_back
 import {computer} from "./util/globals";
 import {escape_html} from "./util/html";
 import {KeyboardShortcut} from "./util/keyboard";
+import { geteuid } from "./lib/unistd";
 
 /*
 Frame buffer to hold output ready for terminal.
@@ -172,6 +173,36 @@ export class Terminal {
         });
     }
 
+    async handle_command_input(input: string) {
+        const command = input.split(" ")[0];
+        const args = input.split(" ").slice(1);
+
+        // Print a newline before running the command
+        print();
+
+        // Check if we're running a builtin command
+        if (this.builtins[command] !== undefined) {
+            // Terminal builtins do return a status code
+            // we're just not doing anything with it atm
+            this.builtins[command](args, this);
+        } else {
+            const status_code = await computer.run_command(command, args);
+            debug(`Command status code: ${status_code}`);
+        }
+
+
+
+        // At the end, the last thing we want to do is reprint the prompt and reset the input buffer
+        // We're also going to do what zsh does and print a newline if one wasn't already there (with the little %)
+        // Check if the last thing in the output buffer is a newline
+        // This is kinda hacky, but I can't think of a better solution
+        // Running clear makes the terminal print the '%' and insert a newline
+        if (OUTPUT_BUFFER.last() !== "<br />" && command != "clear") {
+            // Black text, white background, character '%' and then reset
+            print("\\e[47m\\e[0;30m%\\e[0m\\e[0m");
+        }
+    }
+
     // Button handler functions
     handle_key_backspace() {
         let popped_value = this.input_buffer.pop();
@@ -187,33 +218,10 @@ export class Terminal {
             const joined = this.input_buffer.join("");
 
             // Save our current input to the history
-            computer.add_input_record(joined);
+            computer.add_shell_history_record(joined);
 
-            const command = joined.split(" ")[0];
-            const args = joined.split(" ").slice(1);
-
-            // Print a newline before running the command
-            print();
-
-            // Check if we're running a builtin command
-            if (this.builtins[command] !== undefined) {
-                // Terminal builtins do return a status code
-                // we're just not doing anything with it atm
-                this.builtins[command](args, this);
-            } else {
-                const status_code = await computer.run_command(command, args);
-                debug(`Command status code: ${status_code}`);
-            }
-
-            // At the end, the last thing we want to do is reprint the prompt and reset the input buffer
-            // We're also going to do what zsh does and print a newline if one wasn't already there (with the little %)
-            // Check if the last thing in the output buffer is a newline
-            // This is kinda hacky, but I can't think of a better solution
-            // Running clear makes the terminal print the '%' and insert a newline
-            if (OUTPUT_BUFFER.last() !== "<br />" && command != "clear") {
-                // Black text, white background, character '%' and then reset
-                print("\\e[47m\\e[0;30m%\\e[0m\\e[0m");
-            }
+            // Handle the command
+            await this.handle_command_input(joined);
         } else {
             // If we have no input, just go down a line and reprint the prompt
             print();
@@ -383,7 +391,7 @@ export class Terminal {
         prompt = prompt.replaceAll("\\w", computer.current_session().get_current_dir().pwd());
         // TODO: Replace home directory with ~
         prompt = prompt.replaceAll("\\W", computer.current_session().get_current_dir().get_name());
-        prompt = prompt.replaceAll("\\$", computer.sys$geteuid() === 0 ? "#" : "$");
+        prompt = prompt.replaceAll("\\$", geteuid() === 0 ? "#" : "$");
         prompt = prompt.replaceAll("\\\\", "\\");
 
         // TODO: Support ANSI escape color codes

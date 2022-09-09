@@ -182,7 +182,7 @@ export class FSBaseObject {
          * @returns {Result<void>} The result of the check (true if the user has the permission, false otherwise)
          */
         // If we're root (uid 0), we can do anything
-        if (computer.sys$geteuid() === 0) {
+        if (computer.sys$geteuid().get_data() === 0) {
             return new Result({success: true});
         }
 
@@ -193,13 +193,13 @@ export class FSBaseObject {
 
         if (this.permissions.group[permission]) {
             // TODO: Support groups with multiple users
-            if (computer.sys$getegid() === this.group_owner) {
-                return new Result({success: true});
-            }
+            // if (computer.sys$getegid().get_data() === this.group_owner) {
+            //     return new Result({success: true});
+            // }
         }
 
         if (this.permissions.owner[permission]) {
-            if (computer.sys$geteuid() === this.owner) {
+            if (computer.sys$geteuid().get_data() === this.owner) {
                 return new Result({success: true});
             }
         }
@@ -212,7 +212,7 @@ export class FSBaseObject {
          * Checks if the current UID or GID is one of the owner of this object (for chmod/chgrp/etc)
          * @returns {Result<void>} The result of the check (true if the user is the owner, false otherwise)
          */
-        if (computer.sys$geteuid() === this.owner) {
+        if (computer.sys$geteuid().get_data() === this.owner) {
             return new Result({success: true});
         }
 
@@ -228,7 +228,7 @@ export class FSBaseObject {
          * @param {number} [gid] The new GID
          * @returns {Result<void>} The result of the change (true if the change was successful, false otherwise)
          */
-        if (this.check_owner().ok() || computer.sys$geteuid() === 0) {
+        if (this.check_owner().ok() || computer.sys$geteuid().get_data() === 0) {
             if (uid !== undefined) {
                 this.owner = uid;
             }
@@ -685,5 +685,9 @@ export class StandardFS {
             current_dir = result.data;
         }
         return new Result({success: true, data: current_dir});
+    }
+
+    exists(path: string | Path): boolean {
+        return this.find(path).ok();
     }
 }

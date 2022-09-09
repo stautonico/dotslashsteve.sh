@@ -1,3 +1,5 @@
+import {sha1hash} from "./util/crypto";
+
 export class User {
     private readonly uid: number;
     private readonly username: string;
@@ -38,6 +40,10 @@ export class User {
 
     get_home_dir(): string | undefined {
         return this.home_dir;
+    }
+
+    async set_password(new_password: string): Promise<void> {
+        this.password = await sha1hash(new_password);
     }
 }
 

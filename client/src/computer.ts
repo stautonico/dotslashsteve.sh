@@ -1,371 +1,394 @@
-import {Directory, StandardFS} from "./fs/inode";
-import {Group, User} from "./user";
-import {Result, ResultMessages} from "./util/result";
-import {Session} from "./session";
-import {Path} from "./fs/path";
-import {sha1hash} from "./util/crypto";
-import {StatStruct} from "./lib/sys/stat";
-import {print} from "./util/io";
-import {Errno, errno_messages} from "./util/errno";
-
-
-interface NewUserOptions {
-    uid?: number;
-    full_name?: string;
-    room_number?: string;
-    work_phone?: string;
-    home_phone?: string;
-    home_dir?: string;
-}
+import { Directory, StandardFS } from "./fs/inode";
+import { Group, User } from "./user";
+import { Session } from "./session";
+import { Errno } from "./util/errno";
+import { NewUserOptions } from "./util/computer_helpers";
+import { Result, ResultMessages } from "./util/result";
+import { sha1hash } from "./util/crypto";
+import { Terminal } from "./terminal";
+import { print } from "./util/io";
 
 export class Computer {
-    public boot_time: number;
-    private hostname: string;
-    private users: { [uid: number]: User } = {};
-    private groups: { [gid: number]: Group } = {};
-    private fs: StandardFS = new StandardFS();
-    private sessions: Session[] = [];
-    private input_history: string[] = [];
-    public errno: Errno | undefined;
+  private boot_time: number;
+  private hostname: string;
 
-    // TODO: Sync input history to 'disk'
+  private users: { [uid: number]: User } = {};
+  private groups: { [gid: number]: Group } = {};
 
-    constructor(hostname: string) {
-        this.boot_time = Date.now();
-        this.hostname = hostname;
+  private fs: StandardFS = new StandardFS();
+  private sessions: Session[] = [];
+  private errno: Errno | undefined;
 
-        this.users[0] = new User({
-            uid: 0,
-            username: "root",
-            password: "",
+  private shell_history: string[] = [];
+
+  private terminal: Terminal | undefined;
+
+  constructor(hostname: string) {
+    this.boot_time = Date.now();
+    this.hostname = hostname;
+
+    (async () => {
+      await this.create_root_user();
+    })();
+  }
+
+  link_terminal(terminal: Terminal) {
+    this.terminal = terminal;
+  }
+
+  get_boot_time(): number {
+    return this.boot_time;
+  }
+
+  get_hostname(): string {
+    return this.hostname;
+  }
+
+  set_hostname(hostname: string) {
+    this.hostname = hostname;
+    this.sync_hostname_file();
+  }
+
+  //////////////////////////
+  // User + Group Methods //
+  //////////////////////////
+
+  async add_user(
+    username: string,
+    password: string,
+    settings?: NewUserOptions,
+  ): Promise<Result<User>> {
+    // If the user already exists, return an error.
+    if (this.get_user({ username })) {
+      return new Result({
+        success: false,
+        message: ResultMessages.ALREADY_EXISTS,
+      });
+    }
+
+    let next_uid = 0;
+
+    if (settings !== undefined && settings?.uid !== undefined) {
+      // Check if uid is available
+      if (this.users[settings.uid]) {
+        return new Result({
+          success: false,
+          message: ResultMessages.ALREADY_EXISTS,
         });
-    }
+      }
+      next_uid = settings.uid;
+    } else {
+      // Find the next available uid
+      next_uid = 0;
 
-
-    new_session(uid: number): boolean {
-        const user = this.get_user_by_uid(uid);
-
-        if (!user) return false;
-        // Find the user's home directory
-        const find_home_dir = this.fs.find(user.get_home_dir()!);
-        if (find_home_dir.fail()) {
-            return false;
-        } else {
-            // @ts-ignore
-            this.sessions.push(new Session({real_uid: uid, current_dir: find_home_dir.get_data()}));
-            return true;
+      if (Object.keys(this.users).length === 1) {
+        next_uid = 1000;
+      } else {
+        for (let uid of Object.keys(this.users)) {
+          if (parseInt(uid) > next_uid) {
+            next_uid = parseInt(uid);
+          }
         }
+      }
     }
 
-    current_session(): Session {
-        // This should never fail because we should always have a session
-        return this.sessions[this.sessions.length - 1];
+    this.users[next_uid] = new User({
+      uid: next_uid,
+      username: username,
+      password: await sha1hash(password),
+      full_name: settings?.full_name,
+      room_number: settings?.room_number,
+      work_phone: settings?.work_phone,
+      home_phone: settings?.home_phone,
+      home_dir: settings?.home_dir,
+    });
+
+    return new Result({ success: true, data: this.users[next_uid] });
+  }
+
+  get_user(
+    { username, uid }: { username?: string; uid?: number },
+  ): User | undefined {
+    if (username !== undefined) {
+      for (let user of Object.values(this.users)) {
+        if (user.get_username() === username) {
+          return user;
+        }
+      }
+    } else if (uid !== undefined) {
+      return this.users[uid];
+    } else {
+      return undefined;
+    }
+  }
+
+  delete_user(username: string): Result<void> {
+    let user = this.get_user({ username });
+
+    if (!user) {
+      return new Result({ success: false, message: ResultMessages.NOT_FOUND });
     }
 
-    async add_user(username: string, password: string, settings?: NewUserOptions): Promise<Result<User>> {
-        if (this.get_user(username))
-            return new Result({success: false, message: ResultMessages.ALREADY_EXISTS});
+    delete this.users[user.get_uid()];
 
-        let next_uid = 0;
+    return new Result({ success: true });
+  }
 
-        // @ts-ignore
-        if (settings !== undefined && settings?.uid !== undefined) {
-            // Check if uid is available
-            // @ts-ignore
-            if (this.users[settings.uid])
-                return new Result({success: false, message: ResultMessages.ALREADY_EXISTS});
-            // @ts-ignore
-            next_uid = settings.uid;
-        } else {
-            // Find the next available uid
-            next_uid = 0;
+  get_current_user(): User {
+    return this.users[this.current_session().get_effective_uid()];
+  }
 
-            if (Object.keys(this.users).length === 1) {
-                next_uid = 1000;
-            } else {
-                for (let uid of Object.keys(this.users)) {
-                    if (parseInt(uid) > next_uid)
-                        next_uid = parseInt(uid);
-                }
+  async change_user_password(
+    uid: number,
+    new_password: string,
+  ): Promise<Result<void>> {
+    let user = this.get_user({ uid });
+
+    if (!user) {
+      return new Result({ success: false, message: ResultMessages.NOT_FOUND });
+    }
+
+    await user.set_password(new_password);
+
+    return new Result({ success: true });
+  }
+
+  change_user_uid(uid: number, new_uid: number): Result<void> {
+    let user = this.get_user({ uid });
+
+    if (!user) {
+      return new Result({ success: false, message: ResultMessages.NOT_FOUND });
+    }
+
+    if (this.get_user({ uid: new_uid })) {
+      return new Result({
+        success: false,
+        message: ResultMessages.ALREADY_EXISTS,
+      });
+    }
+
+    delete this.users[uid];
+    this.users[new_uid] = user;
+
+    return new Result({ success: true });
+  }
+
+  // TODO: Implement groups
+
+  private async create_root_user() {
+    // TODO: Randomize this password for the 'game' element
+    await this.add_user("root", "password", {
+      uid: 0,
+      full_name: "root",
+      room_number: "0",
+      work_phone: "0",
+      home_phone: "0",
+      home_dir: "/root",
+    });
+  }
+
+  // This is in-between a filesystem and a user function
+  run_current_user_shellrc() {
+    let current_user = this.get_user({ uid: this.sys$getuid().get_data() });
+
+    if (!current_user) {
+      throw new Error("Failed to find current user when running shellrc");
+    }
+
+    let shellrc_location = current_user.get_home_dir() + "/.shellrc";
+
+    let find_shellrc = this.fs.find(shellrc_location);
+
+    if (find_shellrc.ok()) {
+      // @ts-ignore
+      let shellrc = find_shellrc.get_data() as File;
+      // @ts-ignore: read doesn't exist on file??
+      let lines = shellrc.read().split("\n");
+
+      for (let line of lines) {
+        this.terminal?.handle_command_input(line);
+      }
+    }
+  }
+
+  ////////////////////////
+  // Filesystem Methods //
+  ////////////////////////
+
+  sync_user_and_group_files() {
+    // TODO: Implement
+    // Sync the /etc/passwd and /etc/group files with the current users and groups
+  }
+
+  sync_hostname_file() {
+    // TODO: Implement
+    // Sync the /etc/hostname file with the current hostname
+  }
+
+  //////////////////
+  // Misc Methods //
+  //////////////////
+  get_env(key: string): string | undefined {
+    if (this.sessions.length === 0) {
+      return undefined;
+    }
+
+    return this.sessions[this.sessions.length - 1].get_env(key);
+  }
+
+  set_env(key: string, value: string): Result<void> {
+    if (this.sessions.length === 0) {
+      // This should never happen, but you never know
+      return new Result({ success: false });
+    }
+
+    this.sessions[this.sessions.length - 1].set_env(key, value);
+
+    return new Result({ success: true });
+  }
+
+  add_shell_history_record(record: string) {
+    this.shell_history.push(record);
+
+    // TODO: Sync with shell history file
+  }
+
+  get_shell_history(): string[] {
+    return this.shell_history;
+  }
+
+  current_session(): Session {
+    // This should never fail because we should always have a session
+    return this.sessions[this.sessions.length - 1];
+  }
+
+  new_session(uid: number): boolean {
+    const user = this.get_user({ uid });
+
+    if (!user) return false;
+    // Find the user's home directory
+    const find_home_dir = this.fs.find(user.get_home_dir()!);
+    if (find_home_dir.fail()) {
+      return false;
+    } else {
+      // @ts-ignore
+      this.sessions.push(
+        new Session({ real_uid: uid, current_dir: find_home_dir.get_data() }),
+      );
+      return true;
+    }
+  }
+
+  async run_command(command: string, args: string[]): Promise<number> {
+    // Step 1: List all directories in the $PATH
+    // Step 2: Loop through each directory and search for our command name
+    // Step 3a: If we find it at some point, run the command
+    // Step 3b: If we didn't find it, return a "command not found" and exit (127)
+
+    return new Promise<number>(async (resolve) => {
+      let path = this.current_session().get_env("PATH");
+
+      if (path === undefined) {
+        print(`shell: command not found: ${command}`);
+        return resolve(127);
+      }
+
+      let bin_dirs = path.split(":");
+
+      for (let dir of bin_dirs) {
+        let find_dir = this.fs.find(dir);
+        if (find_dir.ok()) {
+          let dir_obj = find_dir.get_data() as Directory;
+
+          // Try to find our executable inside our directory
+          let has_executable = dir_obj.get_child(command);
+          if (has_executable.ok()) {
+            let module;
+            try {
+              module = await import(`./bin/${command}.js`);
+            } catch (e) {
+              print(
+                "Something went wrong, check the console for more details.",
+              );
+              console.error(e);
+              return resolve(127);
             }
-        }
 
-        this.users[next_uid] = new User({
-            uid: next_uid,
-            username: username,
-            password: await sha1hash(password),
-            full_name: settings?.full_name,
-            room_number: settings?.room_number,
-            work_phone: settings?.work_phone,
-            home_phone: settings?.home_phone,
-            home_dir: settings?.home_dir,
-        });
-
-
-        return new Result({success: true, data: this.users[next_uid]});
-    }
-
-    get_user(username: string): User | null {
-        for (let uid in this.users) {
-            if (this.users[uid].get_username() === username)
-                return this.users[uid];
-        }
-
-        return null;
-    }
-
-    get_user_by_uid(uid: number): User | null {
-        if (this.users[uid])
-            return this.users[uid];
-        else
-            return null;
-    }
-
-    get_hostname(): string {
-        return this.hostname;
-    }
-
-    get_current_user(): User {
-        return this.users[this.current_session().get_effective_uid()];
-    }
-
-    find(path: string) {
-        return this.fs.find(path);
-    }
-
-    get_input_history(index?: number): string | string[] {
-        if (index === undefined)
-            // Get the entire input history if no index is provided
-            return this.input_history;
-        // The index is in reverse order
-        return [...this.input_history].reverse()[index];
-    }
-
-    add_input_record(input: string) {
-        this.input_history.push(input);
-    }
-
-    async run_command(command: string, args: string[]): Promise<number> {
-        // Step 1: List all directories in the $PATH
-        // Step 2: Loop through each directory and search for our command name
-        // Step 3a: If we find it at some point, run the command
-        // Step 3b: If we didn't find it, return a "command not found" and exit (127)
-
-        return new Promise<number>(async (resolve) => {
-
-            let path = this.current_session().get_env("PATH");
-
-            if (path === undefined) {
-                print(`shell: command not found: ${command}`);
-                return resolve(127);
+            try {
+              return resolve(module.main(args));
+            } catch (e) {
+              // Fake segfault (well, the program did really crash lol)
+              // TODO: Make a fake pid?
+              print(
+                `[1]    <FAKEPID> segmentation fault (core dumped)  ${command}`,
+              );
+              console.error(e);
+              return resolve(139);
             }
-
-            let bin_dirs = path.split(":");
-
-            for (let dir of bin_dirs) {
-                let find_dir = this.find(dir);
-                if (find_dir.ok()) {
-                    let dir_obj = find_dir.get_data() as Directory;
-
-                    // Try to find our executable inside our directory
-                    let has_executable = dir_obj.get_child(command);
-                    if (has_executable.ok()) {
-                        let module;
-                        try {
-                            module = await import(`./bin/${command}.js`);
-                        } catch (e) {
-                            print("Something went wrong, check the console for more details.");
-                            console.error(e);
-                            return resolve(127);
-                        }
-
-                        try {
-                            return resolve(module.main(args));
-                        } catch (e) {
-                            // Fake segfault (well, the program did really crash lol)
-                            print(`[1]    <FAKEPID> segmentation fault (core dumped)  ${command}`);
-                            console.error(e);
-                            return resolve(139);
-                        }
-                    }
-                }
-            }
-
-            // At this point, we are yet to find our executable, so we need to fail
-            print(`shell: command not found: ${command}`);
-            return resolve(127);
-        });
-    }
-
-    // Syscalls?
-    sys$read(filepath: string): Result<string> {
-        let find = this.fs.find(filepath);
-
-        if (find.fail())
-            return new Result({success: false, message: ResultMessages.NOT_FOUND});
-
-        if (find.get_data()!.is_directory())
-            return new Result({success: false, message: ResultMessages.IS_DIRECTORY});
-
-        // @ts-ignore: Class inheritance
-        return find.get_data()!.read();
-    }
-
-    sys$write(filepath: string, data: string): Result<void> {
-        let find = this.fs.find(filepath);
-
-        if (find.fail())
-            return new Result({success: false, message: ResultMessages.NOT_FOUND});
-
-        if (find.get_data()!.is_directory())
-            return new Result({success: false, message: ResultMessages.IS_DIRECTORY});
-
-        // @ts-ignore: Class inheritance
-        return new Result({success: true, data: find.get_data()!.write(data)});
-    }
-
-    sys$chown(filepath: string, owner: number, group: number): Result<void> {
-        let find = this.fs.find(filepath);
-
-        if (find.fail())
-            return new Result({success: false, message: ResultMessages.NOT_FOUND});
-
-        let file = find.get_data();
-
-        let change_perms = file?.change_owner(owner, group);
-
-        if (change_perms?.fail()) return change_perms;
-
-        return new Result({success: true});
-    }
-
-    sys$geteuid(): number {
-        return this.current_session().get_effective_uid();
-    }
-
-    sys$getegid(): number {
-        return this.current_session().get_effective_gid();
-    }
-
-    sys$stat(filepath: string): Result<StatStruct> {
-        let find = this.fs.find(filepath);
-
-        if (find.fail())
-            return new Result({success: false, message: ResultMessages.NOT_FOUND});
-
-        return new Result({success: true, data: find.get_data()!.stat()});
-    }
-
-    sys$readdir(filepath: string): Result<string[]> {
-        let find = this.fs.find(filepath);
-
-        if (find.fail())
-            return new Result({success: false, message: ResultMessages.NOT_FOUND});
-
-        if (!find.get_data()!.is_directory())
-            return new Result({success: false, message: ResultMessages.IS_FILE});
-
-        let files = [];
-
-        // @ts-ignore: Class inheritance
-        for (let file of find.get_data()!.get_children()) {
-            files.push(file.get_name());
+          }
         }
+      }
 
-        return new Result({success: true, data: files});
+      // At this point, we are yet to find our executable, so we need to fail
+      print(`shell: command not found: ${command}`);
+      return resolve(127);
+    });
+  }
+
+  get_errno(): Errno {
+    if (this.errno === undefined) {
+      return { name: "", number: 0, message: "No error" };
+    }
+    return this.errno;
+  }
+
+  set_errno(errno: Errno): void {
+    this.errno = errno;
+  }
+
+  //////////////
+  // Syscalls //
+  //////////////
+
+  sys$read(path: string): Result<string> {
+    let find = this.fs.find(path);
+
+    if (find.fail()) {
+      this.errno = Errno.ENOENT;
+      return new Result({ success: false, message: ResultMessages.NOT_FOUND });
     }
 
-    sys$chdir(filepath: string): Result<void> {
-        let find = this.fs.find(filepath);
-
-        if (find.fail()) {
-            this.errno = errno_messages.ENOENT;
-            return new Result({success: false, message: ResultMessages.NOT_FOUND});
-        }
-
-        if (!find.get_data()!.is_directory()) {
-            this.errno = errno_messages.ENOTDIR;
-            return new Result({success: false, message: ResultMessages.IS_FILE});
-        }
-
-        // @ts-ignore: Class inheritance
-        this.current_session().set_current_dir(find.get_data());
-
-        return new Result({success: true});
+    if (find.get_data() instanceof Directory) {
+      this.errno = Errno.EISDIR;
+      return new Result({
+        success: false,
+        message: ResultMessages.IS_DIRECTORY,
+      });
     }
 
-    getcwd(): string {
-        return this.current_session().get_current_dir().pwd();
+    // @ts-ignore
+    return (find.get_data() as File).read();
+  }
+
+  sys$getuid(): Result<number> {
+    if (this.sessions.length === 0) {
+      return new Result({ success: false, message: ResultMessages.GENERIC });
     }
 
-    mkdir(path: string) {
-        // TODO: Check if the user has permission to create a directory and if the directory already exists
-        let path_obj = new Path(path).canonicalize();
-        console.log(path_obj.to_string());
-        let parent = path_obj.parent_path();
-        let parent_exists = this.fs.find(parent);
-        if (!parent_exists.ok())
-            return new Result({success: false, message: ResultMessages.NOT_FOUND});
+    return new Result({
+      success: true,
+      data: this.sessions[this.sessions.length - 1].get_saved_uid(),
+    });
+  }
 
-        if (parent_exists.get_data()!.is_file())
-            return new Result({success: false, message: ResultMessages.IS_FILE});
-
-        // @ts-ignore
-        new Directory(path_obj.file_name(), parent_exists.get_data()!, this.geteuid(), this.geteuid());
-        return new Result({success: true});
+  sys$geteuid(): Result<number> {
+    if (this.sessions.length === 0) {
+      return new Result({ success: false, message: ResultMessages.GENERIC });
     }
+
+    return new Result({
+      success: true,
+      data: this.sessions[this.sessions.length - 1].get_saved_uid(),
+    });
+  }
 }
-
-/*
-Possible commands to implement:
-adduser - 100%
-base32
-base64
-cat - 100%
-cd - 100%
-chmod - 100%
-chown - 100%
-clear - 100%
-commands ?
-cp - 100%
-date
-echo - 100%
-env - 100%
-exit - 100%
-export - 100%
-head
-hostname - 100%
-id - 100%
-ls - 100%
-man
-md5sum
-mkdir - 100%
-mv - 100%
-nano
-passwd - 100%
-poweroff
-printenv - 100%
-pwd - 100%
-reboot
-rmdir - 100%
-rm - 100%
-sha1sum
-sha224sum
-sha256sum
-sha384sum
-sha512sum
-stat - 100%
-sudo
-su - 100%
-tail
-touch - 100%
-tutorial
-uname (DONE)
-unset - 100%
-uptime - 100%
-users
-wc
-which
-whoami - 100%
-who
- */

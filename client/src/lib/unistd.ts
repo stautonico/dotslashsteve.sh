@@ -5,10 +5,23 @@ export function read(path: string): string | undefined {
 }
 
 export function chdir(path: string): boolean {
-    console.log(`Chdiring to ${path}`);
-    return computer.sys$chdir(path).ok();
+    // TODO: Implement
+    return false;
+    // return computer.sys$chdir(path).ok();
 }
 
 export function getcwd(): string {
-    return computer.getcwd();
+    return "";
+    // TODO: Implement
+    // return computer.sys$getcwd();
+}
+
+export function geteuid(): number {
+    let result = computer.sys$geteuid();
+    if (result.ok())
+        // @ts-ignore: The check above ensures that this is a number
+        return result.get_data();
+    else
+        // Possible exploit? :)
+        return 0;
 }

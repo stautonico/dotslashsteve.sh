@@ -1,18 +1,30 @@
-import {print}  from "../util/io";
-import {computer} from "../util/globals";
+import {print} from "../util/io";
+import {geteuid} from "../lib/unistd";
+import {ArgParser} from "../util/argparser";
+import {getpwuid, passwd} from "../lib/pwd";
 
-export function main(_args: string[]): number {
-    const current_session = computer.current_session();
+export function main(args: string[]): number {
+    let parser = new ArgParser({
+        name: "whoami",
+        description: "print effective user name",
+        description_long: "Print the user name associated with the current effective user ID.  Same as id -un.",
+        version: "1.0.0",
+        print_function: print
+    });
+    let parsed = parser.parse(args);
 
-    const uid = current_session.get_effective_uid();
+    if (parsed.printed_version_or_help())
+        return 0;
 
-    const user = computer.get_user_by_uid(uid);
 
-    if (user) {
-        print(user.get_username());
-    } else {
-        print("?");
+    let passwd = getpwuid(geteuid());
+
+    if (passwd === undefined) {
+        print(`whoami: cannot find username for UID ${geteuid()}`);
+        return 1;
     }
+
+    print(passwd.pw_name);
 
     return 0;
 }

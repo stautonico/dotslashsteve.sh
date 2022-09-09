@@ -10,7 +10,7 @@ const TERMINALS = ["Puppy"];
 function get_username() {
     const current_session = computer.current_session();
     const uid = current_session.get_effective_uid();
-    const user = computer.get_user_by_uid(uid);
+    const user = computer.get_user({uid});
     return user ? user.get_username() : "?";
 }
 
@@ -61,7 +61,7 @@ function get_memory() {
 }
 
 function get_uptime() {
-    let uptime_secs = (Date.now() - computer.boot_time) / 1000;
+    let uptime_secs = (Date.now() - computer.get_boot_time()) / 1000;
     let day = Math.floor(uptime_secs / (3600 * 24));
     let hour = Math.floor(uptime_secs % (3600 * 24) / 3600);
     let minute = Math.floor(uptime_secs % 3600 / 60);

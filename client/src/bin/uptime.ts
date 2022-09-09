@@ -5,7 +5,7 @@ function format_uptime() {
     // Example output:
     // 21:31:53 up 341 days, 12:04,  1 user,  load average: 0.09, 0.02, 0.01
     // 17:32:11 up  1:43,  1 user,  load average: 2.55, 2.09, 1.78
-    let uptime_secs = (Date.now() - computer.boot_time) / 1000;
+    let uptime_secs = (Date.now() - computer.get_boot_time()) / 1000;
     let day = Math.floor(uptime_secs / (3600 * 24));
     let hour = Math.floor(uptime_secs % (3600 * 24) / 3600);
     let minute = Math.floor(uptime_secs % 3600 / 60);

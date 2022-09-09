@@ -32,7 +32,7 @@ export function main(args: string[]): number {
         return 1;
     }
 
-    let username_result = computer.get_user_by_uid(stat_result.uid);
+    let username_result = computer.get_user({uid: stat_result.uid});
     let username = username_result?.get_username() || "?";
 
     let output = `File: ${parsed.get("file")}

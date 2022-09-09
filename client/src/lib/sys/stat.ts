@@ -16,23 +16,29 @@ export interface StatStruct {
 }
 
 export function stat(path: string): StatStruct | undefined {
-    return computer.sys$stat(path).get_data();
+    // TODO: Implement
+    throw new Error("Not implemented");
+    // return computer.sys$stat(path).get_data();
 }
 
 export function ISDIR(path: string): boolean {
-    const find_result = computer.find(path);
-
-    if (find_result.fail())
-        return false;
-
-    return find_result.get_data()!.is_directory();
+    // TODO: Implement
+    throw new Error("Not implemented");
+    // const find_result = computer.find(path);
+    //
+    // if (find_result.fail())
+    //     return false;
+    //
+    // return find_result.get_data()!.is_directory();
 }
 
 export function ISREG(path: string): boolean {
-    const find_result = computer.find(path);
-
-    if (find_result.fail())
-        return false;
-
-    return find_result.get_data()!.is_file();
+    // TODO: Implement
+    throw new Error("Not implemented");
+    // const find_result = computer.find(path);
+    //
+    // if (find_result.fail())
+    //     return false;
+    //
+    // return find_result.get_data()!.is_file();
 }
