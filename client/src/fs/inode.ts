@@ -597,7 +597,8 @@ export class StandardFS {
 
     setup_bin(): void {
         // It would be really nice if this was automatic, but since we can't read files on disk, we'll have to do it manually
-        const AVAILABLE_BINS = ["cat", "clear", "hostname", "id", "ls", "man", "neofetch", "stat", "uname", "uptime", "whoami"];
+        // TODO: Maybe we can generate this list at build time?
+        const AVAILABLE_BINS = ["cat", "clear", "hostname", "id", "ls", "man", "neofetch", "stat", "uname", "uptime", "whoami", "head", "tail"];
 
         let bin = this.root.get_child("bin").get_data() as Directory;
 
