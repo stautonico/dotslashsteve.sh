@@ -29,7 +29,7 @@ export class ArgParser {
     private _version_string = "";
     private _did_parse_args = false;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private _custom_console_log: (...args: any[]) => void;
+    private readonly _custom_console_log: (...args: any[]) => void;
     private _positional_arg_counter = 0;
 
     constructor(options: ArgParserOptions) {
@@ -90,6 +90,11 @@ export class ArgParser {
         this._custom_console_log = options.print_function ?? console.log;
     }
 
+    private reset() {
+        this._did_parse_args = false;
+        this._positional_arg_counter = 0;
+    }
+
     private generate_help(): void {
         if (this._help_string === undefined || this._help_string === "") {
             this._help_string = `Usage: ${this._name}`;
@@ -145,16 +150,61 @@ export class ArgParser {
     }
 
     public generate_manual(): string {
-        // Generate the manpage string and return it
-        // TODO: Implement
-        return "";
+        let NAME = `<b>NAME</b>\n\t${this._name} - ${this._description}`;
+        let SYNOPSIS = `<b>SYNOPSIS</b>\n\t${this._name} [OPTION]... `;
+        let DESCRIPTION = `<b>DESCRIPTION</b>\n\t${this._description_long}\n\n`;
+
+        for (let arg of this._args) {
+            let arg_name = arg[0];
+            let arg_obj = arg[1];
+            if (arg_obj.positional) {
+                // TODO: Implement positional arguments that can take one or more values (+)
+                if (arg_obj.required)
+                    SYNOPSIS += `${arg_name.toUpperCase()} `;
+                else
+                    SYNOPSIS += `[${arg_name.toUpperCase()}] `;
+            } else {
+                // Flag
+                // If we have more than one flags, print the description on the next line
+                // @ts-ignore
+                if (arg_obj.short == undefined) arg_obj.short = [];
+                if (!Array.isArray(arg_obj.short)) arg_obj.short = [arg_obj.short];
+                // @ts-ignore
+                if (arg_obj.long == undefined) arg_obj.long = [];
+                if (!Array.isArray(arg_obj.long)) arg_obj.long = [arg_obj.long];
+
+                let short = [];
+                let long = [];
+
+                for (let short_flag of arg_obj.short) short.push("-" + short_flag);
+                for (let long_flag of arg_obj.long) long.push("--" + long_flag);
+
+                // TODO: Implement flag arguments that can take one or more values (+)
+
+                if (short.length + long.length > 1) {
+                    if (arg_obj.type === "boolean")
+                        DESCRIPTION += `\t\\e[0;32m${short.concat(long).join(" ")}\\e[0m\n\t\t${arg_obj.description}\n\n`;
+                    else
+                        DESCRIPTION += `\t<b>${short.concat(long).join(" ")}</b>=${arg_name.toUpperCase()}\n\t\t[PUT HELP STRING HERE]\n\n`;
+                } else {
+                    if (arg_obj.type === "boolean")
+                        DESCRIPTION += `\t\\e[0;32m${short.concat(long).join(" ")}\\e[0m\t${arg_obj.description}\n\n`;
+                    else
+                        DESCRIPTION += `\t<b>${short.concat(long).join(" ")}</b>=${arg_name.toUpperCase()}\n\t\t[PUT HELP STRING HERE]\n\n`;
+                }
+            }
+        }
+
+        return `${NAME}\n\n${SYNOPSIS}\n\n${DESCRIPTION}`;
+
     }
 
     public parse(argv: string[] | string): ArgParseResult {
-        // if (this._did_parse_args) {
-            //     TODO: Maybe just re-parse or just do nothing?
+        if (this._did_parse_args) {
+            // TODO: Maybe just re-parse or just do nothing?
+            this.reset();
             // throw new Error("ArgParser: Already parsed arguments");
-        // }
+        }
         if (typeof argv === "string")
             argv = argv.split(" ");
 
@@ -174,8 +224,6 @@ export class ArgParser {
                     output[name] = undefined;
             }
         }
-
-        // FIXME: Required for positional arguments doesn't work
 
         for (let i = 0; i < argv.length; i++) {
             let arg = argv[i];

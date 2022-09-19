@@ -1,6 +1,7 @@
 import {ArgParser} from "../util/argparser";
 import {print} from "../util/io";
 import {readdir} from "../lib/dirent";
+import {read} from "../lib/unistd";
 
 export const parser = new ArgParser({
     name: "man",
@@ -24,9 +25,13 @@ export function main(args: string[]): number {
     if (parsed.printed_version_or_help())
         return 0;
 
-    let files = readdir("/usr/share/man");
+    let read_result = read(`/usr/share/man/${parsed.get("page")}`);
 
-    print(files!.join(", "));
+    if (read_result) {
+        print(read_result, {escape_html: false});
+        return 0;
+    }
 
-    return 0;
+    print(`No manual entry for ${parsed.get('page')}`);
+    return 16;
 }
