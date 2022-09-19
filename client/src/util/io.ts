@@ -1,4 +1,4 @@
-import {computer, OUTPUT_BUFFER} from "./globals";
+import {computer, OUTPUT_BUFFER, SETTINGS} from "./globals";
 
 interface PrintOptions {
     escape_html?: boolean, // Whether to sanitize the message (Remove html tags) |  Default - True
@@ -112,9 +112,11 @@ export function print(msg?: string, options?: PrintOptions) {
 }
 
 export function debug(msg: object | string | number | boolean) {
-    if (typeof msg === "object")
-        msg = JSON.stringify(msg); // So we can see objects without seeing "[object Object]"
-    print(`<span style="color: var(--term-debug-color);">[DEBUG]</span>: ${msg}`, {sanitize: false});
+    if (SETTINGS.debug) {
+        if (typeof msg === "object")
+            msg = JSON.stringify(msg); // So we can see objects without seeing "[object Object]"
+        print(`<span style="color: var(--term-debug-color);">[DEBUG]</span>: ${msg}`, {sanitize: false});
+    }
 }
 
 export function perror(msg: string) {

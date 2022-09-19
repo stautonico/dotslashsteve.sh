@@ -3,21 +3,22 @@ import {ArgParser} from "../util/argparser";
 import {stat, ISDIR} from "../lib/sys/stat";
 import {computer} from "../util/globals";
 
-export function main(args: string[]): number {
-    let parser = new ArgParser({
-        name: "stat",
-        description: "display file or file system status",
-        description_long: "display file or file system status",
-        version: "0.0.1",
-        print_function: print,
-        args: {
-            "file": {
-                description: "the file to display status for",
-                type: "string",
-                required: true,
-            }
+export const parser = new ArgParser({
+    name: "stat",
+    description: "display file or file system status",
+    description_long: "display file or file system status",
+    version: "0.0.1",
+    print_function: print,
+    args: {
+        "file": {
+            description: "the file to display status for",
+            type: "string",
+            required: true,
         }
-    });
+    }
+});
+
+export function main(args: string[]): number {
 
     let parsed = parser.parse(args);
 

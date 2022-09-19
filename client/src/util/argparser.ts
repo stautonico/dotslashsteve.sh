@@ -20,11 +20,11 @@ interface ArgParserOptions {
 }
 
 export class ArgParser {
-    private _name: string; // The name of the program/command
-    private _version?: string;
+    private readonly _name: string; // The name of the program/command
+    private readonly _version?: string;
     private _description?: string;
     private _description_long?: string;
-    private _args: Map<string, Arg>;
+    private readonly _args: Map<string, Arg>;
     private _help_string = "";
     private _version_string = "";
     private _did_parse_args = false;
@@ -144,11 +144,17 @@ export class ArgParser {
         this._args.set(name, options);
     }
 
+    public generate_manual(): string {
+        // Generate the manpage string and return it
+        // TODO: Implement
+        return "";
+    }
+
     public parse(argv: string[] | string): ArgParseResult {
-        if (this._did_parse_args) {
-            // TODO: Maybe just re-parse or just do nothing?
-            throw new Error("ArgParser: parse() called twice");
-        }
+        // if (this._did_parse_args) {
+            //     TODO: Maybe just re-parse or just do nothing?
+            // throw new Error("ArgParser: Already parsed arguments");
+        // }
         if (typeof argv === "string")
             argv = argv.split(" ");
 
@@ -241,8 +247,6 @@ export class ArgParser {
                     return new ArgParseResult({});
                 }
 
-                console.log(`Setting ${expected_positional_arg.name!} to ${arg}`);
-
                 output[expected_positional_arg.name!] = arg;
             }
         }
@@ -252,10 +256,8 @@ export class ArgParser {
         this._args.forEach(arg => {
             // If our arg is required, check that it exists in our output
             if (arg.required) {
-                console.log(`${arg.name} is required, let's check if we have it`);
                 // @ts-ignore: arg.name is never undefined
                 if (!(arg.name in output) || (output[arg.name] === undefined)) {
-                    console.log(`WE'RE MISSING REQUIRED ${arg.name}`);
                     missing_arg = arg.name;
                     return;
                 }
@@ -263,8 +265,8 @@ export class ArgParser {
         });
 
         if (missing_arg) {
-            // Do something
-            throw new Error(`${this._name}: Missing required argument '${missing_arg}'`);
+            this._custom_console_log(`${this._name}: Missing required argument '${missing_arg}'`);
+            return new ArgParseResult({}, true);
         }
 
         this._did_parse_args = true;
@@ -366,14 +368,14 @@ class ArgParseResult {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public has(key: string): any {
         // eslint-disable-next-line no-prototype-builtins
-        return this._args.prototype.hasOwnProperty(key) && this._args[key] !== undefined;
+        return this._args.hasOwnProperty(key) && this._args[key] !== undefined;
     }
 
     public has_none(): boolean {
         // Loop through each of our possible arguments and check if any of them were provided
         for (let key in this._args) {
             // eslint-disable-next-line no-prototype-builtins
-            if (this._args.prototype.hasOwnProperty(key)) {
+            if (this._args.hasOwnProperty(key)) {
                 if (this._args[key])
                     return false;
             }

@@ -11,9 +11,9 @@ export function chdir(path: string): boolean {
 }
 
 export function getcwd(): string {
-    return "";
-    // TODO: Implement
-    // return computer.sys$getcwd();
+    let cwd = computer.sys$getcwd();
+    if (cwd.fail()) return "?";
+    return cwd.get_data()!;
 }
 
 export function geteuid(): number {
@@ -24,4 +24,18 @@ export function geteuid(): number {
     else
         // Possible exploit? :)
         return 0;
+}
+
+
+export function gethostname(): string {
+    let result = computer.sys$gethostname();
+    if (result.ok())
+        // @ts-ignore: The check above ensures that this is a string
+        return result.get_data();
+    else
+        return "localhost";
+}
+
+export function sethostname(name: string): boolean {
+    return computer.sys$sethostname(name).ok();
 }

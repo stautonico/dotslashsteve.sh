@@ -7,6 +7,16 @@ import {arch} from "../util/arch";
 const SHELLS = ["Trout", "Bish"];
 const TERMINALS = ["Puppy"];
 
+export const parser = new ArgParser({
+    name: "neofetch",
+    description: "A fast, highly customizable system info script",
+    description_long: "Neofetch is a CLI system information tool written in BASH. Neofetch\n" +
+        "displays information about your system next to an image, your OS logo,\n" +
+        "or any ASCII file of your choice.",
+    version: "0.0.1",
+    print_function: print,
+});
+
 function get_username() {
     const current_session = computer.current_session();
     const uid = current_session.get_effective_uid();
@@ -83,15 +93,6 @@ function get_uptime() {
 }
 
 export function main(args: string[]): number {
-    let parser = new ArgParser({
-        name: "neofetch",
-        description: "A fast, highly customizable system info script",
-        description_long: "Neofetch is a CLI system information tool written in BASH. Neofetch\n" +
-            "displays information about your system next to an image, your OS logo,\n" +
-            "or any ASCII file of your choice.",
-        version: "0.0.1",
-        print_function: print,
-    });
     const parsed = parser.parse(args);
 
     if (parsed.printed_version_or_help()) {

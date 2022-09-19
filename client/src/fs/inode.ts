@@ -10,6 +10,7 @@ import {Path} from "./path";
 import {computer} from "../util/globals";
 import {StatStruct} from "../lib/sys/stat";
 import {termprefs_write_handler} from "../util/callbacks";
+import {print} from "../util/io";
 
 type PermissionType = "read" | "write" | "execute";
 type EventType = "read" | "write" | "execute" | "move" | "change_perm" | "change_owner" | "delete";
@@ -558,10 +559,12 @@ export class StandardFS {
     private root: Directory = new Directory("/", 0, 0);
 
     constructor() {
-        this.init();
+        (async () => {
+            await this.init();
+        })();
     }
 
-    init(): void {
+    async init(): Promise<void> {
         for (let dir of ["bin", "etc", "home", "lib", "mnt", "opt", "proc", "root", "sbin", "tmp", "usr", "var"]) {
             let directory = new Directory(dir, 0, 0, {parent: this.root});
 
@@ -588,13 +591,13 @@ export class StandardFS {
         //this.setup_root();
         //this.setup_sbin();
         //this.setup_tmp();
-        //this.setup_usr();
+        await this.setup_usr();
         //this.setup_var();
     }
 
     setup_bin(): void {
         // It would be really nice if this was automatic, but since we can't read files on disk, we'll have to do it manually
-        const AVAILABLE_BINS = ["mkdir", "id", "neofetch", "uname", "ls", "stat", "uptime", "whoami", "edit", "cat", "clear"];
+        const AVAILABLE_BINS = ["mkdir", "id", "neofetch", "uname", "ls", "stat", "uptime", "whoami", "edit", "cat", "clear", "hostname", "man"];
 
         let bin = this.root.get_child("bin").get_data() as Directory;
 
@@ -646,6 +649,25 @@ export class StandardFS {
         // Create a pseudo-file for each of the available terminal fonts
         for (let font of TERMINAL_FONTS)
             new File(font + ".ttf", 1000, 1000, {parent: local_share_fonts_dir});
+    }
+
+    async setup_usr(): Promise<void> {
+        let usr = this.root.get_child("usr").get_data() as Directory;
+        let share = new Directory("share", 0, 0, {parent: usr});
+        let man = new Directory("man", 0, 0, {parent: share});
+
+        // Generate the manpage file for each binary
+        let bin_directory = this.root.get_child("bin").get_data() as Directory;
+        for (let file of bin_directory.get_children()) {
+            let file_name = file.get_name();
+            try {
+                let module = await import(`../bin/${file_name}.js`);
+                let manpage = module.parser.generate_manual();
+                let file = new File(file_name, 0, 0, {parent: man, content: manpage});
+            } catch (e) {
+                console.error(`Error while creating manpage for ${file_name}: `, e);
+            }
+        }
     }
 
     find(path: string | Path): Result<FSBaseObject> {
