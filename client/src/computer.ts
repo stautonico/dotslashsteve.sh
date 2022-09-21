@@ -7,6 +7,7 @@ import {Result, ResultMessages} from "./util/result";
 import {sha1hash} from "./util/crypto";
 import {Terminal} from "./terminal";
 import {print} from "./util/io";
+import * as path from "path";
 
 export class Computer {
     private readonly boot_time: number;
@@ -445,6 +446,39 @@ export class Computer {
         }
 
         return new Result({success: true, data: children_names});
+    }
 
+    sys$mkdir(pathname: string, mode: number): Result<void> {
+        // Check if it already exists
+        let find_dir = this.fs.find(pathname);
+
+        if (find_dir.ok()) {
+            this.errno = Errno.EEXIST;
+            return new Result({success: false, message: ResultMessages.ALREADY_EXISTS});
+        }
+
+        if (!pathname.includes("/")) pathname = "./" + pathname;
+
+        // Make sure we have write permissions on the parent dir
+        let parent_path = pathname.split("/").slice(0, -1).join("/");
+
+        // Just in case
+        let find_parent = this.fs.find(parent_path);
+
+        if (find_parent.fail()){
+            this.errno = Errno.ENOENT;
+            return new Result({success: false, message: ResultMessages.NOT_FOUND});
+        }
+
+        // TODO: Check write permissions on parent
+
+        // TODO: Replace this with this.sys$getegid()
+        // TODO: Apply `mode`
+        // @ts-ignore
+        let new_dir = new Directory(pathname.split("/").at(-1), this.sys$geteuid(), this.sys$geteuid(), {
+            parent: find_parent.get_data()
+        });
+
+        return new Result({success: true});
     }
 }

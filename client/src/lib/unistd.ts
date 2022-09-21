@@ -39,3 +39,7 @@ export function gethostname(): string {
 export function sethostname(name: string): boolean {
     return computer.sys$sethostname(name).ok();
 }
+
+export function mkdir(pathname: string, mode: number): boolean {
+    return computer.sys$mkdir(pathname, mode).ok();
+}
