@@ -77,5 +77,16 @@ export class Session {
 
     set_env(key: string, value: string): void {
         this.env[key] = value;
+
+        console.log(this.env);
     }
+
+    unset_env(key: string): void {
+        delete this.env[key];
+    }
+
+    getallenv() {
+        return this.env;
+    }
+
 }

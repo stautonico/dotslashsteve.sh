@@ -7,7 +7,6 @@ import {Result, ResultMessages} from "./util/result";
 import {sha1hash} from "./util/crypto";
 import {Terminal} from "./terminal";
 import {print} from "./util/io";
-import * as path from "path";
 
 export class Computer {
     private readonly boot_time: number;
@@ -34,6 +33,8 @@ export class Computer {
     // user probably wouldn't be created yet
     async init() {
         await this.create_root_user();
+        // TODO: Change this, its only for debugging
+        this.set_env("HOME", "/home/user");
     }
 
     link_terminal(terminal: Terminal) {
@@ -246,7 +247,17 @@ export class Computer {
             return new Result({success: false});
         }
 
-        this.sessions[this.sessions.length - 1].set_env(key, value);
+        this.current_session().set_env(key, value);
+
+        return new Result({success: true});
+    }
+
+    unset_env(key: string): Result<void> {
+        if (this.sessions.length === 0) {
+            return new Result({success: false, message: ResultMessages.GENERIC});
+        }
+
+        this.sessions[this.sessions.length - 1].unset_env(key);
 
         return new Result({success: true});
     }
@@ -465,7 +476,7 @@ export class Computer {
         // Just in case
         let find_parent = this.fs.find(parent_path);
 
-        if (find_parent.fail()){
+        if (find_parent.fail()) {
             this.errno = Errno.ENOENT;
             return new Result({success: false, message: ResultMessages.NOT_FOUND});
         }
@@ -480,5 +491,24 @@ export class Computer {
         });
 
         return new Result({success: true});
+    }
+
+    sys$chdir(path: string): Result<void> {
+        let find_result = this.fs.find(path);
+        if (find_result.fail()) {
+            this.errno = Errno.ENOENT;
+            return new Result({success: false, message: ResultMessages.NOT_FOUND});
+        }
+
+        // TODO: Check if we have executable permissions
+        if (find_result.get_data()?.is_file()) {
+            this.errno = Errno.ENOTDIR;
+            return new Result({success: false, message: ResultMessages.MISSING_ARGUMENT});
+        }
+
+        // @ts-ignore: Handled by function above
+        this.sessions[this.sessions.length - 1].set_current_dir(find_result.get_data());
+        return new Result({success: true});
+
     }
 }

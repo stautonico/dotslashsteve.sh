@@ -4,6 +4,7 @@ import {Terminal} from "./terminal";
 import {computer, PASS_THROUGH_INDICATOR} from "./util/globals";
 import {stat, ISDIR} from "./lib/sys/stat";
 import {chdir, getcwd} from "./lib/unistd";
+import {setenv} from "./lib/stdlib";
 
 export function cd(args: string[], _terminal: Terminal): number {
     const parser = new ArgParser({
@@ -35,29 +36,6 @@ export function cd(args: string[], _terminal: Terminal): number {
     }
 
     return 0;
-
-
-    // // Make sure the directory exists
-    // const stat_result = stat(parsed.get("directory"));
-    //
-    // if (stat_result === undefined) {
-    //     print(`cd: ${parsed.get("directory")}: No such file or directory`);
-    //     return 1;
-    // }
-    //
-    // if (!ISDIR(parsed.get("directory"))) {
-    //     print(`cd: ${parsed.get("directory")}: Not a directory`);
-    //     return 1;
-    // }
-    //
-    // const result = chdir(parsed.get("directory"));
-    //
-    // if (!result) {
-    //     print(`cd: ${parsed.get("directory")}: Permission denied`);
-    //     return 1;
-    // }
-    //
-    // return 0;
 }
 
 export function history(_args: string[], _terminal: Terminal): number {
@@ -108,6 +86,34 @@ export function passthrough(args: string[], terminal: Terminal): number {
 
     terminal.pass_through_enabled = !terminal.pass_through_enabled;
     PASS_THROUGH_INDICATOR!.style.display = terminal.pass_through_enabled ? "block" : "none";
+
+    return 0;
+}
+
+export function custom_export(args: string[], terminal: Terminal): number {
+    const parser = new ArgParser({
+        name: "export",
+        description: "Set an environment variable",
+        description_long: "Set an environment variable",
+        version: "0.0.1",
+        print_function: print,
+        args: {
+            "value": {
+                type: "string",
+                required: true,
+                description: "The key=value to set",
+                positional: true
+            }
+        }
+    });
+    const parsed = parser.parse(args);
+
+    if (parsed.printed_version_or_help())
+        return 0;
+
+    let {key, value} = parsed.get("value").split("=");
+
+    setenv(key, value);
 
     return 0;
 }

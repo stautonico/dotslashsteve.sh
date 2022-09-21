@@ -1,19 +1,12 @@
 import {debug, print} from "./util/io";
 import {Buffer} from "./util/buffer";
-import {cd, history, pwd, passthrough} from "./terminal_builtins";
+import {cd, history, pwd, passthrough, custom_export} from "./terminal_builtins";
 import {CURSOR, OUTPUT_BUFFER, OUTPUT_FRAME, PASS_THROUGH_INDICATOR} from "./util/globals";
 import {make_backslash_at, make_backslash_d, make_backslash_capital_t, make_backslash_t} from "./util/date";
 import {computer} from "./util/globals";
 import {escape_html} from "./util/html";
 import {KeyboardShortcut} from "./util/keyboard";
 import { geteuid } from "./lib/unistd";
-
-/*
-Frame buffer to hold output ready for terminal.
-Backspace single char is fine.
-Append when using print so no full recalculation.
-Recalculate when erasing more that one char
- */
 
 export class Terminal {
     // The buffer that stores what the user has typed in/is currently typing in
@@ -50,7 +43,7 @@ export class Terminal {
     DONE: cd: Change the current working directory
     TODO: chdir: Change the current working directory (maybe won't do)
     TODO: exit: Exit the terminal
-    TODO: export: Export a variable to the environment
+    DONE: export: Export a variable to the environment
     TODO: history: Show the history of commands
     TODO: logout: Log out of the current session
     TODO: printf: Print formatted output to the terminal
@@ -78,7 +71,8 @@ export class Terminal {
         cd,
         history,
         pwd,
-        passthrough
+        passthrough,
+        "export": custom_export
     };
 
     constructor() {
@@ -174,6 +168,10 @@ export class Terminal {
     }
 
     async handle_command_input(input: string) {
+        // Lets do some pre-processing to the input
+        // TODO: Here we would replace environment variables
+        input = input.replaceAll("~", computer.get_env("HOME") || "")
+
         const command = input.split(" ")[0];
         const args = input.split(" ").slice(1);
 
