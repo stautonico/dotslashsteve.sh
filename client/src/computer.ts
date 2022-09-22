@@ -7,6 +7,7 @@ import {Result, ResultMessages} from "./util/result";
 import {sha1hash} from "./util/crypto";
 import {Terminal} from "./terminal";
 import {print} from "./util/io";
+import {OUTPUT_BUFFER} from "./util/globals";
 
 export class Computer {
     private readonly boot_time: number;
@@ -332,6 +333,8 @@ export class Computer {
                         try {
                             return resolve(module.main(args));
                         } catch (e) {
+                            // Make sure the colors reset
+                            OUTPUT_BUFFER.push("</span>")
                             // Fake segfault (well, the program did really crash lol)
                             // TODO: Make a fake pid?
                             print(

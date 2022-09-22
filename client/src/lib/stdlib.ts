@@ -1,6 +1,5 @@
 import {computer} from "../util/globals";
 
-// TODO: Static type this
 export function getallenv(): { [key: string]: string } {
     return computer.current_session().getallenv();
 }

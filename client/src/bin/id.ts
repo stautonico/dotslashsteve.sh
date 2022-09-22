@@ -1,6 +1,8 @@
-import {print,} from "../util/io";
+import {perror, print,} from "../util/io";
 import {computer} from "../util/globals";
 import {ArgParser} from "../util/argparser";
+import {Errno} from "../util/errno";
+import {geteuid} from "../lib/unistd";
 
 export const parser = new ArgParser({
     name: "id",
@@ -19,8 +21,21 @@ export const parser = new ArgParser({
     }
 });
 
-export function main(_args: string[]): number {
+export function main(args: string[]): number {
+    const parsed = parser.parse(args);
 
+    if (parsed.printed_version_or_help())
+        return 0;
+
+    if (parsed.has("user")) {
+        computer.set_errno(Errno.ENOSYS);
+        perror("id");
+        return 1;
+    }
+
+    let uid = geteuid();
+
+    print(`${uid}`);
 
     return 0;
 }

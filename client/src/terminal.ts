@@ -185,6 +185,7 @@ export class Terminal {
             this.builtins[command](args, this);
         } else {
             const status_code = await computer.run_command(command, args);
+            OUTPUT_BUFFER.push("</span>");
             debug(`Command status code: ${status_code}`);
         }
 
