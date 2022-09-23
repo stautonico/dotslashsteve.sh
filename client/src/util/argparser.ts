@@ -104,7 +104,6 @@ export class ArgParser {
                     this._help_string += ` ${name}`;
                 } else {
                     if (arg.long && arg.long.length > 0) {
-                        console.log(arg.long);
                         if (typeof arg.long === "string") {
                             this._help_string += ` [--${arg.long}]`;
                         } else if (Array.isArray(arg.long)) {

@@ -2,6 +2,7 @@ import {ArgParser} from "../util/argparser";
 import {perror, print} from "../util/io";
 import {read} from "../lib/unistd";
 
+// TODO: Support cat-ing multiple files
 export const parser = new ArgParser({
     name: "cat",
     description: "concatenate files and print on the standard output",
