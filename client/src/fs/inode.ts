@@ -9,7 +9,7 @@ import {
 import {Path} from "./path";
 import {computer} from "../util/globals";
 import {StatStruct} from "../lib/sys/stat";
-import {termprefs_write_handler} from "../util/callbacks";
+import {proc_uptime_read_handler, termprefs_write_handler} from "../util/callbacks";
 import {print} from "../util/io";
 
 type PermissionType = "read" | "write" | "execute";
@@ -458,6 +458,11 @@ export class File extends FSBaseObject {
         return true;
     }
 
+    set_content(content: string): void {
+        this.content = content;
+        this.update_size();
+    }
+
 }
 
 export class Directory extends FSBaseObject {
@@ -587,7 +592,7 @@ export class StandardFS {
         //this.setup_lib();
         //this.setup_mnt();
         //this.setup_opt();
-        //this.setup_proc();
+        this.setup_proc();
         //this.setup_root();
         //this.setup_sbin();
         //this.setup_tmp();
@@ -658,6 +663,13 @@ export class StandardFS {
         // Create a pseudo-file for each of the available terminal fonts
         for (let font of TERMINAL_FONTS)
             new File(font + ".ttf", 1000, 1000, {parent: local_share_fonts_dir});
+    }
+
+    setup_proc(): void {
+        let proc = this.root.get_child("proc").get_data() as Directory;
+
+        let uptime = new File("uptime", 0, 0, {parent: proc});
+        uptime.add_event_listener("read", proc_uptime_read_handler);
     }
 
     async setup_usr(): Promise<void> {

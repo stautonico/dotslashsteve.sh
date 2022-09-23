@@ -46,6 +46,10 @@ export class Computer {
         return this.boot_time;
     }
 
+    get_uptime(): number {
+        return +((Date.now() - this.boot_time) / 1000).toFixed(2);
+    }
+
     get_hostname(): string {
         return this.hostname;
     }

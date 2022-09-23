@@ -1,4 +1,5 @@
-import {FSBaseObject} from "../fs/inode";
+import {File, FSBaseObject} from "../fs/inode";
+import {computer} from "./globals";
 
 // File listener callbacks
 export function termprefs_write_handler(file: FSBaseObject) {
@@ -31,4 +32,13 @@ export function termprefs_write_handler(file: FSBaseObject) {
         // @ts-ignore
         root.style.setProperty("--term-font-size", json["font-size"]);
     }
+}
+
+
+export function proc_uptime_read_handler(file: FSBaseObject) {
+    let uptime = computer.get_uptime();
+
+    // @ts-ignore
+    // The computer has had 0 idle time (lol) (second number)
+    file.set_content(`${uptime} 0.0`);
 }
