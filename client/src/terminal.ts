@@ -170,7 +170,13 @@ export class Terminal {
     async handle_command_input(input: string) {
         // Lets do some pre-processing to the input
         // TODO: Here we would replace environment variables
-        input = input.replaceAll("~", computer.get_env("HOME") || "")
+        let home_dir = computer.get_env("HOME");
+        if (!home_dir) {
+            let user = computer.get_current_user().get_username();
+            console.info(`HOME environment variable not set, defaulting to /home/${user}`);
+            home_dir = `/home/${user}`;
+        }
+        input = input.replaceAll("~", home_dir);
 
         const command = input.split(" ")[0];
         const args = input.split(" ").slice(1);

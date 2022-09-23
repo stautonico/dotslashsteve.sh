@@ -641,7 +641,16 @@ export class StandardFS {
         termprefs_file.add_event_listener("write", termprefs_write_handler);
 
         // Write the default preferences
-        termprefs_file.write(JSON.stringify(DEFAULT_TERM_PREFS, undefined, 4));
+        let bruh = JSON.stringify(DEFAULT_TERM_PREFS, undefined, 4);
+        let lines = bruh.split("\n");
+        // Put a blank line between each line
+        let new_lines = [];
+        for (let line of lines) {
+            new_lines.push(line);
+            new_lines.push("\n");
+        }
+        termprefs_file.write(new_lines.join("\n"));
+        // termprefs_file.write(JSON.stringify(DEFAULT_TERM_PREFS, undefined, 4));
 
         let local_dir = new Directory(".local", 1000, 1000, {parent: users_home});
         let local_share_dir = new Directory("share", 1000, 1000, {parent: local_dir});

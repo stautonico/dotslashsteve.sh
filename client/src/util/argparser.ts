@@ -96,20 +96,22 @@ export class ArgParser {
     }
 
     private generate_help(): void {
+        // TODO: Implement extended help with arg descriptions
         if (this._help_string === undefined || this._help_string === "") {
             this._help_string = `Usage: ${this._name}`;
             for (let [name, arg] of this._args) {
                 if (arg.positional) {
                     this._help_string += ` ${name}`;
                 } else {
-                    if (arg.long) {
+                    if (arg.long && arg.long.length > 0) {
+                        console.log(arg.long);
                         if (typeof arg.long === "string") {
                             this._help_string += ` [--${arg.long}]`;
                         } else if (Array.isArray(arg.long)) {
                             this._help_string += ` [--${arg.long.join("|--")}]`;
                         }
                     }
-                    if (arg.short) {
+                    if (arg.short && arg.short.length > 0) {
                         if (typeof arg.short === "string") {
                             this._help_string += ` [-${arg.short}]`;
                         } else if (Array.isArray(arg.short)) {
@@ -194,6 +196,11 @@ export class ArgParser {
                 }
             }
         }
+
+        // At the end, add the --help and --version flags
+        SYNOPSIS += "[--help] [--version]";
+        DESCRIPTION += `\t\\e[0;32m--help\\e[0m\n\t\tShow this help message and exit\n\n`;
+        DESCRIPTION += `\t\\e[0;32m--version\\e[0m\n\t\tShow program's version number and exit\n\n`;
 
         return `${NAME}\n\n${SYNOPSIS}\n\n${DESCRIPTION}`;
 

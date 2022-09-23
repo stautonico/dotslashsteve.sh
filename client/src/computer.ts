@@ -247,7 +247,6 @@ export class Computer {
             // This should never happen, but you never know
             return new Result({success: false});
         }
-
         this.current_session().set_env(key, value);
 
         return new Result({success: true});

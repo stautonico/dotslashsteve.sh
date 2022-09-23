@@ -111,7 +111,7 @@ export function custom_export(args: string[], terminal: Terminal): number {
     if (parsed.printed_version_or_help())
         return 0;
 
-    let {key, value} = parsed.get("value").split("=");
+    const [key, value] = parsed.get("value").split("=");
 
     setenv(key, value);
 
