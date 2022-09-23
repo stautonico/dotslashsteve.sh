@@ -13,7 +13,7 @@ export interface passwd {
   pw_expire: number;
 }
 
-export function getpwnam(name: string): passwd | undefined {
+export function getpwnam(_name: string): passwd | undefined {
   // TODO: Implement
   return undefined;
 }
