@@ -2,10 +2,7 @@ import {print} from "../util/io";
 import {ArgParser} from "../util/argparser";
 import {computer} from "../util/globals";
 import {arch} from "../util/arch";
-
-// TODO: Make these not change every time it's run
-const SHELLS = ["Trout", "Bish"];
-const TERMINALS = ["Puppy"];
+import {getenv} from "../lib/stdlib";
 
 export const parser = new ArgParser({
     name: "neofetch",
@@ -156,8 +153,8 @@ export function main(args: string[]): number {
 
 
     const username = get_username();
-    const shell = SHELLS[Math.floor(Math.random() * SHELLS.length)];
-    const terminal = TERMINALS[Math.floor(Math.random() * TERMINALS.length)];
+    const shell = getenv("SHELL") || "?";
+    const terminal = getenv("TERM") || "?";
     const gpu = get_gpu(); // TODO: Fix this, its unreliable (doesn't work on my laptop)
     const memory = get_memory();
     const uptime = get_uptime();

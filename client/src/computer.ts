@@ -1,4 +1,4 @@
-import {Directory, StandardFS, File} from "./fs/inode";
+import {Directory, File, StandardFS} from "./fs/inode";
 import {Group, User} from "./user";
 import {Session} from "./session";
 import {Errno} from "./util/errno";
@@ -8,7 +8,10 @@ import {sha1hash} from "./util/crypto";
 import {Terminal} from "./terminal";
 import {print} from "./util/io";
 import {OUTPUT_BUFFER} from "./util/globals";
-import {geteuid, open_mode} from "./lib/unistd";
+import {open_mode} from "./lib/unistd";
+
+const TERMINALS = ["Puppy", "yterm"];
+const SHELLS = ["Trout", "Bish"];
 
 export class Computer {
     private readonly boot_time: number;
@@ -25,6 +28,10 @@ export class Computer {
 
     private terminal: Terminal | undefined;
 
+    // Terminal and shell name for neofetch ($TERM and $SHELL)
+    private term = TERMINALS[Math.floor(Math.random() * TERMINALS.length)];
+    private shell = SHELLS[Math.floor(Math.random() * SHELLS.length)];
+
     constructor(hostname: string) {
         this.boot_time = Date.now();
         this.hostname = hostname;
@@ -35,8 +42,14 @@ export class Computer {
     // user probably wouldn't be created yet
     async init() {
         await this.create_root_user();
+    }
+
+    async post_session_init() {
+        // This runs after the first session has been created
         // TODO: Change this, its only for debugging
         this.set_env("HOME", "/home/user");
+        this.set_env("TERM", this.term);
+        this.set_env("SHELL", this.shell);
     }
 
     link_terminal(terminal: Terminal) {
@@ -265,6 +278,16 @@ export class Computer {
         this.sessions[this.sessions.length - 1].unset_env(key);
 
         return new Result({success: true});
+    }
+
+    list_env(): Result<string[]> {
+        if (this.sessions.length === 0) {
+            return new Result({success: false, message: ResultMessages.GENERIC});
+        }
+
+        let env = this.sessions[this.sessions.length - 1].getallenv();
+        let keys = Object.keys(env);
+        return new Result({success: true, data: keys});
     }
 
     add_shell_history_record(record: string) {

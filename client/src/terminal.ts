@@ -6,7 +6,8 @@ import {make_backslash_at, make_backslash_d, make_backslash_capital_t, make_back
 import {computer} from "./util/globals";
 import {escape_html} from "./util/html";
 import {KeyboardShortcut} from "./util/keyboard";
-import { geteuid } from "./lib/unistd";
+import {geteuid} from "./lib/unistd";
+
 
 export class Terminal {
     // The buffer that stores what the user has typed in/is currently typing in
@@ -87,6 +88,7 @@ export class Terminal {
         this.create_keyboard_shortcuts();
 
         focus();
+
     }
 
     // Intervals
@@ -194,7 +196,6 @@ export class Terminal {
             OUTPUT_BUFFER.push("</span>");
             debug(`Command status code: ${status_code}`);
         }
-
 
 
         // At the end, the last thing we want to do is reprint the prompt and reset the input buffer
@@ -482,6 +483,8 @@ export class Terminal {
             print("[<span style='color: red; font-weight: bold;'>FAIL</span>]: Failed to create new user. Check console for details.", {escape_html: false});
             return;
         }
+
+        await computer.post_session_init();
 
         print("./steve.sh [Version 0.0.0]");
         print("(c) Steve Tautonico. All rights reserved.");

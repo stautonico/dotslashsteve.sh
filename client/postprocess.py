@@ -1,5 +1,6 @@
 import os
 
+
 def set_binary_names():
     # We want to find the "inode.js" file and replace ["<BINARY_NAMES_HERE>"] with the directory listing of the binaries
     try:
@@ -16,7 +17,7 @@ def set_binary_names():
 
         new_binary_string = "["
         for b in binary_names:
-             new_binary_string += f'\"{b}\", '
+            new_binary_string += f'\"{b}\", '
         new_binary_string += "]"
         data = data.replace("[\"<BINARY_NAMES_HERE>\"]", new_binary_string)
 
@@ -24,6 +25,7 @@ def set_binary_names():
             f.write(data)
     except Exception as e:
         print(f"Failed to set binary names in dist/src/fs/inode.js: {e}")
+
 
 def run_job(job_function, job_name, job_num):
     try:
@@ -34,11 +36,10 @@ def run_job(job_function, job_name, job_num):
         print(f"Failed while running \"{job_name}\" (job #{job_num}) ({e}")
 
 
-
 if __name__ == "__main__":
     jobs = [[set_binary_names, "Set binary names"]]
 
     counter = 0
     for job in jobs:
         run_job(job[0], job[1], counter)
-        counter+=1
+        counter += 1
