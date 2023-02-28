@@ -325,6 +325,10 @@ export class Computer {
         }
     }
 
+    set_return_code(code: number) {
+        this.current_session().set_return_code(code);
+    }
+
     async run_command(command: string, args: string[]): Promise<number> {
         // Step 1: List all directories in the $PATH
         // Step 2: Loop through each directory and search for our command name
@@ -357,11 +361,14 @@ export class Computer {
                                 "Something went wrong, check the console for more details.",
                             );
                             console.error(e);
+                            this.set_return_code(127);
                             return resolve(127);
                         }
 
                         try {
-                            return resolve(module.main(args));
+                            let result = await module.main(args);
+                            this.set_return_code(result);
+                            return resolve(result);
                         } catch (e) {
                             // Make sure the colors reset
                             OUTPUT_BUFFER.push("</span>");
@@ -371,6 +378,7 @@ export class Computer {
                                 `[1]    <FAKEPID> segmentation fault (core dumped)  ${command}`,
                             );
                             console.error(e);
+                            this.set_return_code(139);
                             return resolve(139);
                         }
                     }
@@ -379,6 +387,7 @@ export class Computer {
 
             // At this point, we are yet to find our executable, so we need to fail
             print(`shell: command not found: ${command}`);
+            this.set_return_code(127);
             return resolve(127);
         });
     }

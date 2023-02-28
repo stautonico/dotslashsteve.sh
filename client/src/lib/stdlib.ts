@@ -28,4 +28,13 @@ export function listenv(): { [key: string]: string } {
 
     // TODO: Get each key and value
     // TODO: Maybe just write a function in computer so we don't have to get each value manually?
+    let env: { [key: string]: string } = {};
+    // @ts-ignore
+    for (let key of get_keys.get_data()) {
+        let get_value = computer.get_env(key);
+        if (get_value)
+            env[key] = get_value;
+    }
+
+    return env;
 }

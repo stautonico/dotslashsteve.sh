@@ -22,6 +22,19 @@ export class Session {
     private readonly saved_gid: number;
     private current_dir: Directory;
     private env: { [key: string]: string } = {"PATH": "/bin:/usr/bin"};
+    private special_env: {[key: string]: string } = {}; // Special environment variables like $? and $$
+    /*
+    Reserved variables:
+    $* - All arguments
+    $@ - All arguments, but each argument is separated by a space
+    $# - Number of arguments
+    $? - Exit code of last command
+    $- - Current options
+    $$ - PID of current shell
+    $! - PID of last background process
+    $0 - Name of current shell
+    $_ - Last argument of last command
+     */
 
     constructor(args: SessionArguments) {
         this.real_uid = args.real_uid;
@@ -72,6 +85,8 @@ export class Session {
     }
 
     get_env(key: string): string {
+        if (key in this.special_env)
+            return this.special_env[key];
         return this.env[key];
     }
 
@@ -85,6 +100,14 @@ export class Session {
 
     getallenv() {
         return this.env;
+    }
+
+    set_return_code(code: number): void {
+        this.set_special_env("?", code.toString());
+    }
+
+    set_special_env(key: string, value: string): void {
+        this.special_env[key] = value;
     }
 
 }
