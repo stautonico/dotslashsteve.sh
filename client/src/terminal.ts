@@ -9,6 +9,15 @@ import {KeyboardShortcut} from "./util/keyboard";
 import {geteuid} from "./lib/unistd";
 
 
+const NON_PRINTABLES = ["Control", "Shift", "Alt", "Super", "OS", "Meta", "Escape", "Delete",
+    "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
+    "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24",
+    "PrintScreen", "PageUp", "PageDown", "Insert", "Home", "End", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+    "CapsLock", "NumLock", "ScrollLock", "Pause", "ContextMenu", "AudioVolumeMute", "AudioVolumeDown", "AudioVolumeUp",
+    "MediaTrackNext", "MediaTrackPrevious", "MediaPlay", "MediaStop", "MediaPlayPause", "LaunchMail", "SelectTask",
+    "LaunchApp1", "LaunchApp2", "BrowserSearch", "BrowserHome", "BrowserBack", "BrowserForward", "BrowserStop", "BrowserRefresh"];
+
+
 export class Terminal {
     // The buffer that stores what the user has typed in/is currently typing in
     // This is used to be able to backspace and use the arrow keys to navigate the buffer.
@@ -126,7 +135,7 @@ export class Terminal {
     start_keyup_listener() {
         // Set up a listener for keyup events so we can release modifier keys
         document.body.addEventListener("keyup", (e) => {
-            if (["Control", "Shift", "Alt", "Super"].includes(e.key)) {
+            if (["Control", "Shift", "Alt", "Super", "OS", "Meta"].includes(e.key)) {
                 this.pressed_buttons[e.key] = false;
             }
 
@@ -140,11 +149,16 @@ export class Terminal {
             this.keydown_timeout = 75;
             this.typing = true;
 
+
             if (!this.pass_through_enabled) e.preventDefault();
             // Handle some special keys
             switch (e.key) {
                 case "Backspace":
                     this.handle_key_backspace();
+                    break;
+
+                case "Delete":
+                    this.handle_delete_key();
                     break;
 
                 case "Enter":
@@ -219,6 +233,10 @@ export class Terminal {
         if (this.input_buffer.length()) this.input_index = -1;
     }
 
+    handle_delete_key() {
+        console.warn("Delete key not implemented");
+    }
+
     async handle_key_enter() {
         if (this.input_buffer.length() > 0) {
             const joined = this.input_buffer.join("");
@@ -250,7 +268,8 @@ export class Terminal {
     handle_other_key(key: string) {
         // We can't do anything while we're waiting for a key to be released
         if (!this.waiting_for_release) {
-            if (["Control", "Shift", "Alt", "Super"].includes(key)) {
+            // Super, OS, and Meta are all the same key, but they have different names depending on the OS/browser
+            if (NON_PRINTABLES.includes(key)) {
                 this.pressed_buttons[key] = true;
             } else {
                 // If we have no modifier keys, don't bother checking

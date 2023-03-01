@@ -12,7 +12,6 @@ export function setenv(name: string, value: string, overwrite = true): boolean {
     if (!overwrite) {
         if (getenv(name)) return false;
     }
-    console.log(computer.set_env(name, value));
     return true;
 }
 
