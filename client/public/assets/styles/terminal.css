@@ -26,6 +26,8 @@
     --term-font: 'Fira Mono', monospace;
 
     --term-font-size: 16px;
+
+    --term-cursor-offset: 0em;
 }
 
 body {
@@ -40,6 +42,10 @@ body {
     transition: opacity 0.2s linear;
     scroll-behavior: smooth;
     color: var(--term-cursor);
+    /* Put the cursor above everything else, so we can move it back without screwing with anything */
+    z-index: 100;
+    /*position: absolute;*/
+    margin-left: var(--term-cursor-offset);
 }
 
 #cursor.active {

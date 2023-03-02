@@ -14,6 +14,28 @@ import {escape_html} from "./util/html";
 import {KeyboardShortcut} from "./util/keyboard";
 import {geteuid} from "./lib/unistd";
 
+/*
+The way the terminal works:
+There are 3 main buffers involved in the terminal:
+1. The input buffer : This is the buffer that stores what the user has typed in/is currently typing in
+2. The output buffer : This is an array of strings. Each string is a line of output.
+3. The line output buffer : This is the same as the input buffer, but it is used to print what the user has typed in.
+    The reason this is a separate buffer is so we can type characters in the input buffer without them being printed (such as the sudo password)
+
+How input is handled:
+1. The user types in a character
+2. The character is added to the input buffer
+3. The character is added to the line output buffer
+4. The line output buffer is printed to the screen
+5. The cursor is moved to the end of the line output buffer
+   5b. The cursor is an element in the line output buffer, so it can be moved around by adding/removing characters from the line output buffer
+6. The input buffer is printed to the screen
+7. When the user presses enter, the input is handled
+8. The input buffer is cleared
+9. The output line buffer is moved to the output buffer
+10. The line output buffer is cleared
+
+ */
 
 const NON_PRINTABLES = ["Control", "Shift", "Alt", "Super", "OS", "Meta", "Escape", "Delete",
     "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
@@ -53,6 +75,8 @@ export class Terminal {
     // This variable will be set to the key the terminal is waiting to be released
     // Once this key is released, the terminal can resume recieving input
     waiting_for_release? = "";
+
+    cursor_position = 0;
 
     /* List of builtins to implement
     TODO: alias: Create an alias for a command
@@ -111,10 +135,12 @@ export class Terminal {
     // Intervals
     start_blinking() {
         setInterval(() => {
+            let cursor = document.getElementById("cursor");
+            if (cursor === null) return;
             if (this.typing)
-                CURSOR!.classList.add("active");
+                cursor!.classList.add("active");
             else
-                CURSOR!.classList.toggle("active");
+                cursor!.classList.toggle("active");
         }, 500);
     }
 
@@ -280,14 +306,48 @@ export class Terminal {
     }
 
     handle_key_tab() {
-        alert("User pressed tab");
+        // List all files in the current directory and find the longest common prefix
+        let files = computer.current_session().get_current_dir().get_children();
+
+        // If we have no files, we can't do anything
+        if (files.length === 0) return;
+
+
+        // Match the beginning of the input buffer to the beginning of the file names
+        let matches = files.filter((file) => file.get_name().startsWith(this.input_buffer.join("")));
+
+        // If we have no matches, we can't do anything
+        if (matches.length === 0) return;
+
+        // If we have only one match, we can just print it
+        if (matches.length === 1) {
+            let match = matches[0].get_name();
+            // If the match is a directory, add a slash
+            if (matches[0].is_directory()) match += "/";
+            // Write the rest of the match to the output buffer (the rest that we haven't already written)
+            // Figure out how many characters the user already typed
+            let user_typed = this.input_buffer.join("").length;
+            // Slice the match from the user_typed index to the end
+            let match_slice = match.slice(user_typed);
+            // Write the match slice to the output buffer
+            for (let char of match_slice) OUTPUT_BUFFER.push(char);
+
+
+            this.input_buffer.clear();
+            // Push each character of the match to the input buffer
+            for (let char of match) this.input_buffer.push(char);
+
+
+            return;
+        }
+
+
     }
 
     handle_key_arrow(arrow: string) {
-        alert(`User pressed ${arrow}`);
+
     }
 
-    // https://www.toptal.com/developers/keycode/table-of-all-keycodes
     handle_other_key(key: string) {
         // We can't do anything while we're waiting for a key to be released
         if (!this.waiting_for_release) {
@@ -325,7 +385,11 @@ export class Terminal {
                 // or we're not trying to enter a shortcut (normal typing), we can allow characters to be entered
                 if (!handled && (!this.pass_through_enabled || !has_modifier)) {
                     this.input_buffer.push(key);
+                    // Pop the cursor off
+                    if (OUTPUT_BUFFER.length() > 1) OUTPUT_BUFFER.pop();
                     OUTPUT_BUFFER.push(escape_html(key));
+                    // Push the cursor back on
+                    OUTPUT_BUFFER.push("<span id=\"cursor\">|</span>");
                 }
             }
         }
