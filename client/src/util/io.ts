@@ -1,4 +1,4 @@
-import {computer, OUTPUT_BUFFER, SETTINGS} from "./globals";
+import {computer, OUTPUT_BUFFER, SETTINGS, incrementFormattingCounter, decrementFormattingCounter} from "./globals";
 
 interface PrintOptions {
     escape_html?: boolean, // Whether to sanitize the message (Remove html tags) |  Default - True
@@ -16,6 +16,18 @@ export function print(msg?: string, options?: PrintOptions) {
     if (options.sanitize === undefined) options.sanitize = true;
     if (options.escape_html === undefined) options.escape_html = false;
     if (options.newline === undefined) options.newline = true;
+
+    // Increment the formatting counter for each instance of any ansi escape codes (not counting the reset)
+    let formatting_count = (msg.match(/\\e\[[0-9;]+m/g) || []).length;
+    for (let i = 0; i < formatting_count; i++) {
+        incrementFormattingCounter();
+    }
+
+    // Decrement the formatting counter for each instance of the reset code
+    let reset_count = (msg.match(/\\e\[0m/g) || []).length;
+    for (let i = 0; i < reset_count; i++) {
+        decrementFormattingCounter();
+    }
 
     // TODO: Check if we're in a pipe and if so, print to the pipe buffer instead of the output buffer
 
@@ -112,7 +124,9 @@ export function print(msg?: string, options?: PrintOptions) {
 }
 
 export function debug(msg: object | string | number | boolean) {
-    if (SETTINGS.debug) {
+    console.log(computer.list_env());
+    console.log(computer.get_env("DEBUG"));
+    if (SETTINGS.debug || computer.get_env("DEBUG") !== undefined) {
         if (typeof msg === "object")
             msg = JSON.stringify(msg); // So we can see objects without seeing "[object Object]"
         print(`<span style="color: var(--term-debug-color);">[DEBUG]</span>: ${msg}`, {sanitize: false});

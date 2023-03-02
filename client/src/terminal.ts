@@ -1,7 +1,13 @@
 import {debug, print} from "./util/io";
 import {Buffer} from "./util/buffer";
-import {cd, history, pwd, passthrough, custom_export} from "./terminal_builtins";
-import {CURSOR, OUTPUT_BUFFER, OUTPUT_FRAME, PASS_THROUGH_INDICATOR} from "./util/globals";
+import {cd, history, pwd, passthrough, custom_export, unset} from "./terminal_builtins";
+import {
+    CURSOR, decrementFormattingCounter,
+    FORMATTING_COUNTER,
+    OUTPUT_BUFFER,
+    OUTPUT_FRAME,
+    PASS_THROUGH_INDICATOR, resetFormattingCounter,
+} from "./util/globals";
 import {make_backslash_at, make_backslash_d, make_backslash_capital_t, make_backslash_t} from "./util/date";
 import {computer} from "./util/globals";
 import {escape_html} from "./util/html";
@@ -82,7 +88,8 @@ export class Terminal {
         history,
         pwd,
         passthrough,
-        "export": custom_export
+        "export": custom_export,
+        unset
     };
 
     constructor() {
@@ -92,6 +99,7 @@ export class Terminal {
         this.start_blinking();
         this.start_typing_timeout();
         this.start_render_buffer_listener();
+        this.start_focus_listener();
         this.start_keydown_listener();
         this.start_keyup_listener();
         this.create_keyboard_shortcuts();
@@ -132,8 +140,17 @@ export class Terminal {
         });
     }
 
+    start_focus_listener() {
+        window.addEventListener("blur", () => {
+            // Clear the pressed modifiers (they get stuck if a user is holding a modifier key and changes tab/tabs out of the window)
+            // This is because the keyup event doesn't fire when the user tabs out of the window
+            this.pressed_buttons = {};
+        });
+
+    }
+
     start_keyup_listener() {
-        // Set up a listener for keyup events so we can release modifier keys
+        // Set up a listener for keyup events, so we can release modifier keys
         document.body.addEventListener("keyup", (e) => {
             if (["Control", "Shift", "Alt", "Super", "OS", "Meta"].includes(e.key)) {
                 this.pressed_buttons[e.key] = false;
@@ -148,7 +165,6 @@ export class Terminal {
         document.body.addEventListener("keydown", async (e) => {
             this.keydown_timeout = 75;
             this.typing = true;
-
 
             if (!this.pass_through_enabled) e.preventDefault();
             // Handle some special keys
@@ -200,6 +216,7 @@ export class Terminal {
         // Print a newline before running the command
         print();
 
+        resetFormattingCounter();
         // Check if we're running a builtin command
         if (this.builtins[command] !== undefined) {
             // Terminal builtins do return a status code
@@ -207,7 +224,7 @@ export class Terminal {
             this.builtins[command](args, this);
         } else {
             const status_code = await computer.run_command(command, args);
-            OUTPUT_BUFFER.push("</span>");
+
             debug(`Command status code: ${status_code}`);
         }
 
@@ -221,6 +238,12 @@ export class Terminal {
             // Black text, white background, character '%' and then reset
             print("\\e[47m\\e[0;30m%\\e[0m\\e[0m");
         }
+
+        while (FORMATTING_COUNTER > 0) {
+            OUTPUT_BUFFER.push("</span>");
+            decrementFormattingCounter();
+        }
+
     }
 
     // Button handler functions

@@ -8,7 +8,21 @@ export var computer = new Computer(window.location.hostname);
 await computer.init();
 export var PASS_THROUGH_INDICATOR = document.getElementById("passthrough-mode");
 
+export var FORMATTING_COUNTER = 0;
+
+export function incrementFormattingCounter() {
+    FORMATTING_COUNTER++;
+}
+
+export function decrementFormattingCounter() {
+    FORMATTING_COUNTER--;
+}
+
+export function resetFormattingCounter() {
+    FORMATTING_COUNTER = 0;
+}
+
 // Some misc global settings go here
 export var SETTINGS = {
-    debug: true,
+    debug: false,
 };
