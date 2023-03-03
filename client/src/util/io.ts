@@ -124,8 +124,6 @@ export function print(msg?: string, options?: PrintOptions) {
 }
 
 export function debug(msg: object | string | number | boolean) {
-    console.log(computer.list_env());
-    console.log(computer.get_env("DEBUG"));
     if (SETTINGS.debug || computer.get_env("DEBUG") !== undefined) {
         if (typeof msg === "object")
             msg = JSON.stringify(msg); // So we can see objects without seeing "[object Object]"

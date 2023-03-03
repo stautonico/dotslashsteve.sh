@@ -52,6 +52,7 @@ export class Terminal {
     // Each sub-buffer is an inputted line
     // input_buffer: Buffer<Buffer<string>>;
     input_buffer: Buffer<string>;
+    output_line_buffer: Buffer<string>;
 
     // Whether the user is currently typing in something (used to control the cursor blinking)
     typing = false;
@@ -118,6 +119,7 @@ export class Terminal {
 
     constructor() {
         this.input_buffer = new Buffer();
+        this.output_line_buffer = new Buffer();
 
         // Start intervals
         this.start_blinking();
@@ -164,6 +166,10 @@ export class Terminal {
             // Whenever the output buffer changes, we need to update the output frame
             this.render_output_buffer();
         });
+
+        this.output_line_buffer.onChange((_old_value, _new_value) => {
+            this.render_output_buffer();
+        });
     }
 
     start_focus_listener() {
@@ -196,7 +202,7 @@ export class Terminal {
             // Handle some special keys
             switch (e.key) {
                 case "Backspace":
-                    this.handle_key_backspace();
+                    this.handle_backspace_key();
                     break;
 
                 case "Delete":
@@ -204,18 +210,18 @@ export class Terminal {
                     break;
 
                 case "Enter":
-                    await this.handle_key_enter();
+                    await this.handle_enter_key();
                     break;
 
                 case "Tab":
-                    this.handle_key_tab();
+                    this.handle_tab_key();
                     break;
 
                 case "ArrowUp":
                 case "ArrowDown":
                 case "ArrowLeft":
                 case "ArrowRight":
-                    this.handle_key_arrow(e.key);
+                    this.handle_arrow_key(e.key);
                     break;
 
                 default:
@@ -273,25 +279,31 @@ export class Terminal {
     }
 
     // Button handler functions
-    handle_key_backspace() {
+    handle_backspace_key() {
         let popped_value = this.input_buffer.pop();
         if (popped_value) {
-            OUTPUT_BUFFER.pop();
+            this.output_line_buffer.pop();
         }
         // Reset our history position
         if (this.input_buffer.length()) this.input_index = -1;
+        this.position_cursor()
     }
 
     handle_delete_key() {
         console.warn("Delete key not implemented");
     }
 
-    async handle_key_enter() {
+    async handle_enter_key() {
         if (this.input_buffer.length() > 0) {
             const joined = this.input_buffer.join("");
 
             // Save our current input to the history
             computer.add_shell_history_record(joined);
+
+            // Clear the input buffer and line buffer and move it to the main output buffer
+            this.input_buffer.clear();
+            OUTPUT_BUFFER.appendToElement(this.output_line_buffer.join(""), -1);
+            this.output_line_buffer.clear();
 
             // Handle the command
             await this.handle_command_input(joined);
@@ -300,12 +312,10 @@ export class Terminal {
             print();
         }
 
-        this.input_buffer.clear();
-
         this.print_prompt();
     }
 
-    handle_key_tab() {
+    handle_tab_key() {
         // List all files in the current directory and find the longest common prefix
         let files = computer.current_session().get_current_dir().get_children();
 
@@ -344,8 +354,8 @@ export class Terminal {
 
     }
 
-    handle_key_arrow(arrow: string) {
-
+    handle_arrow_key(arrow: string) {
+        console.warn(`Arrow key not implemented: ${arrow}`);
     }
 
     handle_other_key(key: string) {
@@ -385,11 +395,8 @@ export class Terminal {
                 // or we're not trying to enter a shortcut (normal typing), we can allow characters to be entered
                 if (!handled && (!this.pass_through_enabled || !has_modifier)) {
                     this.input_buffer.push(key);
-                    // Pop the cursor off
-                    if (OUTPUT_BUFFER.length() > 1) OUTPUT_BUFFER.pop();
-                    OUTPUT_BUFFER.push(escape_html(key));
-                    // Push the cursor back on
-                    OUTPUT_BUFFER.push("<span id=\"cursor\">|</span>");
+                    this.output_line_buffer.push(escape_html(key));
+                    this.position_cursor();
                 }
             }
         }
@@ -465,8 +472,12 @@ export class Terminal {
         this.print_prompt();
     }
 
+    position_cursor() {
+        console.warn("Not implemented yet");
+    }
+
     render_output_buffer() {
-        OUTPUT_FRAME!.innerHTML = OUTPUT_BUFFER.join("");
+        OUTPUT_FRAME!.innerHTML = OUTPUT_BUFFER.join("") + this.output_line_buffer.join("");
     }
 
     generate_prompt() {

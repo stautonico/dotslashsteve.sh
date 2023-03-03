@@ -93,10 +93,14 @@ export class Buffer<T> {
     public appendToElement(content: T, index: number) {
         let old_value = this.clone();
         if (typeof content === "string") {
-            // @ts-ignore
+            // Support negative indexes
+            if (index < 0)
+                index = this._buffer.length + index;
+            // @ts-ignore: It doesn't recognize generic types
             this._buffer[index] += content;
 
             this.callOnChangeHandler(old_value, this);
+            return;
         }
 
         throw new Error("Cannot use appendToElement on a non-string (type: " + typeof content + ")");
