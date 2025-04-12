@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>./steve.sh</title>
+  <link rel="stylesheet" href="ncurses.css">
+
+  <style>
+    .box {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      -webkit-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="box">
+    <div class="box">
+      <div class="content">
+        <span class="title">Navigation</span>
+        <p>Please choose an option:</p>
+        <ul class="menu">
+          <li class="selectable">
+            <a id="home" href="/" class="btn">Go home</a>
+          </li>
+          <li class="selectable">
+            <a id="blog" href="https://blog.dotslashsteve.sh" class="btn">Visit blog</a>
+          </li>
+          <li class="selectable">
+            <a id="dnp" href="https://youareanidiot.cc/" class="btn">DO NOT PRESS</a>
+          </li>
+        </ul>
+        <div class="buttons">
+          <a id="ok" href="#" class="btn selectable">OK</a>
+          <a id="cancel" href="#" class="btn selectable">Cancel</a>
+        </div> <!-- .buttons -->
+      </div> <!-- .content -->
+    </div>  <!-- .box -->
+  </div> <!-- .container -->
+</div>
+</body>
+
+<script>
+  const cancel = document.getElementById('cancel');
+
+</script>
+
+</html>
